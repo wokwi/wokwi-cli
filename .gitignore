@@ -1,0 +1,4 @@
+node_modules
+wokwi.toml
+*.bin
+diagram.json
