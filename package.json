@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build": "tsc",
     "start": "ts-node src/main.ts",
     "lint": "eslint ./src",
     "test": "npm run lint",
