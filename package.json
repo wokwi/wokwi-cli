@@ -1,10 +1,10 @@
 {
   "name": "wokwi-cli",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "rimraf dist && tsc && node tools/createVersionFile.js",
     "start": "ts-node src/main.ts",
     "lint": "eslint ./src",
     "test": "npm run lint",
@@ -15,6 +15,7 @@
   "license": "ISC",
   "dependencies": {
     "@iarna/toml": "2.2.5",
+    "arg": "^5.0.2",
     "ws": "^8.13.0"
   },
   "devDependencies": {
@@ -29,6 +30,7 @@
     "husky": "^8.0.0",
     "lint-staged": "^13.2.2",
     "prettier": "^2.8.8",
+    "rimraf": "^5.0.0",
     "ts-node": "^10.9.1",
     "typescript": "^5.0.4"
   },

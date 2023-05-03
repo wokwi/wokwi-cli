@@ -2,13 +2,14 @@
   "compilerOptions": {
     "rootDir": "src",
     "target": "es2020",
-    "module": "commonjs",
-    "outDir": "./dist/cjs",
+    "module": "CommonJS",
+    "outDir": "./dist",
     "strict": true,
     "noFallthroughCasesInSwitch": true,
     "declaration": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
+    "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true
   },
   "include": ["src/**/*.ts"],
