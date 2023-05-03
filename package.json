@@ -1,7 +1,7 @@
 {
   "name": "wokwi-cli",
   "version": "0.1.0",
-  "description": "",
+  "description": "Wokwi Simulator CLI (for CI and local development)",
   "main": "index.js",
   "scripts": {
     "build": "rimraf dist && tsc && node tools/createVersionFile.js",
@@ -12,8 +12,12 @@
     "prepare": "husky install"
   },
   "keywords": [],
-  "author": "",
+  "author": "Uri Shaked",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wokwi/wokwi-cli"
+  },
   "dependencies": {
     "@iarna/toml": "2.2.5",
     "arg": "^5.0.2",
