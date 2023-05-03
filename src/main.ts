@@ -1,11 +1,13 @@
 import arg from 'arg';
+import chalk from 'chalk';
 import { existsSync, readFileSync } from 'fs';
 import path, { join } from 'path';
 import { APIClient } from './APIClient';
 import type { APIEvent, SerialMonitorDataPayload } from './APITypes';
 import { parseConfig } from './config';
-import { readVersion } from './readVersion';
 import { cliHelp } from './help';
+import { readVersion } from './readVersion';
+import { ExpectEngine } from './ExpectEngine';
 
 async function main() {
   const args = arg(
@@ -13,6 +15,9 @@ async function main() {
       '--help': Boolean,
       '--quiet': Boolean,
       '--version': Boolean,
+      '--expect-text': String,
+      '--fail-text': String,
+      '--timeout': Number,
       '-h': '--help',
       '-q': '--quiet',
     },
@@ -20,6 +25,11 @@ async function main() {
   );
 
   const quiet = args['--quiet'];
+  const expectText = args['--expect-text'];
+  const failText = args['--fail-text'];
+  const timeout = args['--timeout'] ?? 0;
+  const timeoutNanos = timeout * 1_000_000;
+
   if (!quiet) {
     const { sha, version } = readVersion();
     console.log(`Wokwi CLI v${version} (${sha})`);
@@ -69,6 +79,28 @@ async function main() {
     process.exit(1);
   }
 
+  const expectEngine = new ExpectEngine();
+
+  if (expectText) {
+    expectEngine.expectTexts.push(expectText);
+    expectEngine.on('match', (text) => {
+      if (!quiet) {
+        console.log(chalk`\n\nExpected text found: {green "${expectText}"}`);
+        console.log('TEST PASSED.');
+      }
+      process.exit(0);
+    });
+  }
+
+  if (failText) {
+    expectEngine.failTexts.push(failText);
+    expectEngine.on('fail', (text) => {
+      console.error(chalk`\n\n{red Error:} Unexpected text found: {yellow "${text}"}`);
+      console.error('TEST FAILED.');
+      process.exit(1);
+    });
+  }
+
   const client = new APIClient(token);
   client.onConnected = (hello) => {
     if (!quiet) {
@@ -85,13 +117,24 @@ async function main() {
   }
 
   await client.serialMonitorListen();
-  await client.simStart({ elf: 'test.elf', firmware: 'firmware' });
+  await client.simStart({ elf: 'test.elf', firmware: 'firmware', pause: timeoutNanos > 0 });
+  if (timeout > 0) {
+    await client.simResume(timeoutNanos);
+  }
 
   client.onEvent = (event) => {
+    if (event.event === 'sim:pause') {
+      if (timeoutNanos && event.nanos >= timeoutNanos) {
+        console.error(`Timeout: simulation did not finish in ${timeout}ms`);
+        process.exit(42);
+      }
+    }
     if (event.event === 'serial-monitor:data') {
-      for (const byte of (event as APIEvent<SerialMonitorDataPayload>).payload.bytes) {
+      const { bytes } = (event as APIEvent<SerialMonitorDataPayload>).payload;
+      for (const byte of bytes) {
         process.stdout.write(String.fromCharCode(byte));
       }
+      expectEngine.feed(bytes);
     }
   };
 }
