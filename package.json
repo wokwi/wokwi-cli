@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "rimraf dist && tsc && node tools/createVersionFile.js",
+    "package": "npm run build && pkg --public -o dist/bin/wokwi-cli -t node18-linuxstatic-arm64,node18-linuxstatic-x64,node18-macos-arm64,node18-macos-x64,node18-win-x64 dist/main.js",
     "start": "ts-node src/main.ts",
     "lint": "eslint ./src",
     "test": "npm run lint",
@@ -29,6 +30,7 @@
     "eslint-plugin-promise": "^6.1.1",
     "husky": "^8.0.0",
     "lint-staged": "^13.2.2",
+    "pkg": "^5.8.1",
     "prettier": "^2.8.8",
     "rimraf": "^5.0.0",
     "ts-node": "^10.9.1",

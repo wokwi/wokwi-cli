@@ -1,0 +1,29 @@
+name: CLI Release
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - '*'
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: 'Install NPM dependencies'
+        run: npm ci
+      - name: 'Install LDID'
+        run: |
+          wget -O /usr/local/bin/ldid https://github.com/ProcursusTeam/ldid/releases/download/v2.1.5-procursus7/ldid_linux_x86_64
+          chmod +x /usr/local/bin/ldid
+      - name: 'Configure binfmt'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y binfmt-support qemu-user-static
+      - name: 'Build'
+        run: npm run package
+      - name: Upload Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: 'dist/bin/wokwi-cli-*'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          generateReleaseNotes: true
