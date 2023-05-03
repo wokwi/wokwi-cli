@@ -6,10 +6,11 @@ Wokwi Simulation API command line interface.
 
 Download the latest release from the [GitHub Releases page](https://github.com/wokwi/wokwi-cli/releases/latest). Rename the file to `wokwi-cli` (or `wokwi-cli.exe` on Windows), and put it in your `PATH`.
 
-On Linux, the CLI can be installed using the following command:
+On Linux (x64), the CLI can be installed using the following commands:
 
 ```bash
-sudo wget -O /usr/local/bin/wokwi-cli https://github.com/wokwi/wokwi-cli/releases/download/latest/wokwi-cli-linuxstatic-x64
+sudo wget -O /usr/local/bin/wokwi-cli https://github.com/wokwi/wokwi-cli/releases/latest/download/wokwi-cli-linuxstatic-x64
+sudo chmod +x /usr/local/bin/wokwi-cli
 ```
 
 ## Usage
