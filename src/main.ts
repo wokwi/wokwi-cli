@@ -1,13 +1,16 @@
 import arg from 'arg';
 import chalk from 'chalk';
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import path, { join } from 'path';
 import { APIClient } from './APIClient';
 import type { APIEvent, SerialMonitorDataPayload } from './APITypes';
+import { EventManager } from './EventManager';
+import { ExpectEngine } from './ExpectEngine';
 import { parseConfig } from './config';
 import { cliHelp } from './help';
 import { readVersion } from './readVersion';
-import { ExpectEngine } from './ExpectEngine';
+
+const millis = 1_000_000;
 
 async function main() {
   const args = arg(
@@ -17,7 +20,11 @@ async function main() {
       '--version': Boolean,
       '--expect-text': String,
       '--fail-text': String,
+      '--screenshot-part': String,
+      '--screenshot-file': String,
+      '--screenshot-time': Number,
       '--timeout': Number,
+      '--timeout-exit-code': Number,
       '-h': '--help',
       '-q': '--quiet',
     },
@@ -28,7 +35,11 @@ async function main() {
   const expectText = args['--expect-text'];
   const failText = args['--fail-text'];
   const timeout = args['--timeout'] ?? 0;
-  const timeoutNanos = timeout * 1_000_000;
+  const screenshotPart = args['--screenshot-part'];
+  const screenshotTime = args['--screenshot-time'];
+  const screenshotFile = args['--screenshot-file'] ?? 'screenshot.png';
+  const timeoutExitCode = args['--timeout-exit-code'] ?? 42;
+  const timeoutNanos = timeout * millis;
 
   if (!quiet) {
     const { sha, version } = readVersion();
@@ -102,6 +113,7 @@ async function main() {
   }
 
   const client = new APIClient(token);
+  const eventManager = new EventManager();
   client.onConnected = (hello) => {
     if (!quiet) {
       console.log(`Connected to Wokwi Simulation API ${hello.appVersion}`);
@@ -116,17 +128,41 @@ async function main() {
     console.log('Starting simulation...');
   }
 
+  if (timeoutNanos) {
+    eventManager.at(timeoutNanos, () => {
+      // We are using setImmediate to make sure other events (e.g. screen shot) are processed first
+      setImmediate(() => {
+        void eventManager.eventHandlersInProgress.then(() => {
+          console.error(`Timeout: simulation did not finish in ${timeout}ms`);
+          process.exit(timeoutExitCode);
+        });
+      });
+    });
+  }
+
+  if (screenshotPart != null && screenshotTime != null) {
+    eventManager.at(screenshotTime * millis, async (t) => {
+      const result = await client.framebufferRead(screenshotPart);
+      writeFileSync(screenshotFile, result.png, 'base64');
+    });
+  }
+
   await client.serialMonitorListen();
-  await client.simStart({ elf: 'test.elf', firmware: 'firmware', pause: timeoutNanos > 0 });
-  if (timeout > 0) {
-    await client.simResume(timeoutNanos);
+  const { timeToNextEvent } = eventManager;
+  await client.simStart({
+    elf: 'test.elf',
+    firmware: 'firmware',
+    pause: timeToNextEvent >= 0,
+  });
+  if (timeToNextEvent > 0) {
+    await client.simResume(timeToNextEvent);
   }
 
   client.onEvent = (event) => {
     if (event.event === 'sim:pause') {
-      if (timeoutNanos && event.nanos >= timeoutNanos) {
-        console.error(`Timeout: simulation did not finish in ${timeout}ms`);
-        process.exit(42);
+      eventManager.processEvents(event.nanos);
+      if (eventManager.timeToNextEvent >= 0) {
+        void client.simResume(eventManager.timeToNextEvent);
       }
     }
     if (event.event === 'serial-monitor:data') {

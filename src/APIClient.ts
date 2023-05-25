@@ -68,7 +68,7 @@ export class APIClient {
   }
 
   async simStatus() {
-    return await (this.sendCommand('sim:status') as Promise<{ running: boolean; nanos: number }>);
+    return await this.sendCommand<{ running: boolean; nanos: number }>('sim:status');
   }
 
   async serialMonitorListen() {
@@ -79,8 +79,12 @@ export class APIClient {
     return await this.sendCommand('serial-monitor:write', { bytes: Array.from(bytes) });
   }
 
-  async sendCommand(command: string, params?: any) {
-    return await new Promise((resolve, reject) => {
+  async framebufferRead(partId: string) {
+    return await this.sendCommand<{ png: string }>('framebuffer:read', { id: partId });
+  }
+
+  async sendCommand<T = unknown>(command: string, params?: any) {
+    return await new Promise<T>((resolve, reject) => {
       const id = this.lastId++;
       this.pendingCommands.set(id.toString(), [resolve, reject]);
       const message: APICommand = { type: 'command', command, params, id: id.toString() };
