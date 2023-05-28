@@ -121,7 +121,9 @@ async function main() {
   };
   await client.connected;
   await client.fileUpload('diagram.json', diagram);
-  await client.fileUpload('firmware', readFileSync(firmwarePath));
+  const extension = firmwarePath.split('.').pop();
+  const firmwareName = `firmware.${extension}`;
+  await client.fileUpload(firmwareName, readFileSync(firmwarePath));
   await client.fileUpload('firmware.elf', readFileSync(elfPath));
 
   if (!quiet) {
@@ -151,7 +153,7 @@ async function main() {
   const { timeToNextEvent } = eventManager;
   await client.simStart({
     elf: 'test.elf',
-    firmware: 'firmware',
+    firmware: firmwareName,
     pause: timeToNextEvent >= 0,
   });
   if (timeToNextEvent > 0) {
