@@ -37,6 +37,11 @@ export interface SerialMonitorDataPayload {
   bytes: number[];
 }
 
+export interface ChipsLogPayload {
+  chip: string;
+  message: string;
+}
+
 export interface APIResultError {
   code: number;
   message: string;
@@ -46,4 +51,5 @@ export interface APISimStartParams {
   firmware: string;
   elf: string;
   pause?: boolean;
+  chips?: string[];
 }

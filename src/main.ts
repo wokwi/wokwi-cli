@@ -3,12 +3,13 @@ import chalk from 'chalk';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import path, { join } from 'path';
 import { APIClient } from './APIClient';
-import type { APIEvent, SerialMonitorDataPayload } from './APITypes';
+import type { APIEvent, ChipsLogPayload, SerialMonitorDataPayload } from './APITypes';
 import { EventManager } from './EventManager';
 import { ExpectEngine } from './ExpectEngine';
 import { parseConfig } from './config';
 import { cliHelp } from './help';
 import { readVersion } from './readVersion';
+import { loadChips } from './loadChips';
 
 const millis = 1_000_000;
 
@@ -90,6 +91,8 @@ async function main() {
     process.exit(1);
   }
 
+  const chips = loadChips(config.chip ?? [], rootDir);
+
   const expectEngine = new ExpectEngine();
 
   if (expectText) {
@@ -126,6 +129,11 @@ async function main() {
   await client.fileUpload(firmwareName, readFileSync(firmwarePath));
   await client.fileUpload('firmware.elf', readFileSync(elfPath));
 
+  for (const chip of chips) {
+    await client.fileUpload(`${chip.name}.chip.json`, readFileSync(chip.jsonPath, 'utf-8'));
+    await client.fileUpload(`${chip.name}.chip.wasm`, readFileSync(chip.wasmPath));
+  }
+
   if (!quiet) {
     console.log('Starting simulation...');
   }
@@ -151,14 +159,6 @@ async function main() {
 
   await client.serialMonitorListen();
   const { timeToNextEvent } = eventManager;
-  await client.simStart({
-    elf: 'test.elf',
-    firmware: firmwareName,
-    pause: timeToNextEvent >= 0,
-  });
-  if (timeToNextEvent > 0) {
-    await client.simResume(timeToNextEvent);
-  }
 
   client.onEvent = (event) => {
     if (event.event === 'sim:pause') {
@@ -174,7 +174,22 @@ async function main() {
       }
       expectEngine.feed(bytes);
     }
+    if (event.event === 'chips:log') {
+      const { message, chip } = (event as APIEvent<ChipsLogPayload>).payload;
+      console.log(chalk`[{magenta ${chip}}] ${message}`);
+    }
   };
+
+  await client.simStart({
+    elf: 'test.elf',
+    firmware: firmwareName,
+    chips: chips.map((chip) => chip.name),
+    pause: timeToNextEvent >= 0,
+  });
+
+  if (timeToNextEvent > 0) {
+    await client.simResume(timeToNextEvent);
+  }
 }
 
 main().catch((err) => {
