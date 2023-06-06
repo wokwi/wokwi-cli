@@ -90,7 +90,6 @@ export class TestScenario {
     for (const key of Object.keys(this.handlers) as Array<keyof typeof this.handlers>) {
       if (key in step) {
         const value = step[key];
-        console.log('running handler for ' + key);
         void this.handlers[key](value as any, step);
         this.stepIndex++;
         return;
@@ -126,7 +125,7 @@ export class TestScenario {
     delay: async (value: string, step: IStepDefinition) => {
       const nanos = parseTime(value);
       const targetNanos = (this.client?.lastNanos ?? 0) + nanos;
-      this.log(chalk`delay {yellow "${value}"}`);
+      this.log(chalk`delay {yellow ${value}}`);
       this.eventManager.at(targetNanos, () => {
         void this.nextStep();
       });

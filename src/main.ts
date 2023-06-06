@@ -97,8 +97,9 @@ async function main() {
 
   const chips = loadChips(config.chip ?? [], rootDir);
 
-  if (scenarioFile && !existsSync(scenarioFile)) {
-    console.error(`Error: scenario file not found: ${path.resolve(scenarioFile)}`);
+  const resolvedScenarioFile = scenarioFile ? path.resolve(rootDir, scenarioFile) : null;
+  if (resolvedScenarioFile && !existsSync(resolvedScenarioFile)) {
+    console.error(`Error: scenario file not found: ${path.resolve(resolvedScenarioFile)}`);
     process.exit(1);
   }
 
@@ -106,9 +107,9 @@ async function main() {
   const expectEngine = new ExpectEngine();
 
   let scenario;
-  if (scenarioFile) {
+  if (resolvedScenarioFile) {
     scenario = new TestScenario(
-      YAML.parse(readFileSync(scenarioFile, 'utf-8')),
+      YAML.parse(readFileSync(resolvedScenarioFile, 'utf-8')),
       eventManager,
       expectEngine
     );
