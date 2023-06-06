@@ -9,11 +9,13 @@ import type {
   APISimStartParams,
 } from './APITypes';
 
-const DEFAULT_SERVER = 'wss://wokwi.com/api/ws/beta';
+const DEFAULT_SERVER = process.env.WOKWI_CLI_SERVER ?? 'wss://wokwi.com/api/ws/beta';
 
 export class APIClient {
   private readonly socket: WebSocket;
   private lastId = 0;
+  private _running = false;
+  private _lastNanos = 0;
   private readonly pendingCommands = new Map<
     string,
     [(result: any) => void, (error: Error) => void]
@@ -52,6 +54,7 @@ export class APIClient {
   }
 
   async simStart(params: APISimStartParams) {
+    this._running = false;
     return await this.sendCommand('sim:start', params);
   }
 
@@ -60,6 +63,7 @@ export class APIClient {
   }
 
   async simResume(pauseAfter?: number) {
+    this._running = true;
     return await this.sendCommand('sim:resume', { pauseAfter });
   }
 
@@ -83,6 +87,10 @@ export class APIClient {
     return await this.sendCommand<{ png: string }>('framebuffer:read', { id: partId });
   }
 
+  async controlSet(partId: string, control: string, value: number) {
+    return await this.sendCommand('control:set', { part: partId, control, value });
+  }
+
   async sendCommand<T = unknown>(command: string, params?: any) {
     return await new Promise<T>((resolve, reject) => {
       const id = this.lastId++;
@@ -90,6 +98,14 @@ export class APIClient {
       const message: APICommand = { type: 'command', command, params, id: id.toString() };
       this.socket.send(JSON.stringify(message));
     });
+  }
+
+  get running() {
+    return this._running;
+  }
+
+  get lastNanos() {
+    return this._lastNanos;
   }
 
   processMessage(message: APIError | APIHello | APIEvent | APIResponse) {
@@ -116,6 +132,10 @@ export class APIClient {
   }
 
   processEvent(message: APIEvent) {
+    if (message.event === 'sim:pause') {
+      this._running = false;
+    }
+    this._lastNanos = message.nanos;
     this.onEvent?.(message);
   }
 

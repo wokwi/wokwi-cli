@@ -2,14 +2,16 @@ import arg from 'arg';
 import chalk from 'chalk';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import path, { join } from 'path';
+import YAML from 'yaml';
 import { APIClient } from './APIClient';
 import type { APIEvent, ChipsLogPayload, SerialMonitorDataPayload } from './APITypes';
 import { EventManager } from './EventManager';
 import { ExpectEngine } from './ExpectEngine';
+import { TestScenario } from './TestScenario';
 import { parseConfig } from './config';
 import { cliHelp } from './help';
-import { readVersion } from './readVersion';
 import { loadChips } from './loadChips';
+import { readVersion } from './readVersion';
 
 const millis = 1_000_000;
 
@@ -21,6 +23,7 @@ async function main() {
       '--version': Boolean,
       '--expect-text': String,
       '--fail-text': String,
+      '--scenario': String,
       '--screenshot-part': String,
       '--screenshot-file': String,
       '--screenshot-time': Number,
@@ -35,6 +38,7 @@ async function main() {
   const quiet = args['--quiet'];
   const expectText = args['--expect-text'];
   const failText = args['--fail-text'];
+  const scenarioFile = args['--scenario'];
   const timeout = args['--timeout'] ?? 0;
   const screenshotPart = args['--screenshot-part'];
   const screenshotTime = args['--screenshot-time'];
@@ -93,11 +97,31 @@ async function main() {
 
   const chips = loadChips(config.chip ?? [], rootDir);
 
+  if (scenarioFile && !existsSync(scenarioFile)) {
+    console.error(`Error: scenario file not found: ${path.resolve(scenarioFile)}`);
+    process.exit(1);
+  }
+
+  const eventManager = new EventManager();
   const expectEngine = new ExpectEngine();
+
+  let scenario;
+  if (scenarioFile) {
+    scenario = new TestScenario(
+      YAML.parse(readFileSync(scenarioFile, 'utf-8')),
+      eventManager,
+      expectEngine
+    );
+    scenario.validate();
+  }
 
   if (expectText) {
     expectEngine.expectTexts.push(expectText);
     expectEngine.on('match', (text) => {
+      if (text !== expectText) {
+        return;
+      }
+
       if (!quiet) {
         console.log(chalk`\n\nExpected text found: {green "${expectText}"}`);
         console.log('TEST PASSED.');
@@ -109,6 +133,10 @@ async function main() {
   if (failText) {
     expectEngine.failTexts.push(failText);
     expectEngine.on('fail', (text) => {
+      if (text !== failText) {
+        return;
+      }
+
       console.error(chalk`\n\n{red Error:} Unexpected text found: {yellow "${text}"}`);
       console.error('TEST FAILED.');
       process.exit(1);
@@ -116,7 +144,6 @@ async function main() {
   }
 
   const client = new APIClient(token);
-  const eventManager = new EventManager();
   client.onConnected = (hello) => {
     if (!quiet) {
       console.log(`Connected to Wokwi Simulation API ${hello.appVersion}`);
@@ -137,6 +164,8 @@ async function main() {
   if (!quiet) {
     console.log('Starting simulation...');
   }
+
+  await scenario?.start(client);
 
   if (timeoutNanos) {
     eventManager.at(timeoutNanos, () => {
