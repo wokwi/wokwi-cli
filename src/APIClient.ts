@@ -10,9 +10,11 @@ import type {
 } from './APITypes';
 
 const DEFAULT_SERVER = process.env.WOKWI_CLI_SERVER ?? 'wss://wokwi.com/api/ws/beta';
+const retryDelays = [1000, 2000, 5000, 10000, 20000];
 
 export class APIClient {
-  private readonly socket: WebSocket;
+  private socket: WebSocket;
+  private connectionAttempts = 0;
   private lastId = 0;
   private _running = false;
   private _lastNanos = 0;
@@ -27,19 +29,60 @@ export class APIClient {
   onEvent?: (event: APIEvent) => void;
 
   constructor(readonly token: string, readonly server = DEFAULT_SERVER) {
-    this.socket = new WebSocket(server, { headers: { Authorization: `Bearer ${token}` } });
-    this.socket.addEventListener('message', ({ data }) => {
-      if (typeof data === 'string') {
-        const message = JSON.parse(data);
-        this.processMessage(message);
-      } else {
-        console.error('Unsupported binary message');
-      }
-    });
-    this.connected = new Promise((resolve, reject) => {
+    this.socket = this.createSocket(token, server);
+    this.connected = this.connectSocket(this.socket);
+  }
+
+  private createSocket(token: string, server: string) {
+    return new WebSocket(server, { headers: { Authorization: `Bearer ${token}` } });
+  }
+
+  private async connectSocket(socket: WebSocket) {
+    await new Promise((resolve, reject) => {
+      socket.addEventListener('message', ({ data }) => {
+        if (typeof data === 'string') {
+          const message = JSON.parse(data);
+          this.processMessage(message);
+        } else {
+          console.error('Unsupported binary message');
+        }
+      });
       this.socket.addEventListener('open', resolve);
-      this.socket.addEventListener('error', reject);
+      this.socket.on('unexpected-response', (req, res) => {
+        this.socket.close();
+        const ServiceUnavailable = 503;
+        if (res.statusCode === ServiceUnavailable) {
+          console.warn(
+            `Connection to ${this.server} failed: ${res.statusMessage ?? ''} (${res.statusCode}).`
+          );
+          resolve(this.retryConnection());
+        } else {
+          reject(
+            new Error(
+              `Error connecting to ${this.server}: ${res.statusCode} ${res.statusMessage ?? ''}`
+            )
+          );
+        }
+      });
+      this.socket.addEventListener('error', (event) => {
+        reject(new Error(`Error connecting to ${this.server}: ${event.message}`));
+      });
     });
+  }
+
+  private async retryConnection() {
+    const delay = retryDelays[this.connectionAttempts++];
+    if (delay == null) {
+      throw new Error(`Failed to connect to ${this.server}. Giving up.`);
+    }
+
+    console.log(`Will retry in ${delay}ms...`);
+
+    await new Promise((resolve) => setTimeout(resolve, delay));
+
+    console.log(`Retrying connection to ${this.server}...`);
+    this.socket = this.createSocket(this.token, this.server);
+    await this.connectSocket(this.socket);
   }
 
   async fileUpload(name: string, content: string | ArrayBuffer) {
