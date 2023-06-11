@@ -12,6 +12,9 @@ import { parseConfig } from './config';
 import { cliHelp } from './help';
 import { loadChips } from './loadChips';
 import { readVersion } from './readVersion';
+import { DelayCommand } from './scenario/DelayCommand';
+import { SetControlCommand } from './scenario/SetControlCommand';
+import { WaitSerialCommand } from './scenario/WaitSerialCommand';
 
 const millis = 1_000_000;
 
@@ -110,9 +113,13 @@ async function main() {
   if (resolvedScenarioFile) {
     scenario = new TestScenario(
       YAML.parse(readFileSync(resolvedScenarioFile, 'utf-8')),
-      eventManager,
-      expectEngine
+      eventManager
     );
+    scenario.registerCommands({
+      delay: new DelayCommand(eventManager),
+      'set-control': new SetControlCommand(),
+      'wait-serial': new WaitSerialCommand(expectEngine),
+    });
     scenario.validate();
   }
 
@@ -166,7 +173,7 @@ async function main() {
     console.log('Starting simulation...');
   }
 
-  await scenario?.start(client);
+  const scenarioPromise = scenario?.start(client);
 
   if (timeoutNanos) {
     eventManager.at(timeoutNanos, () => {
@@ -220,6 +227,8 @@ async function main() {
   if (timeToNextEvent > 0) {
     await client.simResume(timeToNextEvent);
   }
+
+  await scenarioPromise;
 }
 
 main().catch((err) => {
