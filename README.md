@@ -15,7 +15,7 @@ sudo chmod +x /usr/local/bin/wokwi-cli
 
 ## Usage
 
-First, ensure that you set the `WOKWI_CLI_TOKEN` environment variable to your Wokwi API token. You can get your token from your [Wokwi profile page](https://wokwi.com/dashboard/profile).
+First, ensure that you set the `WOKWI_CLI_TOKEN` environment variable to your Wokwi API token. You can get your token from your [Wokwi CI Dashboard](https://wokwi.com/dashboard/ci).
 
 ```
 wokwi-cli [directory]
