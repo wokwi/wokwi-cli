@@ -50,8 +50,9 @@ export class APIClient {
       this.socket.addEventListener('open', resolve);
       this.socket.on('unexpected-response', (req, res) => {
         this.socket.close();
+        const RequestTimeout = 408;
         const ServiceUnavailable = 503;
-        if (res.statusCode === ServiceUnavailable) {
+        if (res.statusCode === ServiceUnavailable || res.statusCode === RequestTimeout) {
           console.warn(
             `Connection to ${this.server} failed: ${res.statusMessage ?? ''} (${res.statusCode}).`
           );
