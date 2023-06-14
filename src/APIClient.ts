@@ -198,4 +198,10 @@ export class APIClient {
       console.error('Unknown response', message);
     }
   }
+
+  close() {
+    if (this.socket.readyState === WebSocket.OPEN) {
+      this.socket.close();
+    }
+  }
 }

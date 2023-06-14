@@ -134,6 +134,7 @@ async function main() {
         console.log(chalk`\n\nExpected text found: {green "${expectText}"}`);
         console.log('TEST PASSED.');
       }
+      client.close();
       process.exit(0);
     });
   }
@@ -147,88 +148,94 @@ async function main() {
 
       console.error(chalk`\n\n{red Error:} Unexpected text found: {yellow "${text}"}`);
       console.error('TEST FAILED.');
+      client.close();
       process.exit(1);
     });
   }
 
   const client = new APIClient(token);
-  client.onConnected = (hello) => {
-    if (!quiet) {
-      console.log(`Connected to Wokwi Simulation API ${hello.appVersion}`);
+  try {
+    client.onConnected = (hello) => {
+      if (!quiet) {
+        console.log(`Connected to Wokwi Simulation API ${hello.appVersion}`);
+      }
+    };
+    await client.connected;
+    await client.fileUpload('diagram.json', diagram);
+    const extension = firmwarePath.split('.').pop();
+    const firmwareName = `firmware.${extension}`;
+    await client.fileUpload(firmwareName, readFileSync(firmwarePath));
+    await client.fileUpload('firmware.elf', readFileSync(elfPath));
+
+    for (const chip of chips) {
+      await client.fileUpload(`${chip.name}.chip.json`, readFileSync(chip.jsonPath, 'utf-8'));
+      await client.fileUpload(`${chip.name}.chip.wasm`, readFileSync(chip.wasmPath));
     }
-  };
-  await client.connected;
-  await client.fileUpload('diagram.json', diagram);
-  const extension = firmwarePath.split('.').pop();
-  const firmwareName = `firmware.${extension}`;
-  await client.fileUpload(firmwareName, readFileSync(firmwarePath));
-  await client.fileUpload('firmware.elf', readFileSync(elfPath));
 
-  for (const chip of chips) {
-    await client.fileUpload(`${chip.name}.chip.json`, readFileSync(chip.jsonPath, 'utf-8'));
-    await client.fileUpload(`${chip.name}.chip.wasm`, readFileSync(chip.wasmPath));
-  }
+    if (!quiet) {
+      console.log('Starting simulation...');
+    }
 
-  if (!quiet) {
-    console.log('Starting simulation...');
-  }
+    const scenarioPromise = scenario?.start(client);
 
-  const scenarioPromise = scenario?.start(client);
-
-  if (timeoutNanos) {
-    eventManager.at(timeoutNanos, () => {
-      // We are using setImmediate to make sure other events (e.g. screen shot) are processed first
-      setImmediate(() => {
-        void eventManager.eventHandlersInProgress.then(() => {
-          console.error(`Timeout: simulation did not finish in ${timeout}ms`);
-          process.exit(timeoutExitCode);
+    if (timeoutNanos) {
+      eventManager.at(timeoutNanos, () => {
+        // We are using setImmediate to make sure other events (e.g. screen shot) are processed first
+        setImmediate(() => {
+          void eventManager.eventHandlersInProgress.then(() => {
+            console.error(`Timeout: simulation did not finish in ${timeout}ms`);
+            client.close();
+            process.exit(timeoutExitCode);
+          });
         });
       });
-    });
-  }
+    }
 
-  if (screenshotPart != null && screenshotTime != null) {
-    eventManager.at(screenshotTime * millis, async (t) => {
-      const result = await client.framebufferRead(screenshotPart);
-      writeFileSync(screenshotFile, result.png, 'base64');
-    });
-  }
+    if (screenshotPart != null && screenshotTime != null) {
+      eventManager.at(screenshotTime * millis, async (t) => {
+        const result = await client.framebufferRead(screenshotPart);
+        writeFileSync(screenshotFile, result.png, 'base64');
+      });
+    }
 
-  await client.serialMonitorListen();
-  const { timeToNextEvent } = eventManager;
+    await client.serialMonitorListen();
+    const { timeToNextEvent } = eventManager;
 
-  client.onEvent = (event) => {
-    if (event.event === 'sim:pause') {
-      eventManager.processEvents(event.nanos);
-      if (eventManager.timeToNextEvent >= 0) {
-        void client.simResume(eventManager.timeToNextEvent);
+    client.onEvent = (event) => {
+      if (event.event === 'sim:pause') {
+        eventManager.processEvents(event.nanos);
+        if (eventManager.timeToNextEvent >= 0) {
+          void client.simResume(eventManager.timeToNextEvent);
+        }
       }
-    }
-    if (event.event === 'serial-monitor:data') {
-      const { bytes } = (event as APIEvent<SerialMonitorDataPayload>).payload;
-      for (const byte of bytes) {
-        process.stdout.write(String.fromCharCode(byte));
+      if (event.event === 'serial-monitor:data') {
+        const { bytes } = (event as APIEvent<SerialMonitorDataPayload>).payload;
+        for (const byte of bytes) {
+          process.stdout.write(String.fromCharCode(byte));
+        }
+        expectEngine.feed(bytes);
       }
-      expectEngine.feed(bytes);
-    }
-    if (event.event === 'chips:log') {
-      const { message, chip } = (event as APIEvent<ChipsLogPayload>).payload;
-      console.log(chalk`[{magenta ${chip}}] ${message}`);
-    }
-  };
+      if (event.event === 'chips:log') {
+        const { message, chip } = (event as APIEvent<ChipsLogPayload>).payload;
+        console.log(chalk`[{magenta ${chip}}] ${message}`);
+      }
+    };
 
-  await client.simStart({
-    elf: 'test.elf',
-    firmware: firmwareName,
-    chips: chips.map((chip) => chip.name),
-    pause: timeToNextEvent >= 0,
-  });
+    await client.simStart({
+      elf: 'test.elf',
+      firmware: firmwareName,
+      chips: chips.map((chip) => chip.name),
+      pause: timeToNextEvent >= 0,
+    });
 
-  if (timeToNextEvent > 0) {
-    await client.simResume(timeToNextEvent);
+    if (timeToNextEvent > 0) {
+      await client.simResume(timeToNextEvent);
+    }
+
+    await scenarioPromise;
+  } finally {
+    client.close();
   }
-
-  await scenarioPromise;
 }
 
 main().catch((err) => {
