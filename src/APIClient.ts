@@ -7,6 +7,7 @@ import type {
   APIResponse,
   APIResultError,
   APISimStartParams,
+  PinReadResponse,
 } from './APITypes';
 
 const DEFAULT_SERVER = process.env.WOKWI_CLI_SERVER ?? 'wss://wokwi.com/api/ws/beta';
@@ -133,6 +134,10 @@ export class APIClient {
 
   async controlSet(partId: string, control: string, value: number) {
     return await this.sendCommand('control:set', { part: partId, control, value });
+  }
+
+  async pinRead(partId: string, pin: string) {
+    return await this.sendCommand<PinReadResponse>('pin:read', { part: partId, pin });
   }
 
   async sendCommand<T = unknown>(command: string, params?: any) {

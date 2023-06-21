@@ -53,3 +53,8 @@ export interface APISimStartParams {
   pause?: boolean;
   chips?: string[];
 }
+
+export interface PinReadResponse {
+  pin: string;
+  value: number;
+}

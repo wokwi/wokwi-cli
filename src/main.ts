@@ -15,6 +15,7 @@ import { readVersion } from './readVersion';
 import { DelayCommand } from './scenario/DelayCommand';
 import { SetControlCommand } from './scenario/SetControlCommand';
 import { WaitSerialCommand } from './scenario/WaitSerialCommand';
+import { ExpectPinCommand } from './scenario/ExpectPinCommand';
 
 const millis = 1_000_000;
 
@@ -117,6 +118,7 @@ async function main() {
     );
     scenario.registerCommands({
       delay: new DelayCommand(eventManager),
+      'expect-pin': new ExpectPinCommand(),
       'set-control': new SetControlCommand(),
       'wait-serial': new WaitSerialCommand(expectEngine),
     });
