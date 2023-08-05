@@ -2,7 +2,7 @@
   "compilerOptions": {
     "rootDir": "src",
     "target": "es2020",
-    "module": "CommonJS",
+    "module": "ESNext",
     "outDir": "./dist",
     "strict": true,
     "noFallthroughCasesInSwitch": true,
@@ -10,6 +10,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
+    "moduleResolution": "Node16",
     "forceConsistentCasingInFileNames": true
   },
   "include": ["src/**/*.ts"],

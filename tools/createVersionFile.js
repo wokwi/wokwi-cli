@@ -1,10 +1,10 @@
-const fs = require('fs');
-const version = require('../package.json').version;
-const sha = require('child_process').execSync('git rev-parse --short=12 HEAD').toString().trim();
-fs.writeFileSync(
-  'dist/version.json',
-  JSON.stringify({
-    version,
-    sha,
-  })
+import { execSync } from "child_process";
+import { readFileSync, writeFileSync } from "fs";
+
+const { version } = JSON.parse(readFileSync("package.json", "utf8"));
+const sha = execSync("git rev-parse --short=12 HEAD").toString().trim();
+
+writeFileSync(
+  "dist/version.js",
+  `export const { version, sha } = ${JSON.stringify({ version, sha })}\n`
 );

@@ -1,13 +1,13 @@
-import chalk from 'chalk';
-import type { APIClient } from './APIClient';
-import type { EventManager } from './EventManager';
+import chalkTemplate from "chalk-template";
+import type { APIClient } from "./APIClient.js";
+import type { EventManager } from "./EventManager.js";
 
 export interface IScenarioCommand {
   validate?(params: any): boolean;
   run(scenario: TestScenario, client: APIClient, params: any): Promise<void>;
 }
 
-const validStepKeys = ['name'];
+const validStepKeys = ["name"];
 
 export interface IStepDefinition {
   name?: string;
@@ -28,7 +28,10 @@ export class TestScenario {
 
   readonly handlers: Record<string, IScenarioCommand> = {};
 
-  constructor(readonly scenario: IScenarioDefinition, readonly eventManager: EventManager) {}
+  constructor(
+    readonly scenario: IScenarioDefinition,
+    readonly eventManager: EventManager
+  ) {}
 
   registerCommands(commands: Record<string, IScenarioCommand>) {
     Object.assign(this.handlers, commands);
@@ -40,7 +43,7 @@ export class TestScenario {
       throw new Error(`Scenario name is missing`);
     }
 
-    if (typeof scenario.name !== 'string') {
+    if (typeof scenario.name !== "string") {
       throw new Error(`Scenario name must be a string`);
     }
 
@@ -53,12 +56,15 @@ export class TestScenario {
     }
 
     for (const step of scenario.steps) {
-      if (typeof step !== 'object') {
+      if (typeof step !== "object") {
         throw new Error(`Scenario step must be an object`);
       }
 
       for (const key of Object.keys(step)) {
-        if (!validStepKeys.includes(key) && !Object.keys(this.handlers).includes(key)) {
+        if (
+          !validStepKeys.includes(key) &&
+          !Object.keys(this.handlers).includes(key)
+        ) {
           throw new Error(`Invalid scenario step key: ${key}`);
         }
       }
@@ -73,11 +79,11 @@ export class TestScenario {
         void client.simPause();
       }
       if (step.name) {
-        this.log(chalk`{gray Executing step:} {yellow ${step.name}`);
+        this.log(chalkTemplate`{gray Executing step:} {yellow ${step.name}`);
       }
       await this.executeStep(client, step);
     }
-    this.log(chalk`{green Scenario completed successfully}`);
+    this.log(chalkTemplate`{green Scenario completed successfully}`);
     process.exit(0);
   }
 
@@ -90,12 +96,12 @@ export class TestScenario {
         return;
       }
     }
-    console.error('Unknown key in step: ', step);
+    console.error("Unknown key in step: ", step);
     process.exit(1);
   }
 
   log(message: string) {
-    console.log(chalk`{cyan [${this.scenario.name}]}`, message);
+    console.log(chalkTemplate`{cyan [${this.scenario.name}]}`, message);
   }
 
   fail(message: string) {
@@ -104,7 +110,9 @@ export class TestScenario {
 
   async resume() {
     await this.client?.simResume(
-      this.eventManager.timeToNextEvent >= 0 ? this.eventManager.timeToNextEvent : undefined
+      this.eventManager.timeToNextEvent >= 0
+        ? this.eventManager.timeToNextEvent
+        : undefined
     );
   }
 }

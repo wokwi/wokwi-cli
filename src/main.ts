@@ -1,53 +1,57 @@
-import arg from 'arg';
-import chalk from 'chalk';
-import { existsSync, readFileSync, writeFileSync } from 'fs';
-import path, { join } from 'path';
-import YAML from 'yaml';
-import { APIClient } from './APIClient';
-import type { APIEvent, ChipsLogPayload, SerialMonitorDataPayload } from './APITypes';
-import { EventManager } from './EventManager';
-import { ExpectEngine } from './ExpectEngine';
-import { TestScenario } from './TestScenario';
-import { parseConfig } from './config';
-import { cliHelp } from './help';
-import { loadChips } from './loadChips';
-import { readVersion } from './readVersion';
-import { DelayCommand } from './scenario/DelayCommand';
-import { SetControlCommand } from './scenario/SetControlCommand';
-import { WaitSerialCommand } from './scenario/WaitSerialCommand';
-import { ExpectPinCommand } from './scenario/ExpectPinCommand';
+import arg from "arg";
+import chalkTemplate from "chalk-template";
+import { existsSync, readFileSync, writeFileSync } from "fs";
+import path, { join } from "path";
+import YAML from "yaml";
+import { APIClient } from "./APIClient.js";
+import type {
+  APIEvent,
+  ChipsLogPayload,
+  SerialMonitorDataPayload,
+} from "./APITypes.js";
+import { EventManager } from "./EventManager.js";
+import { ExpectEngine } from "./ExpectEngine.js";
+import { TestScenario } from "./TestScenario.js";
+import { parseConfig } from "./config.js";
+import { cliHelp } from "./help.js";
+import { loadChips } from "./loadChips.js";
+import { readVersion } from "./readVersion.js";
+import { DelayCommand } from "./scenario/DelayCommand.js";
+import { ExpectPinCommand } from "./scenario/ExpectPinCommand.js";
+import { SetControlCommand } from "./scenario/SetControlCommand.js";
+import { WaitSerialCommand } from "./scenario/WaitSerialCommand.js";
 
 const millis = 1_000_000;
 
 async function main() {
   const args = arg(
     {
-      '--help': Boolean,
-      '--quiet': Boolean,
-      '--version': Boolean,
-      '--expect-text': String,
-      '--fail-text': String,
-      '--scenario': String,
-      '--screenshot-part': String,
-      '--screenshot-file': String,
-      '--screenshot-time': Number,
-      '--timeout': Number,
-      '--timeout-exit-code': Number,
-      '-h': '--help',
-      '-q': '--quiet',
+      "--help": Boolean,
+      "--quiet": Boolean,
+      "--version": Boolean,
+      "--expect-text": String,
+      "--fail-text": String,
+      "--scenario": String,
+      "--screenshot-part": String,
+      "--screenshot-file": String,
+      "--screenshot-time": Number,
+      "--timeout": Number,
+      "--timeout-exit-code": Number,
+      "-h": "--help",
+      "-q": "--quiet",
     },
     { argv: process.argv.slice(2) }
   );
 
-  const quiet = args['--quiet'];
-  const expectText = args['--expect-text'];
-  const failText = args['--fail-text'];
-  const scenarioFile = args['--scenario'];
-  const timeout = args['--timeout'] ?? 30000;
-  const screenshotPart = args['--screenshot-part'];
-  const screenshotTime = args['--screenshot-time'];
-  const screenshotFile = args['--screenshot-file'] ?? 'screenshot.png';
-  const timeoutExitCode = args['--timeout-exit-code'] ?? 42;
+  const quiet = args["--quiet"];
+  const expectText = args["--expect-text"];
+  const failText = args["--fail-text"];
+  const scenarioFile = args["--scenario"];
+  const timeout = args["--timeout"] ?? 30000;
+  const screenshotPart = args["--screenshot-part"];
+  const screenshotTime = args["--screenshot-time"];
+  const screenshotFile = args["--screenshot-file"] ?? "screenshot.png";
+  const timeoutExitCode = args["--timeout-exit-code"] ?? 42;
   const timeoutNanos = timeout * millis;
 
   if (!quiet) {
@@ -55,7 +59,7 @@ async function main() {
     console.log(`Wokwi CLI v${version} (${sha})`);
   }
 
-  if (args['--help']) {
+  if (args["--help"]) {
     cliHelp();
     process.exit(0);
   }
@@ -68,7 +72,7 @@ async function main() {
     process.exit(1);
   }
 
-  const rootDir = args._[0] || '.';
+  const rootDir = args._[0] || ".";
   const configPath = `${rootDir}/wokwi.toml`;
   const diagramFile = `${rootDir}/diagram.json`;
 
@@ -82,15 +86,17 @@ async function main() {
     process.exit(1);
   }
 
-  const configData = readFileSync(configPath, 'utf8');
+  const configData = readFileSync(configPath, "utf8");
   const config = await parseConfig(configData, rootDir);
-  const diagram = readFileSync(diagramFile, 'utf8');
+  const diagram = readFileSync(diagramFile, "utf8");
 
   const firmwarePath = join(rootDir, config.wokwi.firmware);
   const elfPath = join(rootDir, config.wokwi.elf);
 
   if (!existsSync(firmwarePath)) {
-    console.error(`Error: firmware file not found: ${path.resolve(firmwarePath)}`);
+    console.error(
+      `Error: firmware file not found: ${path.resolve(firmwarePath)}`
+    );
     process.exit(1);
   }
 
@@ -101,9 +107,13 @@ async function main() {
 
   const chips = loadChips(config.chip ?? [], rootDir);
 
-  const resolvedScenarioFile = scenarioFile ? path.resolve(rootDir, scenarioFile) : null;
+  const resolvedScenarioFile = scenarioFile
+    ? path.resolve(rootDir, scenarioFile)
+    : null;
   if (resolvedScenarioFile && !existsSync(resolvedScenarioFile)) {
-    console.error(`Error: scenario file not found: ${path.resolve(resolvedScenarioFile)}`);
+    console.error(
+      `Error: scenario file not found: ${path.resolve(resolvedScenarioFile)}`
+    );
     process.exit(1);
   }
 
@@ -113,28 +123,30 @@ async function main() {
   let scenario;
   if (resolvedScenarioFile) {
     scenario = new TestScenario(
-      YAML.parse(readFileSync(resolvedScenarioFile, 'utf-8')),
+      YAML.parse(readFileSync(resolvedScenarioFile, "utf-8")),
       eventManager
     );
     scenario.registerCommands({
       delay: new DelayCommand(eventManager),
-      'expect-pin': new ExpectPinCommand(),
-      'set-control': new SetControlCommand(),
-      'wait-serial': new WaitSerialCommand(expectEngine),
+      "expect-pin": new ExpectPinCommand(),
+      "set-control": new SetControlCommand(),
+      "wait-serial": new WaitSerialCommand(expectEngine),
     });
     scenario.validate();
   }
 
   if (expectText) {
     expectEngine.expectTexts.push(expectText);
-    expectEngine.on('match', (text) => {
+    expectEngine.on("match", (text) => {
       if (text !== expectText) {
         return;
       }
 
       if (!quiet) {
-        console.log(chalk`\n\nExpected text found: {green "${expectText}"}`);
-        console.log('TEST PASSED.');
+        console.log(
+          chalkTemplate`\n\nExpected text found: {green "${expectText}"}`
+        );
+        console.log("TEST PASSED.");
       }
       client.close();
       process.exit(0);
@@ -143,13 +155,15 @@ async function main() {
 
   if (failText) {
     expectEngine.failTexts.push(failText);
-    expectEngine.on('fail', (text) => {
+    expectEngine.on("fail", (text) => {
       if (text !== failText) {
         return;
       }
 
-      console.error(chalk`\n\n{red Error:} Unexpected text found: {yellow "${text}"}`);
-      console.error('TEST FAILED.');
+      console.error(
+        chalkTemplate`\n\n{red Error:} Unexpected text found: {yellow "${text}"}`
+      );
+      console.error("TEST FAILED.");
       client.close();
       process.exit(1);
     });
@@ -162,25 +176,31 @@ async function main() {
     }
   };
   client.onError = (error) => {
-    console.error('API Error:', error.message);
+    console.error("API Error:", error.message);
     process.exit(1);
   };
 
   try {
     await client.connected;
-    await client.fileUpload('diagram.json', diagram);
-    const extension = firmwarePath.split('.').pop();
+    await client.fileUpload("diagram.json", diagram);
+    const extension = firmwarePath.split(".").pop();
     const firmwareName = `firmware.${extension}`;
     await client.fileUpload(firmwareName, readFileSync(firmwarePath));
-    await client.fileUpload('firmware.elf', readFileSync(elfPath));
+    await client.fileUpload("firmware.elf", readFileSync(elfPath));
 
     for (const chip of chips) {
-      await client.fileUpload(`${chip.name}.chip.json`, readFileSync(chip.jsonPath, 'utf-8'));
-      await client.fileUpload(`${chip.name}.chip.wasm`, readFileSync(chip.wasmPath));
+      await client.fileUpload(
+        `${chip.name}.chip.json`,
+        readFileSync(chip.jsonPath, "utf-8")
+      );
+      await client.fileUpload(
+        `${chip.name}.chip.wasm`,
+        readFileSync(chip.wasmPath)
+      );
     }
 
     if (!quiet) {
-      console.log('Starting simulation...');
+      console.log("Starting simulation...");
     }
 
     const scenarioPromise = scenario?.start(client);
@@ -201,7 +221,7 @@ async function main() {
     if (screenshotPart != null && screenshotTime != null) {
       eventManager.at(screenshotTime * millis, async (t) => {
         const result = await client.framebufferRead(screenshotPart);
-        writeFileSync(screenshotFile, result.png, 'base64');
+        writeFileSync(screenshotFile, result.png, "base64");
       });
     }
 
@@ -209,27 +229,27 @@ async function main() {
     const { timeToNextEvent } = eventManager;
 
     client.onEvent = (event) => {
-      if (event.event === 'sim:pause') {
+      if (event.event === "sim:pause") {
         eventManager.processEvents(event.nanos);
         if (eventManager.timeToNextEvent >= 0) {
           void client.simResume(eventManager.timeToNextEvent);
         }
       }
-      if (event.event === 'serial-monitor:data') {
+      if (event.event === "serial-monitor:data") {
         const { bytes } = (event as APIEvent<SerialMonitorDataPayload>).payload;
         for (const byte of bytes) {
           process.stdout.write(String.fromCharCode(byte));
         }
         expectEngine.feed(bytes);
       }
-      if (event.event === 'chips:log') {
+      if (event.event === "chips:log") {
         const { message, chip } = (event as APIEvent<ChipsLogPayload>).payload;
-        console.log(chalk`[{magenta ${chip}}] ${message}`);
+        console.log(chalkTemplate`[{magenta ${chip}}] ${message}`);
       }
     };
 
     await client.simStart({
-      elf: 'test.elf',
+      elf: "test.elf",
       firmware: firmwareName,
       chips: chips.map((chip) => chip.name),
       pause: timeToNextEvent >= 0,

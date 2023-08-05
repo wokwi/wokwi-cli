@@ -1,7 +1,7 @@
-import chalk from 'chalk';
+import chalkTemplate from "chalk-template";
 
 export function cliHelp() {
-  console.log(chalk`
+  console.log(chalkTemplate`
   {bold USAGE}
 
       {dim $} {bold wokwi-cli} [options] [path/to/project]
