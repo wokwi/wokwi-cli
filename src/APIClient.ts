@@ -17,6 +17,7 @@ export class APIClient {
   private socket: WebSocket;
   private connectionAttempts = 0;
   private lastId = 0;
+  private closed = false;
   private _running = false;
   private _lastNanos = 0;
   private readonly pendingCommands = new Map<
@@ -69,6 +70,18 @@ export class APIClient {
       });
       this.socket.addEventListener('error', (event) => {
         reject(new Error(`Error connecting to ${this.server}: ${event.message}`));
+      });
+      this.socket.addEventListener('close', (event) => {
+        if (this.closed) {
+          return;
+        }
+
+        const message = `Connection to ${this.server} closed unexpectedly: code ${event.code}`;
+        if (this.onError) {
+          this.onError({ type: 'error', message });
+        } else {
+          console.error(message);
+        }
       });
     });
   }
@@ -213,6 +226,7 @@ export class APIClient {
   }
 
   close() {
+    this.closed = true;
     if (this.socket.readyState === WebSocket.OPEN) {
       this.socket.close();
     }
