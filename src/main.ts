@@ -156,12 +156,17 @@ async function main() {
   }
 
   const client = new APIClient(token);
+  client.onConnected = (hello) => {
+    if (!quiet) {
+      console.log(`Connected to Wokwi Simulation API ${hello.appVersion}`);
+    }
+  };
+  client.onError = (error) => {
+    console.error('API Error:', error.message);
+    process.exit(1);
+  };
+
   try {
-    client.onConnected = (hello) => {
-      if (!quiet) {
-        console.log(`Connected to Wokwi Simulation API ${hello.appVersion}`);
-      }
-    };
     await client.connected;
     await client.fileUpload('diagram.json', diagram);
     const extension = firmwarePath.split('.').pop();

@@ -28,6 +28,7 @@ export class APIClient {
 
   onConnected?: (helloMessage: APIHello) => void;
   onEvent?: (event: APIEvent) => void;
+  onError?: (error: APIError) => void;
 
   constructor(readonly token: string, readonly server = DEFAULT_SERVER) {
     this.socket = this.createSocket(token, server);
@@ -160,7 +161,14 @@ export class APIClient {
   processMessage(message: APIError | APIHello | APIEvent | APIResponse) {
     switch (message.type) {
       case 'error':
+        if (this.onError) {
+          this.onError(message);
+        }
         console.error('API Error:', message.message);
+        if (this.pendingCommands.size > 0) {
+          const [, reject] = this.pendingCommands.values().next().value;
+          reject(new Error(message.message));
+        }
         break;
 
       case 'hello':
