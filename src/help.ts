@@ -14,7 +14,7 @@ export function cliHelp() {
       {green --screenshot-part} <string>  Take a screenshot of the given part id (from diagram.json)
       {green --screenshot-time} <number>  Time in simulation milliseconds to take the screenshot
       {green --screenshot-file} <string>  File name to save the screenshot to (default: screenshot.png)
-      {green --timeout} <number>          Timeout in simulation milliseconds (default: 0 = none)
+      {green --timeout} <number>          Timeout in simulation milliseconds (default: 30000)
       {green --timeout-exit-code} <number> Process exit code when timeout is reached (default: 42)
 
   {bold EXAMPLES}

@@ -43,7 +43,7 @@ async function main() {
   const expectText = args['--expect-text'];
   const failText = args['--fail-text'];
   const scenarioFile = args['--scenario'];
-  const timeout = args['--timeout'] ?? 0;
+  const timeout = args['--timeout'] ?? 30000;
   const screenshotPart = args['--screenshot-part'];
   const screenshotTime = args['--screenshot-time'];
   const screenshotFile = args['--screenshot-file'] ?? 'screenshot.png';
