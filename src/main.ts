@@ -239,7 +239,12 @@ async function main() {
       await client.simResume(timeToNextEvent);
     }
 
-    await scenarioPromise;
+    if (scenarioPromise) {
+      await scenarioPromise;
+    } else {
+      // wait forever - until there's an error, timeout, serial output match, or the user presses Ctrl+C
+      await new Promise(() => {});
+    }
   } finally {
     client.close();
   }
