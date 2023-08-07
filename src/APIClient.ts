@@ -55,6 +55,7 @@ export class APIClient {
       });
       this.socket.addEventListener("open", resolve);
       this.socket.on("unexpected-response", (req, res) => {
+        this.closed = true;
         this.socket.close();
         const RequestTimeout = 408;
         const ServiceUnavailable = 503;
@@ -110,6 +111,7 @@ export class APIClient {
 
     console.log(`Retrying connection to ${this.server}...`);
     this.socket = this.createSocket(this.token, this.server);
+    this.closed = false;
     await this.connectSocket(this.socket);
   }
 
