@@ -9,6 +9,7 @@ import type {
   APISimStartParams,
   PinReadResponse,
 } from "./APITypes.js";
+import { readVersion } from "./readVersion.js";
 
 const DEFAULT_SERVER =
   process.env.WOKWI_CLI_SERVER ?? "wss://wokwi.com/api/ws/beta";
@@ -38,8 +39,12 @@ export class APIClient {
   }
 
   private createSocket(token: string, server: string) {
+    const { sha, version } = readVersion();
     return new WebSocket(server, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "User-Agent": `wokwi-cli/${version} (${sha})`,
+      },
     });
   }
 
