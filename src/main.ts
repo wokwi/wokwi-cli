@@ -67,7 +67,7 @@ async function main() {
   const token = process.env.WOKWI_CLI_TOKEN;
   if (token == null || token.length === 0) {
     console.error(
-      `Error: Missing WOKWI_CLI_TOKEN environment variable. Please set it to your Wokwi token. Get your token at https://wokwi.com/dashboard/ci.`
+      `Error: Missing WOKWI_CLI_TOKEN environment variable. Please set it to your Wokwi token.\nGet your token at https://wokwi.com/dashboard/ci.`
     );
     process.exit(1);
   }
