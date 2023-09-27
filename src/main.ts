@@ -16,6 +16,7 @@ import { DelayCommand } from './scenario/DelayCommand.js';
 import { ExpectPinCommand } from './scenario/ExpectPinCommand.js';
 import { SetControlCommand } from './scenario/SetControlCommand.js';
 import { WaitSerialCommand } from './scenario/WaitSerialCommand.js';
+import { uploadFirmware } from './uploadFirmware.js';
 
 const millis = 1_000_000;
 
@@ -169,9 +170,7 @@ async function main() {
   try {
     await client.connected;
     await client.fileUpload('diagram.json', diagram);
-    const extension = firmwarePath.split('.').pop();
-    const firmwareName = `firmware.${extension}`;
-    await client.fileUpload(firmwareName, readFileSync(firmwarePath));
+    const firmwareName = await uploadFirmware(client, firmwarePath);
     await client.fileUpload('firmware.elf', readFileSync(elfPath));
 
     for (const chip of chips) {
