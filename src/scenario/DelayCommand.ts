@@ -1,9 +1,9 @@
-import chalkTemplate from "chalk-template";
-import { type APIClient } from "../APIClient.js";
-import { type EventManager } from "../EventManager.js";
-import { type TestScenario } from "../TestScenario.js";
-import { parseTime } from "../utils/parseTime.js";
-import { promiseAndResolver } from "../utils/promise.js";
+import chalkTemplate from 'chalk-template';
+import { type APIClient } from '../APIClient.js';
+import { type EventManager } from '../EventManager.js';
+import { type TestScenario } from '../TestScenario.js';
+import { parseTime } from '../utils/parseTime.js';
+import { promiseAndResolver } from '../utils/promise.js';
 
 export class DelayCommand {
   constructor(readonly eventManager: EventManager) {}

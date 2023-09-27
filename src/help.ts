@@ -1,4 +1,4 @@
-import chalkTemplate from "chalk-template";
+import chalkTemplate from 'chalk-template';
 
 export function cliHelp() {
   console.log(chalkTemplate`

@@ -1,9 +1,9 @@
-import { existsSync } from "fs";
-import { join, resolve } from "path";
-import type { WokwiTOMLChip } from "./WokwiConfig.js";
+import { existsSync } from 'fs';
+import { join, resolve } from 'path';
+import type { WokwiTOMLChip } from './WokwiConfig.js';
 
 function removeExtension(path: string) {
-  return path.replace(/\.[^.]+$/, "");
+  return path.replace(/\.[^.]+$/, '');
 }
 
 export function loadChips(chips: WokwiTOMLChip[], rootDir: string) {
@@ -15,7 +15,7 @@ export function loadChips(chips: WokwiTOMLChip[], rootDir: string) {
       process.exit(1);
     }
 
-    const jsonPath = join(rootDir, removeExtension(chip.binary) + ".json");
+    const jsonPath = join(rootDir, removeExtension(chip.binary) + '.json');
     if (!existsSync(jsonPath)) {
       console.error(`Error: chip JSON file not found: ${resolve(jsonPath)}`);
       process.exit(1);
