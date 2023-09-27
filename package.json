@@ -13,7 +13,22 @@
     "test:watch": "vitest --watch",
     "prepare": "husky install"
   },
-  "keywords": [],
+  "keywords": [
+    "esp32",
+    "stm32",
+    "iot",
+    "embedded",
+    "testing",
+    "ci",
+    "wokwi",
+    "esp-idf",
+    "simulator",
+    "arduino",
+    "platformio",
+    "zephyr",
+    "micropython",
+    "circuitpython"
+  ],
   "author": "Uri Shaked",
   "license": "ISC",
   "repository": {
