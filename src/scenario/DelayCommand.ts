@@ -8,6 +8,17 @@ import { promiseAndResolver } from '../utils/promise.js';
 export class DelayCommand {
   constructor(readonly eventManager: EventManager) {}
 
+  validate(value: string) {
+    if (typeof value === 'number') {
+      throw new Error(
+        `Invalid delay value ${value}. The value must include units (e.g. ${value}ms)`,
+      );
+    }
+    if (typeof value !== 'string') {
+      throw new Error(`Delay value must be a string`);
+    }
+  }
+
   async run(scenario: TestScenario, client: APIClient, value: string) {
     const nanos = parseTime(value);
     const targetNanos = (client.lastNanos ?? 0) + nanos;

@@ -3,7 +3,9 @@ import type { APIClient } from './APIClient.js';
 import type { EventManager } from './EventManager.js';
 
 export interface IScenarioCommand {
-  validate?(params: any): boolean;
+  /** Validates the input to the command. Throws an exception of the input is not valid */
+  validate?(params: any): void;
+
   run(scenario: TestScenario, client: APIClient, params: any): Promise<void>;
 }
 
@@ -61,9 +63,12 @@ export class TestScenario {
       }
 
       for (const key of Object.keys(step)) {
-        if (!validStepKeys.includes(key) && !Object.keys(this.handlers).includes(key)) {
+        const handler = this.handlers[key];
+        if (!validStepKeys.includes(key) && !handler) {
           throw new Error(`Invalid scenario step key: ${key}`);
         }
+
+        handler?.validate?.(step[key]);
       }
     }
   }
