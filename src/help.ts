@@ -11,6 +11,7 @@ export function cliHelp() {
       {green --quiet}, {green -q}                 Quiet: do not print version or status messages
       {green --expect-text} <string>      Expect the given text in the output
       {green --fail-text} <string>        Fail if the given text is found in the output
+      {green --serial-log-file} <string>  Save the serial monitor output to the given file
       {green --screenshot-part} <string>  Take a screenshot of the given part id (from diagram.json)
       {green --screenshot-time} <number>  Time in simulation milliseconds to take the screenshot
       {green --screenshot-file} <string>  File name to save the screenshot to (default: screenshot.png)

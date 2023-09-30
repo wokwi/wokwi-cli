@@ -1,6 +1,6 @@
 import arg from 'arg';
 import chalkTemplate from 'chalk-template';
-import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync, createWriteStream } from 'fs';
 import path, { join } from 'path';
 import YAML from 'yaml';
 import { APIClient } from './APIClient.js';
@@ -28,6 +28,7 @@ async function main() {
       '--version': Boolean,
       '--expect-text': String,
       '--fail-text': String,
+      '--serial-log-file': String,
       '--scenario': String,
       '--screenshot-part': String,
       '--screenshot-file': String,
@@ -43,6 +44,7 @@ async function main() {
   const quiet = args['--quiet'];
   const expectText = args['--expect-text'];
   const failText = args['--fail-text'];
+  const serialLogFile = args['--serial-log-file'];
   const scenarioFile = args['--scenario'];
   const timeout = args['--timeout'] ?? 30000;
   const screenshotPart = args['--screenshot-part'];
@@ -125,6 +127,8 @@ async function main() {
     });
     scenario.validate();
   }
+
+  const serialLogStream = serialLogFile ? createWriteStream(serialLogFile) : null;
 
   if (expectText) {
     expectEngine.expectTexts.push(expectText);
@@ -219,6 +223,8 @@ async function main() {
         for (const byte of bytes) {
           process.stdout.write(String.fromCharCode(byte));
         }
+
+        serialLogStream?.write(Buffer.from(bytes));
         expectEngine.feed(bytes);
       }
       if (event.event === 'chips:log') {
