@@ -7,7 +7,7 @@
   "scripts": {
     "build": "node tools/build.js",
     "package": "npm run build && pkg --public -o dist/bin/wokwi-cli -t node18-linuxstatic-arm64,node18-linuxstatic-x64,node18-macos-arm64,node18-macos-x64,node18-win-x64 dist/cli.cjs",
-    "start": "ts-node --esm src/main.ts",
+    "start": "tsx src/main.ts",
     "lint": "eslint ./src",
     "test": "npm run lint && vitest --run",
     "test:watch": "vitest --watch",
@@ -58,7 +58,7 @@
     "pkg": "^5.8.1",
     "prettier": "^3.0.3",
     "rimraf": "^5.0.0",
-    "ts-node": "^10.9.1",
+    "tsx": "^4.6.1",
     "typescript": "^5.2.2",
     "vitest": "^0.34.5"
   },
