@@ -11,6 +11,7 @@ export function cliHelp() {
       {green --quiet}, {green -q}                 Quiet: do not print version or status messages
       {green --expect-text} <string>      Expect the given text in the output
       {green --fail-text} <string>        Fail if the given text is found in the output
+      {green --elf} <path>                ELF file to simulate (default: read from wokwi.toml)
       {green --scenario} <path>           Run the given scenario (yaml) file, path is relative to project root
       {green --serial-log-file} <path>    Save the serial monitor output to the given file
       {green --screenshot-part} <string>  Take a screenshot of the given part id (from diagram.json)

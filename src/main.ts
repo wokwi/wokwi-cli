@@ -1,6 +1,6 @@
 import arg from 'arg';
 import chalkTemplate from 'chalk-template';
-import { existsSync, readFileSync, writeFileSync, createWriteStream } from 'fs';
+import { createWriteStream, existsSync, readFileSync, writeFileSync } from 'fs';
 import path, { join } from 'path';
 import YAML from 'yaml';
 import { APIClient } from './APIClient.js';
@@ -26,6 +26,7 @@ async function main() {
       '--help': Boolean,
       '--quiet': Boolean,
       '--version': Boolean,
+      '--elf': String,
       '--expect-text': String,
       '--fail-text': String,
       '--serial-log-file': String,
@@ -42,6 +43,7 @@ async function main() {
   );
 
   const quiet = args['--quiet'];
+  const elf = args['--elf'];
   const expectText = args['--expect-text'];
   const failText = args['--fail-text'];
   const serialLogFile = args['--serial-log-file'];
@@ -74,8 +76,9 @@ async function main() {
   const rootDir = args._[0] || '.';
   const configPath = `${rootDir}/wokwi.toml`;
   const diagramFile = `${rootDir}/diagram.json`;
+  const configExists = existsSync(configPath);
 
-  if (!existsSync(configPath)) {
+  if (!elf && !configExists) {
     console.error(`Error: wokwi.toml not found in ${path.resolve(rootDir)}`);
     process.exit(1);
   }
@@ -85,12 +88,22 @@ async function main() {
     process.exit(1);
   }
 
-  const configData = readFileSync(configPath, 'utf8');
-  const config = await parseConfig(configData, rootDir);
-  const diagram = readFileSync(diagramFile, 'utf8');
+  let firmwarePath;
+  let elfPath;
+  let config;
 
-  const firmwarePath = join(rootDir, config.wokwi.firmware);
-  const elfPath = join(rootDir, config.wokwi.elf);
+  if (configExists) {
+    const configData = readFileSync(configPath, 'utf8');
+    config = await parseConfig(configData, rootDir);
+
+    firmwarePath = elf ?? join(rootDir, config.wokwi.firmware);
+    elfPath = elf ?? join(rootDir, config.wokwi.elf);
+  } else if (elf) {
+    firmwarePath = elf;
+    elfPath = elf;
+  } else {
+    throw new Error('Internal error: neither elf nor config exists');
+  }
 
   if (!existsSync(firmwarePath)) {
     console.error(`Error: firmware file not found: ${path.resolve(firmwarePath)}`);
@@ -102,7 +115,9 @@ async function main() {
     process.exit(1);
   }
 
-  const chips = loadChips(config.chip ?? [], rootDir);
+  const diagram = readFileSync(diagramFile, 'utf8');
+
+  const chips = loadChips(config?.chip ?? [], rootDir);
 
   const resolvedScenarioFile = scenarioFile ? path.resolve(rootDir, scenarioFile) : null;
   if (resolvedScenarioFile && !existsSync(resolvedScenarioFile)) {
