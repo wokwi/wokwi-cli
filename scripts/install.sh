@@ -60,7 +60,13 @@ main() {
     echo "export PATH=\"$HOME/bin:\$PATH\"" >> "$shell_profile"
     echo "Path updated! You may need to restart your shell or run 'source $shell_profile' to refresh your PATH."
     echo "Run '$exe --help' to get started"
+
+    # if $GITHUB_PATH is defined, add $HOME/bin to it
+    if [ -n "$GITHUB_PATH" ]; then
+      echo "$HOME/bin" >> "$GITHUB_PATH"
+    fi
   fi
+
 
   echo
   echo "Stuck? Join our Discord at https://wokwi.com/discord"
