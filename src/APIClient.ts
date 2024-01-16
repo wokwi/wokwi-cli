@@ -1,4 +1,5 @@
 import { WebSocket } from 'ws';
+import { Writable } from 'stream';
 import type {
   APICommand,
   APIError,
@@ -153,6 +154,19 @@ export class APIClient {
   async serialMonitorWrite(bytes: number[] | Uint8Array) {
     return await this.sendCommand('serial-monitor:write', {
       bytes: Array.from(bytes),
+    });
+  }
+
+  serialMonitorWritable() {
+    return new Writable({
+      write: (chunk, encoding, callback) => {
+        if (typeof chunk === 'string') {
+          chunk = Buffer.from(chunk, encoding);
+        }
+        this.serialMonitorWrite(chunk).then(() => {
+          callback(null);
+        }, callback);
+      },
     });
   }
 

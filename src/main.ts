@@ -29,6 +29,7 @@ async function main() {
       '--elf': String,
       '--expect-text': String,
       '--fail-text': String,
+      '--interactive': Boolean,
       '--serial-log-file': String,
       '--scenario': String,
       '--screenshot-part': String,
@@ -46,6 +47,7 @@ async function main() {
   const elf = args['--elf'];
   const expectText = args['--expect-text'];
   const failText = args['--fail-text'];
+  const interactive = args['--interactive'];
   const serialLogFile = args['--serial-log-file'];
   const scenarioFile = args['--scenario'];
   const timeout = args['--timeout'] ?? 30000;
@@ -254,6 +256,10 @@ async function main() {
       chips: chips.map((chip) => chip.name),
       pause: timeToNextEvent >= 0,
     });
+
+    if (interactive) {
+      process.stdin.pipe(client.serialMonitorWritable());
+    }
 
     if (timeToNextEvent > 0) {
       await client.simResume(timeToNextEvent);
