@@ -63,7 +63,7 @@ main() {
 
     # if $GITHUB_PATH is defined, add $HOME/bin to it
     if [ -n "$GITHUB_PATH" ]; then
-      echo "$HOME/bin" >> "$GITHUB_PATH"
+      echo "$HOME/bin" >> "$GITHUB_PATH" | true
     fi
   fi
 
