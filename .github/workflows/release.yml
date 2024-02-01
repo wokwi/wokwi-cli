@@ -8,7 +8,7 @@ jobs:
   create-release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: 'Install NPM dependencies'
         run: npm ci
       - name: 'Install LDID'
@@ -24,6 +24,6 @@ jobs:
       - name: Upload Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: 'dist/bin/wokwi-cli-*'
+          artifacts: 'dist/bin/wokwi-cli-*,dist/bin/version.json'
           token: ${{ secrets.GITHUB_TOKEN }}
           generateReleaseNotes: true
