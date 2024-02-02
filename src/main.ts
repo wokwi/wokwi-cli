@@ -16,6 +16,7 @@ import { DelayCommand } from './scenario/DelayCommand.js';
 import { ExpectPinCommand } from './scenario/ExpectPinCommand.js';
 import { SetControlCommand } from './scenario/SetControlCommand.js';
 import { WaitSerialCommand } from './scenario/WaitSerialCommand.js';
+import { WaitPinCommand } from './scenario/WaitPinCommand.js';
 import { uploadFirmware } from './uploadFirmware.js';
 
 const millis = 1_000_000;
@@ -141,6 +142,7 @@ async function main() {
       'expect-pin': new ExpectPinCommand(),
       'set-control': new SetControlCommand(),
       'wait-serial': new WaitSerialCommand(expectEngine),
+      'wait-pin': new WaitPinCommand(),
     });
     scenario.validate();
   }
