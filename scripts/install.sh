@@ -25,9 +25,9 @@ main() {
 
   # URL based on detected values and version
   if [ "$version" = "latest" ]; then
-    wokwi_cli_uri="https://github.com/wokwi/wokwi-cli/releases/latest/download/wokwi-cli-$os-$arch"
+    wokwi_cli_uri="https://github.com/rafaelcorsi/wokwi-cli/releases/latest/download/wokwi-cli-$os-$arch"
   else
-    wokwi_cli_uri="https://github.com/wokwi/wokwi-cli/releases/download/v$version/wokwi-cli-$os-$arch"
+    wokwi_cli_uri="https://github.com/rafaelcorsi/wokwi-cli/releases/download/v$version/wokwi-cli-$os-$arch"
   fi
 
   wokwi_cli_install="${WOKWI_CLI_INSTALL:-$HOME/.wokwi}"
