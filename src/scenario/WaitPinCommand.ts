@@ -17,7 +17,6 @@ export class WaitPinCommand implements IScenarioCommand {
       chalkTemplate`wait-pin {yellow ${partId}}:{magenta ${pinName}} == {yellow ${expectedValue}}`,
     );
     let value = (await client.pinRead(partId, pinName))?.value ? 1 : 0;
-
     while (value !== expectedValue) {
       value = (await client.pinRead(partId, pinName))?.value ? 1 : 0;
     }
