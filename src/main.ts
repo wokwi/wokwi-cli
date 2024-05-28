@@ -26,6 +26,7 @@ async function main() {
       '--help': Boolean,
       '--quiet': Boolean,
       '--version': Boolean,
+      '--diagram-file': String,
       '--elf': String,
       '--expect-text': String,
       '--fail-text': String,
@@ -48,6 +49,7 @@ async function main() {
   const expectText = args['--expect-text'];
   const failText = args['--fail-text'];
   const interactive = args['--interactive'];
+  const diagramFile = args['--diagram-file'];
   const serialLogFile = args['--serial-log-file'];
   const scenarioFile = args['--scenario'];
   const timeout = args['--timeout'] ?? 30000;
@@ -76,8 +78,8 @@ async function main() {
   }
 
   const rootDir = args._[0] || '.';
-  const configPath = `${rootDir}/wokwi.toml`;
-  const diagramFile = `${rootDir}/diagram.json`;
+  const configPath = path.join(rootDir, 'wokwi.toml');
+  const diagramFilePath = path.join(rootDir, diagramFile ?? 'diagram.json');
   const configExists = existsSync(configPath);
 
   if (!elf && !configExists) {
@@ -85,7 +87,7 @@ async function main() {
     process.exit(1);
   }
 
-  if (!existsSync(diagramFile)) {
+  if (!existsSync(diagramFilePath)) {
     console.error(`Error: diagram.json not found in ${path.resolve(rootDir)}`);
     process.exit(1);
   }
@@ -117,7 +119,7 @@ async function main() {
     process.exit(1);
   }
 
-  const diagram = readFileSync(diagramFile, 'utf8');
+  const diagram = readFileSync(diagramFilePath, 'utf8');
 
   const chips = loadChips(config?.chip ?? [], rootDir);
 

@@ -12,6 +12,7 @@ export function cliHelp() {
       {green --expect-text} <string>      Expect the given text in the output
       {green --fail-text} <string>        Fail if the given text is found in the output
       {green --elf} <path>                ELF file to simulate (default: read from wokwi.toml)
+      {green --diagram-file} <path>       Path to the diagram.json file, relative to project root (default: diagram.json)
       {green --interactive}               Redirect stdin to the simulated serial port
       {green --scenario} <path>           Run the given scenario (yaml) file, path is relative to project root
       {green --serial-log-file} <path>    Save the serial monitor output to the given file
