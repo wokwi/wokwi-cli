@@ -79,7 +79,7 @@ async function main() {
 
   const rootDir = args._[0] || '.';
   const configPath = path.join(rootDir, 'wokwi.toml');
-  const diagramFilePath = path.join(rootDir, diagramFile ?? 'diagram.json');
+  const diagramFilePath = path.resolve(rootDir, diagramFile ?? 'diagram.json');
   const configExists = existsSync(configPath);
 
   if (!elf && !configExists) {
@@ -88,7 +88,7 @@ async function main() {
   }
 
   if (!existsSync(diagramFilePath)) {
-    console.error(`Error: diagram.json not found in ${path.resolve(rootDir)}`);
+    console.error(`Error: diagram file not found in ${diagramFilePath}`);
     process.exit(1);
   }
 
