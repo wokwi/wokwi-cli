@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "node tools/build.js",
-    "package": "npm run build && pkg --public -o dist/bin/wokwi-cli -t node18-linuxstatic-arm64,node18-linuxstatic-x64,node18-macos-arm64,node18-macos-x64,node18-win-x64 dist/cli.cjs",
+    "package": "npm run build && pkg --public -o dist/bin/wokwi-cli -t node20-linuxstatic-arm64,node20-linuxstatic-x64,node20-macos-arm64,node20-macos-x64,node20-win-x64 dist/cli.cjs",
     "start": "tsx src/main.ts",
     "lint": "eslint ./src",
     "test": "npm run lint && vitest --run",
@@ -55,7 +55,7 @@
     "eslint-plugin-promise": "^6.1.1",
     "husky": "^8.0.0",
     "lint-staged": "^13.2.2",
-    "pkg": "^5.8.1",
+    "@yao-pkg/pkg": "^5.11.5",
     "prettier": "^3.0.3",
     "rimraf": "^5.0.0",
     "tsx": "^4.6.1",
