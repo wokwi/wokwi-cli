@@ -5,9 +5,24 @@ import type { IScenarioCommand, TestScenario } from '../TestScenario.js';
 import { promiseAndResolver } from '../utils/promise.js';
 
 export class WaitSerialCommand implements IScenarioCommand {
-  constructor(readonly expectEngine: ExpectEngine) {}
+  readonly buffer: string[] = [];
+
+  constructor(readonly expectEngine: ExpectEngine) {
+    expectEngine.on('line', (line) => {
+      this.buffer.push(line);
+    });
+  }
 
   async run(scenario: TestScenario, client: APIClient, text: string) {
+    for (let i = 0; i < this.buffer.length; i++) {
+      const line = this.buffer[i];
+      if (line.includes(text)) {
+        this.buffer.splice(0, i + 1);
+        scenario.log(chalkTemplate`Expected text matched: {green "${text}"}`);
+        return;
+      }
+    }
+
     this.expectEngine.expectTexts.push(text);
     const { promise, resolve } = promiseAndResolver();
     this.expectEngine.once('match', () => {
@@ -16,6 +31,7 @@ export class WaitSerialCommand implements IScenarioCommand {
       if (textIndex >= 0) {
         this.expectEngine.expectTexts.splice(textIndex, 1);
       }
+      this.buffer.length = 0;
       resolve();
     });
     await Promise.all([scenario.resume(), promise]);

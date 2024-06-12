@@ -17,6 +17,7 @@ export class ExpectEngine extends EventEmitter {
     for (const byte of bytes) {
       const char = String.fromCharCode(byte);
       if (char === '\n') {
+        this.emit('line', this.currentLine);
         this.testMatches();
         this.currentLine = '';
       } else {
