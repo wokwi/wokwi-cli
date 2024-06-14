@@ -67,7 +67,8 @@ export class APIClient {
         this.socket.close();
         const RequestTimeout = 408;
         const ServiceUnavailable = 503;
-        if (res.statusCode === ServiceUnavailable || res.statusCode === RequestTimeout) {
+        const CfRequestTimeout = 524;
+        if (res.statusCode === ServiceUnavailable || res.statusCode === RequestTimeout || res.statusCode === CfRequestTimeout) {
           console.warn(
             `Connection to ${this.server} failed: ${res.statusMessage ?? ''} (${res.statusCode}).`,
           );
