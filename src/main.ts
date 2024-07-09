@@ -63,6 +63,9 @@ async function main() {
   if (!quiet) {
     const { sha, version } = readVersion();
     console.log(`Wokwi CLI v${version} (${sha})`);
+    if (args['--version']) {
+      process.exit(0);
+    }
   }
 
   if (args['--help']) {
