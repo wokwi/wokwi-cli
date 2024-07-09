@@ -16,10 +16,19 @@ import { DelayCommand } from './scenario/DelayCommand.js';
 import { ExpectPinCommand } from './scenario/ExpectPinCommand.js';
 import { SetControlCommand } from './scenario/SetControlCommand.js';
 import { WaitSerialCommand } from './scenario/WaitSerialCommand.js';
-import { uploadFirmware } from './uploadFirmware.js';
 import { WriteSerialCommand } from './scenario/WriteSerialCommand.js';
+import { uploadFirmware } from './uploadFirmware.js';
 
 const millis = 1_000_000;
+
+function printVersion(short = false) {
+  const { sha, version } = readVersion();
+  if (short) {
+    console.log(`${version} (${sha})`);
+  } else {
+    console.log(`Wokwi CLI v${version} (${sha})`);
+  }
+}
 
 async function main() {
   const args = arg(
@@ -27,6 +36,7 @@ async function main() {
       '--help': Boolean,
       '--quiet': Boolean,
       '--version': Boolean,
+      '--short-version': Boolean,
       '--diagram-file': String,
       '--elf': String,
       '--expect-text': String,
@@ -60,12 +70,13 @@ async function main() {
   const timeoutExitCode = args['--timeout-exit-code'] ?? 42;
   const timeoutNanos = timeout * millis;
 
+  if (args['--version'] === true || args['--short-version'] === true) {
+    printVersion(args['--short-version']);
+    process.exit(0);
+  }
+
   if (!quiet) {
-    const { sha, version } = readVersion();
-    console.log(`Wokwi CLI v${version} (${sha})`);
-    if (args['--version']) {
-      process.exit(0);
-    }
+    printVersion();
   }
 
   if (args['--help']) {
