@@ -19,6 +19,7 @@ main() {
 
   case "$arch" in
   x86_64) arch="x64" ;;
+  aarch64) arch="arm64" ;;
   arm64) ;;
   *) echo "Unsupported architecture: $arch"; exit 1 ;;
   esac
