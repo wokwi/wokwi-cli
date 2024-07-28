@@ -10,6 +10,7 @@ import { ExpectEngine } from './ExpectEngine.js';
 import { TestScenario } from './TestScenario.js';
 import { parseConfig } from './config.js';
 import { cliHelp } from './help.js';
+import { initProjectWizard } from './project/initProjectWizard.js';
 import { loadChips } from './loadChips.js';
 import { readVersion } from './readVersion.js';
 import { DelayCommand } from './scenario/DelayCommand.js';
@@ -81,6 +82,11 @@ async function main() {
 
   if (args['--help']) {
     cliHelp();
+    process.exit(0);
+  }
+
+  if (args._[0] === 'init') {
+    await initProjectWizard(args._[1] ?? '.', { diagramFile });
     process.exit(0);
   }
 

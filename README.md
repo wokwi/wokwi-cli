@@ -36,6 +36,20 @@ cd esp-idf-hello-world
 wokwi-cli .
 ```
 
+## Configuration Wizard
+
+To generate a `wokwi.toml` and a default `diagram.json` files for your project, run:
+
+```bash
+wokwi-cli init
+```
+
+This will ask you a few questions and will create the necessary files in the current directory. If you want to create the files in a different directory, pass the directory name as an argument:
+
+```bash
+wokwi-cli init my-project
+```
+
 ## Development
 
 Clone the repository, install the npm depenedencies, and then run the CLI:
