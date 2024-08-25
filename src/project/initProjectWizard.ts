@@ -51,7 +51,7 @@ export async function initProjectWizard(rootDir: string, opts: { diagramFile?: s
   const boardType = await select({
     message: 'Select the board to simulate:',
     options: filteredBoards.map((board) => ({ value: board.board, label: board.title })),
-    maxItems: 12,
+    maxItems: process.stdout.rows - 4,
   });
   if (isCancel(boardType)) {
     cancel('Operation cancelled.');
