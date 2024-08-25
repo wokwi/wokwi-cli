@@ -10,6 +10,7 @@ import { detectProjectType } from './projectType.js';
 export async function initProjectWizard(rootDir: string, opts: { diagramFile?: string }) {
   const configPath = path.join(rootDir, 'wokwi.toml');
   const diagramFilePath = path.resolve(rootDir, opts.diagramFile ?? 'diagram.json');
+  const launchJsonPath = path.join(rootDir, '.vscode', 'launch.json');
 
   intro(`Wokwi CLI - Project Initialization Wizard`);
 
@@ -94,21 +95,72 @@ export async function initProjectWizard(rootDir: string, opts: { diagramFile?: s
     elfPath = elfPathResponse;
   }
 
-  log.info(`Writing wokwi.toml...`);
-  writeFileSync(
-    configPath,
-    `# Wokwi Configuration File
-# Reference: https://docs.wokwi.com/vscode/project-config
+  let vsCodeDebug: boolean = false;
+  if (projectType === 'esp-idf') {
+    const vsCodeDebugAnswer = await confirm({
+      message: `Setup VS Code debugging for ESP-IDF project?`,
+      initialValue: true,
+    });
+    if (isCancel(vsCodeDebugAnswer)) {
+      cancel('Operation cancelled.');
+      process.exit(0);
+    }
+    if (vsCodeDebugAnswer) {
+      vsCodeDebug = true;
+    }
 
-[wokwi]
-version = 1
-firmware = '${firmwarePath}'
-elf = '${elfPath}'
-`,
-  );
+    if (vsCodeDebug && existsSync(launchJsonPath)) {
+      const shouldContinue = await confirm({
+        message: `VS Code debugging configuration already exists in .vscode/launch.json. This operation will overwrite it. Continue?`,
+        initialValue: false,
+      });
+      if (!shouldContinue || isCancel(shouldContinue)) {
+        cancel('Operation cancelled.');
+        process.exit(0);
+      }
+    }
+  }
+
+  const tomlContent = [
+    `# Wokwi Configuration File`,
+    `# Reference: https://docs.wokwi.com/vscode/project-config`,
+    `[wokwi]`,
+    `version = 1`,
+    `firmware = '${firmwarePath}'`,
+    `elf = '${elfPath}'`,
+  ];
+  if (vsCodeDebug) {
+    tomlContent.push(`gdbServerPort=3333`);
+  }
+
+  log.info(`Writing wokwi.toml...`);
+  writeFileSync(configPath, tomlContent.join('\n') + '\n');
 
   log.info(`Writing diagram.json...`);
   writeFileSync(diagramFilePath, JSON.stringify(createDiagram(boardType as string), null, 2));
+
+  if (vsCodeDebug) {
+    log.info(`Writing .vscode/launch.json...`);
+    const vsCodeLaunchJson = {
+      version: '0.2.0',
+      configurations: [
+        {
+          name: 'Wokwi GDB',
+          type: 'cppdbg',
+          request: 'launch',
+          // eslint-disable-next-line no-template-curly-in-string
+          program: '${workspaceFolder}/' + elfPath,
+          // eslint-disable-next-line no-template-curly-in-string
+          cwd: '${workspaceFolder}',
+          MIMode: 'gdb',
+          // eslint-disable-next-line no-template-curly-in-string
+          miDebuggerPath: '${command:espIdf.getToolchainGdb}',
+          miDebuggerServerAddress: 'localhost:3333',
+        },
+      ],
+    };
+    writeFileSync(launchJsonPath, JSON.stringify(vsCodeLaunchJson, null, 2));
+  }
 
   outro(`You're all set!`);
 }
