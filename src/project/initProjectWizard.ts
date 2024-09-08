@@ -1,6 +1,6 @@
 import { cancel, confirm, intro, isCancel, log, note, outro, select, text } from '@clack/prompts';
 import chalkTemplate from 'chalk-template';
-import { existsSync, writeFileSync } from 'fs';
+import { existsSync, writeFileSync, mkdirSync } from 'fs';
 import path from 'path';
 import { boards } from './boards.js';
 import { createDiagram } from './createDiagram.js';
@@ -159,6 +159,8 @@ export async function initProjectWizard(rootDir: string, opts: { diagramFile?: s
         },
       ],
     };
+
+    mkdirSync(path.dirname(launchJsonPath), { recursive: true });
     writeFileSync(launchJsonPath, JSON.stringify(vsCodeLaunchJson, null, 2));
   }
 
