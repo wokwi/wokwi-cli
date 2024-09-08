@@ -10,8 +10,18 @@ export const boards = [
 
   // ESP32-based boards
   { title: 'ESP32-C3 Rust DevKit', board: 'board-esp32-c3-rust-1', family: 'esp32' },
-  { title: 'ESP32-S3-BOX', board: 'board-esp32-s3-box', family: 'esp32' },
-  { title: 'ESP32-S3-BOX-3', board: 'board-esp32-s3-box-3', family: 'esp32' },
+  {
+    title: 'ESP32-S3-BOX',
+    board: 'board-esp32-s3-box',
+    family: 'esp32',
+    serialPins: { RX: 'G44', TX: 'G43' },
+  },
+  {
+    title: 'ESP32-S3-BOX-3',
+    board: 'board-esp32-s3-box-3',
+    family: 'esp32',
+    serialPins: { RX: 'G44', TX: 'G43' },
+  },
   { title: 'M5Stack CoreS3', board: 'board-m5stack-core-s3', family: 'esp32' },
 
   // RP2040-based boards
