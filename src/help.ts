@@ -22,6 +22,11 @@ export function cliHelp() {
       {green --timeout} <number>          Timeout in simulation milliseconds (default: 30000)
       {green --timeout-exit-code} <number> Process exit code when timeout is reached (default: 42)
 
+  {bold PROJECT CONFIGURATION}
+
+      To configure your project for Wokwi, run the "wokwi-cli init" command in the project directory.
+      This will ask you a few questions and create both wokwi.toml and diagram.json files.
+
   {bold EXAMPLES}
 
       Run the simulation for 5 seconds, and expect "Hello World" in the output (assuming wokwi.toml in the current directory):
