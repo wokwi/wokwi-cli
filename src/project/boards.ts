@@ -4,7 +4,12 @@ export const boards = [
   { title: 'ESP32-C3 DevKit', board: 'board-esp32-c3-devkitm-1', family: 'esp32' },
   { title: 'ESP32-C6 DevKit', board: 'board-esp32-c6-devkitc-1', family: 'esp32' },
   { title: 'ESP32-H2 DevKit', board: 'board-esp32-h2-devkitm-1', family: 'esp32' },
-  { title: 'ESP32-P4-Function-EV-Board', board: 'board-esp32-p4-function-ev', family: 'esp32' },
+  {
+    title: 'ESP32-P4-Function-EV-Board',
+    board: 'board-esp32-p4-function-ev',
+    family: 'esp32',
+    serialPins: { RX: '38', TX: '37' },
+  },
   { title: 'ESP32-S2 DevKit', board: 'board-esp32-s2-devkitm-1', family: 'esp32' },
   { title: 'ESP32-S3 DevKit', board: 'board-esp32-s3-devkitc-1', family: 'esp32' },
 
