@@ -244,8 +244,14 @@ async function main() {
 
     if (screenshotPart != null && screenshotTime != null) {
       eventManager.at(screenshotTime * millis, async (t) => {
-        const result = await client.framebufferRead(screenshotPart);
-        writeFileSync(screenshotFile, result.png, 'base64');
+        try {
+          const result = await client.framebufferRead(screenshotPart);
+          writeFileSync(screenshotFile, result.png, 'base64');
+        } catch (err) {
+          console.error('Error taking screenshot:', (err as Error).toString());
+          client.close();
+          process.exit(1);
+        }
       });
     }
 
