@@ -93,7 +93,7 @@ async function main() {
   const token = process.env.WOKWI_CLI_TOKEN;
   if (token == null || token.length === 0) {
     console.error(
-      `Error: Missing WOKWI_CLI_TOKEN environment variable. Please set it to your Wokwi token.\nGet your token at https://wokwi.com/dashboard/ci.`,
+      chalkTemplate`{red Error:} Missing {yellow WOKWI_CLI_TOKEN} environment variable. Please set it to your Wokwi token.\nGet your token at {yellow https://wokwi.com/dashboard/ci.`,
     );
     process.exit(1);
   }
@@ -104,14 +104,24 @@ async function main() {
   const configExists = existsSync(configPath);
 
   if (!elf && !configExists) {
-    console.error(`Error: wokwi.toml not found in ${path.resolve(rootDir)}.`);
-    console.error('Run `wokwi-cli init` to automatically create a wokwi.toml file.');
+    console.error(
+      chalkTemplate`{red Error:} {yellow wokwi.toml} not found in {yellow ${path.resolve(
+        rootDir,
+      )}}.`,
+    );
+    console.error(
+      chalkTemplate`Run \`{green wokwi-cli init}\` to automatically create a {yellow wokwi.toml} file.`,
+    );
     process.exit(1);
   }
 
   if (!existsSync(diagramFilePath)) {
-    console.error(`Error: diagram file not found in ${diagramFilePath}`);
-    console.error('Run `wokwi-cli init` to automatically create a diagram.json file.');
+    console.error(
+      chalkTemplate`{red Error:} {yellow diagram.json} not found in {yellow ${diagramFilePath}}.`,
+    );
+    console.error(
+      chalkTemplate`Run \`{green wokwi-cli init}\` to automatically create a {yellow diagram.json} file.`,
+    );
     process.exit(1);
   }
 
@@ -133,14 +143,22 @@ async function main() {
   }
 
   if (!existsSync(firmwarePath)) {
-    console.error(`Error: firmware file not found: ${path.resolve(firmwarePath)}`);
-    console.error('Please check the firmware path in your wokwi.toml configuration file.');
+    const fullPath = path.resolve(firmwarePath);
+    console.error(
+      chalkTemplate`{red Error:} {yellow firmware file} not found: {yellow ${fullPath}}.`,
+    );
+    console.error(
+      chalkTemplate`Please check the {yellow firmware} path in your {yellow wokwi.toml} configuration file.`,
+    );
     process.exit(1);
   }
 
   if (!existsSync(elfPath)) {
-    console.error(`Error: ELF file not found: ${path.resolve(elfPath)}`);
-    console.error('Please check the ELF path in your wokwi.toml configuration file.');
+    const fullPath = path.resolve(elfPath);
+    console.error(chalkTemplate`{red Error:} ELF file not found: {yellow ${fullPath}}.`);
+    console.error(
+      chalkTemplate`Please check the {yellow elf} path in your {yellow wokwi.toml} configuration file.`,
+    );
     process.exit(1);
   }
 
@@ -150,7 +168,8 @@ async function main() {
 
   const resolvedScenarioFile = scenarioFile ? path.resolve(rootDir, scenarioFile) : null;
   if (resolvedScenarioFile && !existsSync(resolvedScenarioFile)) {
-    console.error(`Error: scenario file not found: ${path.resolve(resolvedScenarioFile)}`);
+    const fullPath = path.resolve(resolvedScenarioFile);
+    console.error(chalkTemplate`{red Error:} scenario file not found: {yellow ${fullPath}}.`);
     process.exit(1);
   }
 
