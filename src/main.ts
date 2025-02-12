@@ -104,12 +104,14 @@ async function main() {
   const configExists = existsSync(configPath);
 
   if (!elf && !configExists) {
-    console.error(`Error: wokwi.toml not found in ${path.resolve(rootDir)}`);
+    console.error(`Error: wokwi.toml not found in ${path.resolve(rootDir)}.`);
+    console.error('Run `wokwi-cli init` to automatically create a wokwi.toml file.');
     process.exit(1);
   }
 
   if (!existsSync(diagramFilePath)) {
     console.error(`Error: diagram file not found in ${diagramFilePath}`);
+    console.error('Run `wokwi-cli init` to automatically create a diagram.json file.');
     process.exit(1);
   }
 
@@ -132,11 +134,13 @@ async function main() {
 
   if (!existsSync(firmwarePath)) {
     console.error(`Error: firmware file not found: ${path.resolve(firmwarePath)}`);
+    console.error('Please check the firmware path in your wokwi.toml configuration file.');
     process.exit(1);
   }
 
   if (!existsSync(elfPath)) {
     console.error(`Error: ELF file not found: ${path.resolve(elfPath)}`);
+    console.error('Please check the ELF path in your wokwi.toml configuration file.');
     process.exit(1);
   }
 
