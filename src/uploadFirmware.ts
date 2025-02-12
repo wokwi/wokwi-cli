@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
-import { basename, resolve, dirname } from 'path';
+import { basename, dirname, resolve } from 'path';
 import { type APIClient } from './APIClient.js';
-import { type IESP32FlasherJSON } from './esp32.js';
+import { type IESP32FlasherJSON } from './esp/flasherArgs.js';
 
 interface IFirmwarePiece {
   offset: number;

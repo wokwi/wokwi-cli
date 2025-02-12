@@ -1,17 +1,51 @@
-export const boards = [
+export interface IBoard {
+  title: string;
+  board: string;
+  family: string;
+  idfTarget?: string;
+  serialPins?: { RX: string; TX: string };
+}
+
+export const boards: IBoard[] = [
   // ESP32 DevKits
-  { title: 'ESP32 DevKit', board: 'board-esp32-devkit-c-v4', family: 'esp32' },
-  { title: 'ESP32-C3 DevKit', board: 'board-esp32-c3-devkitm-1', family: 'esp32' },
-  { title: 'ESP32-C6 DevKit', board: 'board-esp32-c6-devkitc-1', family: 'esp32' },
-  { title: 'ESP32-H2 DevKit', board: 'board-esp32-h2-devkitm-1', family: 'esp32' },
+  { title: 'ESP32 DevKit', board: 'board-esp32-devkit-c-v4', family: 'esp32', idfTarget: 'esp32' },
+  {
+    title: 'ESP32-C3 DevKit',
+    board: 'board-esp32-c3-devkitm-1',
+    family: 'esp32',
+    idfTarget: 'esp32c3',
+  },
+  {
+    title: 'ESP32-C6 DevKit',
+    board: 'board-esp32-c6-devkitc-1',
+    family: 'esp32',
+    idfTarget: 'esp32c6',
+  },
+  {
+    title: 'ESP32-H2 DevKit',
+    board: 'board-esp32-h2-devkitm-1',
+    family: 'esp32',
+    idfTarget: 'esp32h2',
+  },
   {
     title: 'ESP32-P4-Function-EV-Board',
     board: 'board-esp32-p4-function-ev',
     family: 'esp32',
+    idfTarget: 'esp32p4',
     serialPins: { RX: '38', TX: '37' },
   },
-  { title: 'ESP32-S2 DevKit', board: 'board-esp32-s2-devkitm-1', family: 'esp32' },
-  { title: 'ESP32-S3 DevKit', board: 'board-esp32-s3-devkitc-1', family: 'esp32' },
+  {
+    title: 'ESP32-S2 DevKit',
+    board: 'board-esp32-s2-devkitm-1',
+    family: 'esp32',
+    idfTarget: 'esp32s2',
+  },
+  {
+    title: 'ESP32-S3 DevKit',
+    board: 'board-esp32-s3-devkitc-1',
+    family: 'esp32',
+    idfTarget: 'esp32s3',
+  },
 
   // ESP32-based boards
   { title: 'ESP32-C3 Rust DevKit', board: 'board-esp32-c3-rust-1', family: 'esp32' },

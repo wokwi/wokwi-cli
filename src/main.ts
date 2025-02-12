@@ -9,9 +9,10 @@ import { EventManager } from './EventManager.js';
 import { ExpectEngine } from './ExpectEngine.js';
 import { TestScenario } from './TestScenario.js';
 import { parseConfig } from './config.js';
+import { idfProjectConfig } from './esp/idfProjectConfig.js';
 import { cliHelp } from './help.js';
-import { initProjectWizard } from './project/initProjectWizard.js';
 import { loadChips } from './loadChips.js';
+import { initProjectWizard } from './project/initProjectWizard.js';
 import { readVersion } from './readVersion.js';
 import { DelayCommand } from './scenario/DelayCommand.js';
 import { ExpectPinCommand } from './scenario/ExpectPinCommand.js';
@@ -101,7 +102,33 @@ async function main() {
   const rootDir = args._[0] || '.';
   const configPath = path.join(rootDir, 'wokwi.toml');
   const diagramFilePath = path.resolve(rootDir, diagramFile ?? 'diagram.json');
-  const configExists = existsSync(configPath);
+  const espIdfFlasherArgsPath = path.resolve(rootDir, 'build/flasher_args.json');
+  const espIdfProjectDescriptionPath = path.resolve(rootDir, 'build/project_description.json');
+  const isIDFProject =
+    existsSync(espIdfFlasherArgsPath) && existsSync(espIdfProjectDescriptionPath);
+  let configExists = existsSync(configPath);
+  let diagramExists = existsSync(diagramFilePath);
+
+  if (isIDFProject) {
+    if (!quiet) {
+      console.log(`Detected IDF project in ${rootDir}`);
+    }
+    if (
+      !idfProjectConfig({
+        rootDir,
+        configPath,
+        diagramFilePath,
+        projectDescriptionPath: espIdfProjectDescriptionPath,
+        createConfig: !configExists,
+        createDiagram: !diagramExists,
+        quiet,
+      })
+    ) {
+      process.exit(1);
+    }
+    configExists = true;
+    diagramExists = true;
+  }
 
   if (!elf && !configExists) {
     console.error(

@@ -6,6 +6,7 @@ import { boards } from './boards.js';
 import { createDiagram } from './createDiagram.js';
 import { findFirmwarePath } from './findFirmwarePath.js';
 import { detectProjectType } from './projectType.js';
+import { createWokwiToml } from '../WokwiConfig.js';
 
 export async function initProjectWizard(rootDir: string, opts: { diagramFile?: string }) {
   const configPath = path.join(rootDir, 'wokwi.toml');
@@ -46,8 +47,8 @@ export async function initProjectWizard(rootDir: string, opts: { diagramFile?: s
     projectType === 'esp-idf'
       ? boards.filter((board) => board.family === 'esp32')
       : projectType === 'pico-sdk'
-      ? boards.filter((board) => board.family === 'rp2')
-      : boards;
+        ? boards.filter((board) => board.family === 'rp2')
+        : boards;
 
   const boardType = await select({
     message: 'Select the board to simulate:',
@@ -121,20 +122,11 @@ export async function initProjectWizard(rootDir: string, opts: { diagramFile?: s
     }
   }
 
-  const tomlContent = [
-    `# Wokwi Configuration File`,
-    `# Reference: https://docs.wokwi.com/vscode/project-config`,
-    `[wokwi]`,
-    `version = 1`,
-    `firmware = '${firmwarePath}'`,
-    `elf = '${elfPath}'`,
-  ];
-  if (vsCodeDebug) {
-    tomlContent.push(`gdbServerPort=3333`);
-  }
-
   log.info(`Writing wokwi.toml...`);
-  writeFileSync(configPath, tomlContent.join('\n') + '\n');
+  writeFileSync(
+    configPath,
+    createWokwiToml({ firmwarePath, elfPath, gdbServerPort: vsCodeDebug ? 3333 : undefined }),
+  );
 
   log.info(`Writing diagram.json...`);
   writeFileSync(diagramFilePath, JSON.stringify(createDiagram(boardType as string), null, 2));
