@@ -64,8 +64,18 @@ export const boards: IBoard[] = [
   { title: 'M5Stack CoreS3', board: 'board-m5stack-core-s3', family: 'esp32' },
 
   // RP2040-based boards
-  { title: 'Raspberry Pi Pico', board: 'wokwi-pi-pico', family: 'rp2' },
-  { title: 'Raspberry Pi Pico W', board: 'board-pi-pico-w', family: 'rp2' },
+  {
+    title: 'Raspberry Pi Pico',
+    board: 'wokwi-pi-pico',
+    family: 'rp2',
+    serialPins: { RX: 'GP1', TX: 'GP0' },
+  },
+  {
+    title: 'Raspberry Pi Pico W',
+    board: 'board-pi-pico-w',
+    family: 'rp2',
+    serialPins: { RX: 'GP1', TX: 'GP0' },
+  },
 
   // STM32 boards
   { title: 'STM32 Nucleo-64 C031C6', board: 'board-st-nucleo-c031c6', family: 'stm32' },
