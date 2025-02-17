@@ -1,12 +1,12 @@
 import { cancel, confirm, intro, isCancel, log, note, outro, select, text } from '@clack/prompts';
 import chalkTemplate from 'chalk-template';
-import { existsSync, writeFileSync, mkdirSync } from 'fs';
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import path from 'path';
-import { boards } from './boards.js';
+import { createWokwiToml } from '../WokwiConfig.js';
+import { boards, families } from './boards.js';
 import { createDiagram } from './createDiagram.js';
 import { findFirmwarePath } from './findFirmwarePath.js';
 import { detectProjectType } from './projectType.js';
-import { createWokwiToml } from '../WokwiConfig.js';
 
 export async function initProjectWizard(rootDir: string, opts: { diagramFile?: string }) {
   const configPath = path.join(rootDir, 'wokwi.toml');
@@ -52,17 +52,19 @@ export async function initProjectWizard(rootDir: string, opts: { diagramFile?: s
 
   const boardType = await select({
     message: 'Select the board to simulate:',
-    options: filteredBoards.map((board) => ({ value: board.board, label: board.title })),
+    options: filteredBoards.map((board) => ({ value: board.type, label: board.title })),
     maxItems: (process.stdout.rows ?? 16) - 4,
   });
-  if (isCancel(boardType)) {
+  const board = filteredBoards.find((b) => b.type === (boardType as string));
+  if (isCancel(boardType) || !board) {
     cancel('Operation cancelled.');
     process.exit(0);
   }
 
   const defaultFirmwarePath = await findFirmwarePath(rootDir, projectType);
+  const defaultFirmwareExt = families[board.family].defaultFirmwareExt;
   const firmwarePath = await text({
-    message: 'Enter the path to the firmware file (e.g. firmware.bin):',
+    message: `Enter the path to the firmware file (e.g. firmware.${defaultFirmwareExt}):`,
     initialValue: defaultFirmwarePath.firmware,
     validate: (value) => {
       if (!value) {
@@ -129,7 +131,7 @@ export async function initProjectWizard(rootDir: string, opts: { diagramFile?: s
   );
 
   log.info(`Writing diagram.json...`);
-  writeFileSync(diagramFilePath, JSON.stringify(createDiagram(boardType as string), null, 2));
+  writeFileSync(diagramFilePath, JSON.stringify(createDiagram(board), null, 2));
 
   if (vsCodeDebug) {
     log.info(`Writing .vscode/launch.json...`);

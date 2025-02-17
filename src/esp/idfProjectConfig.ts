@@ -36,7 +36,7 @@ export function createDiagramForIDFProject(
       `Target ${target} is not currently supported by Wokwi. You can create a feature request at https://github.com/wokwi/wokwi-features/issues.`,
     );
   }
-  return createDiagram(board.board);
+  return createDiagram(board);
 }
 
 export interface IDFProjectConfigParams {
@@ -74,7 +74,7 @@ export function idfProjectConfig(params: IDFProjectConfigParams) {
     const diagramContent = readFileSync(diagramFilePath, 'utf8');
     const diagram = JSON.parse(diagramContent);
     const board = findBoard(diagram);
-    const boardInfo = boards.find((b) => b.board === board?.type);
+    const boardInfo = boards.find((b) => b.type === board?.type);
     if (boardInfo && boardInfo.idfTarget !== idfProjectDescription.target) {
       console.error(
         chalkTemplate`{red Error:} The IDF project is targeting {yellow ${idfProjectDescription.target}}, but the diagram is for {yellow ${boardInfo.idfTarget}}.`,
