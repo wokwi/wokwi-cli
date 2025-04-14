@@ -20,6 +20,7 @@ import { SetControlCommand } from './scenario/SetControlCommand.js';
 import { WaitSerialCommand } from './scenario/WaitSerialCommand.js';
 import { WriteSerialCommand } from './scenario/WriteSerialCommand.js';
 import { uploadFirmware } from './uploadFirmware.js';
+import { TakeScreenshotCommand } from './scenario/TakeScreenshotCommand.js';
 
 const millis = 1_000_000;
 
@@ -215,6 +216,7 @@ async function main() {
       'set-control': new SetControlCommand(),
       'wait-serial': new WaitSerialCommand(expectEngine),
       'write-serial': new WriteSerialCommand(),
+      'take-screenshot': new TakeScreenshotCommand(path.dirname(resolvedScenarioFile)),
     });
     scenario.validate();
   }
