@@ -55,7 +55,12 @@ export const boards: IBoard[] = [
   },
 
   // ESP32-based boards
-  { title: 'ESP32-C3 Rust DevKit', type: 'board-esp32-c3-rust-1', family: 'esp32' },
+  {
+    title: 'ESP32-C3 Rust DevKit',
+    type: 'board-esp32-c3-rust-1',
+    family: 'esp32',
+    serialPins: { RX: '20', TX: '21' },
+  },
   {
     title: 'ESP32-S3-BOX',
     type: 'board-esp32-s3-box',
