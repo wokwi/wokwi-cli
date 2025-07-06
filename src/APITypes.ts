@@ -49,7 +49,7 @@ export interface APIResultError {
 
 export interface APISimStartParams {
   firmware: string;
-  elf: string;
+  elf?: string;
   pause?: boolean;
   chips?: string[];
 }

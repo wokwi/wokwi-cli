@@ -12,8 +12,11 @@ export async function parseConfig(data: string, configRoot: string) {
         throw new Error(`Unsupported wokwi.toml version: ${wokwi.version}`);
       }
 
-      if (typeof wokwi.firmware !== 'string' || typeof wokwi.elf !== 'string') {
-        throw new Error('Firmware and ELF paths must be strings');
+      if (typeof wokwi.firmware !== 'string') {
+        throw new Error('Firmware path must be a string');
+      }
+      if (wokwi.elf != null && typeof wokwi.elf !== 'string') {
+        throw new Error('ELF path must be a string');
       }
 
       return wokwiConfig;

@@ -162,7 +162,8 @@ async function main() {
     config = await parseConfig(configData, rootDir);
 
     firmwarePath = elf ?? join(rootDir, config.wokwi.firmware);
-    elfPath = elf ?? join(rootDir, config.wokwi.elf);
+    const configElfPath = config.wokwi.elf ? join(rootDir, config.wokwi.elf) : undefined;
+    elfPath = elf ?? configElfPath;
   } else if (elf) {
     firmwarePath = elf;
     elfPath = elf;
@@ -181,7 +182,7 @@ async function main() {
     process.exit(1);
   }
 
-  if (!existsSync(elfPath)) {
+  if (elfPath != null && !existsSync(elfPath)) {
     const fullPath = path.resolve(elfPath);
     console.error(chalkTemplate`{red Error:} ELF file not found: {yellow ${fullPath}}.`);
     console.error(
@@ -268,7 +269,9 @@ async function main() {
     await client.connected;
     await client.fileUpload('diagram.json', diagram);
     const firmwareName = await uploadFirmware(client, firmwarePath);
-    await client.fileUpload('firmware.elf', readFileSync(elfPath));
+    if (elfPath != null) {
+      await client.fileUpload('firmware.elf', readFileSync(elfPath));
+    }
 
     for (const chip of chips) {
       await client.fileUpload(`${chip.name}.chip.json`, readFileSync(chip.jsonPath, 'utf-8'));
@@ -333,8 +336,8 @@ async function main() {
     };
 
     await client.simStart({
-      elf: 'test.elf',
       firmware: firmwareName,
+      elf: elfPath != null ? 'firmware.elf' : undefined,
       chips: chips.map((chip) => chip.name),
       pause: timeToNextEvent >= 0,
     });
