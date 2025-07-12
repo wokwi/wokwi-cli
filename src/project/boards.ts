@@ -1,11 +1,20 @@
 export type BoardFamily = 'esp32' | 'rp2' | 'stm32';
 
+export type SerialInterface = 'uart' | 'usb' | 'usb-serialjtag';
+
+export const serialInterfaces: Record<SerialInterface, string> = {
+  uart: 'UART',
+  usb: 'USB',
+  'usb-serialjtag': 'USB Serial/JTAG',
+};
+
 export interface IBoard {
   title: string;
   type: string;
   family: BoardFamily;
   idfTarget?: string;
   serialPins?: { RX: string; TX: string };
+  serialInterfaces?: SerialInterface[];
 }
 
 export interface IFamilyInfo {
@@ -21,18 +30,21 @@ export const boards: IBoard[] = [
     type: 'board-esp32-c3-devkitm-1',
     family: 'esp32',
     idfTarget: 'esp32c3',
+    serialInterfaces: ['uart', 'usb-serialjtag'],
   },
   {
     title: 'ESP32-C6 DevKit',
     type: 'board-esp32-c6-devkitc-1',
     family: 'esp32',
     idfTarget: 'esp32c6',
+    serialInterfaces: ['uart', 'usb-serialjtag'],
   },
   {
     title: 'ESP32-H2 DevKit',
     type: 'board-esp32-h2-devkitm-1',
     family: 'esp32',
     idfTarget: 'esp32h2',
+    serialInterfaces: ['uart', 'usb-serialjtag'],
   },
   {
     title: 'ESP32-P4-Function-EV-Board',
@@ -40,18 +52,21 @@ export const boards: IBoard[] = [
     family: 'esp32',
     idfTarget: 'esp32p4',
     serialPins: { RX: '38', TX: '37' },
+    serialInterfaces: ['uart', 'usb-serialjtag'],
   },
   {
     title: 'ESP32-S2 DevKit',
     type: 'board-esp32-s2-devkitm-1',
     family: 'esp32',
     idfTarget: 'esp32s2',
+    serialInterfaces: ['uart', 'usb'],
   },
   {
     title: 'ESP32-S3 DevKit',
     type: 'board-esp32-s3-devkitc-1',
     family: 'esp32',
     idfTarget: 'esp32s3',
+    serialInterfaces: ['uart', 'usb', 'usb-serialjtag'],
   },
 
   // ESP32-based boards
@@ -60,20 +75,29 @@ export const boards: IBoard[] = [
     type: 'board-esp32-c3-rust-1',
     family: 'esp32',
     serialPins: { RX: '20', TX: '21' },
+    serialInterfaces: ['uart', 'usb-serialjtag'],
   },
   {
     title: 'ESP32-S3-BOX',
     type: 'board-esp32-s3-box',
     family: 'esp32',
     serialPins: { RX: 'G44', TX: 'G43' },
+    serialInterfaces: ['uart', 'usb-serialjtag'],
   },
   {
     title: 'ESP32-S3-BOX-3',
     type: 'board-esp32-s3-box-3',
     family: 'esp32',
     serialPins: { RX: 'G44', TX: 'G43' },
+    serialInterfaces: ['uart', 'usb-serialjtag'],
   },
-  { title: 'M5Stack CoreS3', type: 'board-m5stack-core-s3', family: 'esp32' },
+  {
+    title: 'M5Stack CoreS3',
+    type: 'board-m5stack-core-s3',
+    family: 'esp32',
+    serialPins: { RX: 'G44', TX: 'G43' },
+    serialInterfaces: ['uart', 'usb-serialjtag'],
+  },
 
   // RP2040-based boards
   {
@@ -81,12 +105,14 @@ export const boards: IBoard[] = [
     type: 'wokwi-pi-pico',
     family: 'rp2',
     serialPins: { RX: 'GP1', TX: 'GP0' },
+    serialInterfaces: ['uart', 'usb'],
   },
   {
     title: 'Raspberry Pi Pico W',
     type: 'board-pi-pico-w',
     family: 'rp2',
     serialPins: { RX: 'GP1', TX: 'GP0' },
+    serialInterfaces: ['uart', 'usb'],
   },
 
   // STM32 boards

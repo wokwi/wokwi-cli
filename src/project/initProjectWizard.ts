@@ -3,7 +3,7 @@ import chalkTemplate from 'chalk-template';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import path from 'path';
 import { createWokwiToml } from '../WokwiConfig.js';
-import { boards, families } from './boards.js';
+import { boards, families, type SerialInterface, serialInterfaces } from './boards.js';
 import { createDiagram } from './createDiagram.js';
 import { findFirmwarePath } from './findFirmwarePath.js';
 import { detectProjectType } from './projectType.js';
@@ -98,6 +98,22 @@ export async function initProjectWizard(rootDir: string, opts: { diagramFile?: s
     elfPath = elfPathResponse;
   }
 
+  let serialInterface: SerialInterface | undefined;
+  if (board.serialInterfaces?.length) {
+    const serialInterfaceResponse = await select({
+      message: 'Select the serial interface to use:',
+      options: board.serialInterfaces.map((item) => ({
+        value: item,
+        label: serialInterfaces[item],
+      })),
+    });
+    if (isCancel(serialInterface)) {
+      cancel('Operation cancelled.');
+      process.exit(0);
+    }
+    serialInterface = serialInterfaceResponse as SerialInterface;
+  }
+
   let vsCodeDebug: boolean = false;
   if (projectType === 'esp-idf') {
     const vsCodeDebugAnswer = await confirm({
@@ -131,7 +147,7 @@ export async function initProjectWizard(rootDir: string, opts: { diagramFile?: s
   );
 
   log.info(`Writing diagram.json...`);
-  writeFileSync(diagramFilePath, JSON.stringify(createDiagram(board), null, 2));
+  writeFileSync(diagramFilePath, JSON.stringify(createDiagram(board, serialInterface), null, 2));
 
   if (vsCodeDebug) {
     log.info(`Writing .vscode/launch.json...`);
