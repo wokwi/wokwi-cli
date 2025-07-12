@@ -81,7 +81,7 @@ export class TestScenario {
         void client.simPause();
       }
       if (step.name) {
-        this.log(chalkTemplate`{gray Executing step:} {yellow ${step.name}`);
+        this.log(chalkTemplate`{gray Executing step:} {yellow ${step.name}}`);
       }
       await this.executeStep(client, step);
     }
