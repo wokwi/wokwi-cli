@@ -1,6 +1,6 @@
 {
   "name": "wokwi-cli",
-  "version": "0.16.2",
+  "version": "0.17.0",
   "description": "Wokwi Simulator CLI (for CI and local development)",
   "main": "index.js",
   "type": "module",
