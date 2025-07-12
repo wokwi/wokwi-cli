@@ -1,0 +1,63 @@
+name: CLI Integration Test
+
+on:
+  push:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  cli-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build CLI
+      run: npm run build
+
+    - name: Clone test project
+      run: git clone https://github.com/wokwi/esp-idf-hello-world.git test-project
+
+    - name: Create test scenario
+      run: |
+        cat > test-project/test-scenario.yaml << 'EOF'
+        name: "Basic Hello World Test"
+        version: 1
+        description: "Test that the ESP32 hello world program outputs expected text"
+
+        steps:
+          - name: "Wait for boot and hello message"
+            wait-serial: "Hello world!"
+          
+          - name: "Wait for chip information"  
+            wait-serial: "This is esp32 chip"
+              
+          - name: "Wait for restart message"
+            wait-serial: "Restarting in 10 seconds"
+        EOF
+
+    - name: Run a Wokwi CI server
+      uses: wokwi/wokwi-ci-server-action@v1
+
+    - name: Test CLI with basic expect-text
+      run: npm start -- test-project --timeout 5000 --expect-text "Hello"
+      env:
+        WOKWI_CLI_TOKEN: ${{ secrets.WOKWI_CLI_TOKEN }}
+
+    - name: Test CLI with scenario file
+      run: npm start -- test-project --scenario test-scenario.yaml --timeout 15000
+      env:
+        WOKWI_CLI_TOKEN: ${{ secrets.WOKWI_CLI_TOKEN }}
+  
