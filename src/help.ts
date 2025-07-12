@@ -22,6 +22,11 @@ export function cliHelp() {
       {green --timeout} <number>          Timeout in simulation milliseconds (default: 30000)
       {green --timeout-exit-code} <number> Process exit code when timeout is reached (default: 42)
 
+  {bold COMMANDS}
+
+      {green init} [path]                     Initialize a new Wokwi project
+      {green mcp} [path]                      Start MCP server for AI integration (experimental)
+
   {bold PROJECT CONFIGURATION}
 
       To configure your project for Wokwi, run the "wokwi-cli init" command in the project directory.
@@ -36,6 +41,10 @@ export function cliHelp() {
       Run the simulation, Take a screenshot of the "lcd1" part after 4.5 seconds, and then exit:
 
       {dim $} {bold wokwi-cli} {green --screenshot-part} lcd1 {green --screenshot-time} 4500 {green --timeout} 4500 {green --timeout-exit-code} 0
+
+      Start MCP server for AI integration (requires WOKWI_CLI_TOKEN environment variable):
+
+      {dim $} {bold wokwi-cli} {green mcp} [project-directory]
   
 `);
 }

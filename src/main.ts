@@ -21,6 +21,7 @@ import { WaitSerialCommand } from './scenario/WaitSerialCommand.js';
 import { WriteSerialCommand } from './scenario/WriteSerialCommand.js';
 import { uploadFirmware } from './uploadFirmware.js';
 import { TakeScreenshotCommand } from './scenario/TakeScreenshotCommand.js';
+import { WokwiMCPServer } from './mcp/MCPServer.js';
 
 const millis = 1_000_000;
 
@@ -98,6 +99,27 @@ async function main() {
       chalkTemplate`{red Error:} Missing {yellow WOKWI_CLI_TOKEN} environment variable. Please set it to your Wokwi token.\nGet your token at {yellow https://wokwi.com/dashboard/ci}.`,
     );
     process.exit(1);
+  }
+
+  if (args._[0] === 'mcp') {
+    const rootDir = args._[1] || '.';
+
+    const mcpServer = new WokwiMCPServer({ rootDir, token, quiet });
+
+    process.on('SIGINT', () => {
+      void mcpServer.stop().then(() => {
+        process.exit(0);
+      });
+    });
+
+    process.on('SIGTERM', () => {
+      void mcpServer.stop().then(() => {
+        process.exit(0);
+      });
+    });
+
+    await mcpServer.start();
+    return;
   }
 
   const rootDir = args._[0] || '.';
