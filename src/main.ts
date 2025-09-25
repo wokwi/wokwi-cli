@@ -335,27 +335,27 @@ async function main() {
     await client.serialMonitorListen();
     const { timeToNextEvent } = eventManager;
 
-    client.onEvent = (event) => {
-      if (event.event === 'sim:pause') {
-        eventManager.processEvents(event.nanos);
-        if (eventManager.timeToNextEvent >= 0) {
-          void client.simResume(eventManager.timeToNextEvent);
-        }
+    client.listen('sim:pause', (event) => {
+      eventManager.processEvents(event.nanos);
+      if (eventManager.timeToNextEvent >= 0) {
+        void client.simResume(eventManager.timeToNextEvent);
       }
-      if (event.event === 'serial-monitor:data') {
-        const { bytes } = (event as APIEvent<SerialMonitorDataPayload>).payload;
-        for (const byte of bytes) {
-          process.stdout.write(String.fromCharCode(byte));
-        }
+    });
 
-        serialLogStream?.write(Buffer.from(bytes));
-        expectEngine.feed(bytes);
+    client.listen('serial-monitor:data', (event: APIEvent<SerialMonitorDataPayload>) => {
+      const { bytes } = event.payload;
+      for (const byte of bytes) {
+        process.stdout.write(String.fromCharCode(byte));
       }
-      if (event.event === 'chips:log') {
-        const { message, chip } = (event as APIEvent<ChipsLogPayload>).payload;
-        console.log(chalkTemplate`[{magenta ${chip}}] ${message}`);
-      }
-    };
+
+      serialLogStream?.write(Buffer.from(bytes));
+      expectEngine.feed(bytes);
+    });
+
+    client.listen('chips:log', (event: APIEvent<ChipsLogPayload>) => {
+      const { message, chip } = event.payload;
+      console.log(chalkTemplate`[{magenta ${chip}}] ${message}`);
+    });
 
     await client.simStart({
       firmware: firmwareName,

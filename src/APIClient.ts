@@ -22,6 +22,7 @@ export class APIClient {
   private closed = false;
   private _running = false;
   private _lastNanos = 0;
+  private readonly apiEvents = new EventTarget();
   private readonly pendingCommands = new Map<
     string,
     [(result: any) => void, (error: Error) => void]
@@ -30,7 +31,6 @@ export class APIClient {
   readonly connected;
 
   onConnected?: (helloMessage: APIHello) => void;
-  onEvent?: (event: APIEvent) => void;
   onError?: (error: APIError) => void;
 
   constructor(
@@ -139,9 +139,9 @@ export class APIClient {
     return await this.sendCommand('sim:pause');
   }
 
-  async simResume(pauseAfter?: number) {
+  async simResume(pauseAfter?: number, { waitForBytes }: { waitForBytes?: number[] } = {}) {
     this._running = true;
-    return await this.sendCommand('sim:resume', { pauseAfter });
+    return await this.sendCommand('sim:resume', { pauseAfter, waitForBytes });
   }
 
   async simRestart({ pause }: { pause?: boolean } = {}) {
@@ -253,7 +253,21 @@ export class APIClient {
       this._running = false;
     }
     this._lastNanos = message.nanos;
-    this.onEvent?.(message);
+    this.apiEvents.dispatchEvent(new CustomEvent<APIEvent>(message.event, { detail: message }));
+  }
+
+  listen(event: string, listener: (event: APIEvent) => void, options?: AddEventListenerOptions) {
+    const callback = (e: CustomEventInit<APIEvent>) => {
+      if (e.detail == null) {
+        return;
+      }
+      listener(e.detail);
+    };
+
+    this.apiEvents.addEventListener(event, callback, options);
+    return () => {
+      this.apiEvents.removeEventListener(event, callback, options);
+    };
   }
 
   processResponse(message: APIResponse) {
