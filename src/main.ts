@@ -12,16 +12,16 @@ import { parseConfig } from './config.js';
 import { idfProjectConfig } from './esp/idfProjectConfig.js';
 import { cliHelp } from './help.js';
 import { loadChips } from './loadChips.js';
+import { WokwiMCPServer } from './mcp/MCPServer.js';
 import { initProjectWizard } from './project/initProjectWizard.js';
 import { readVersion } from './readVersion.js';
 import { DelayCommand } from './scenario/DelayCommand.js';
 import { ExpectPinCommand } from './scenario/ExpectPinCommand.js';
 import { SetControlCommand } from './scenario/SetControlCommand.js';
+import { TakeScreenshotCommand } from './scenario/TakeScreenshotCommand.js';
 import { WaitSerialCommand } from './scenario/WaitSerialCommand.js';
 import { WriteSerialCommand } from './scenario/WriteSerialCommand.js';
 import { uploadFirmware } from './uploadFirmware.js';
-import { TakeScreenshotCommand } from './scenario/TakeScreenshotCommand.js';
-import { WokwiMCPServer } from './mcp/MCPServer.js';
 
 const millis = 1_000_000;
 

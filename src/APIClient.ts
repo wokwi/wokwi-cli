@@ -1,5 +1,5 @@
-import { WebSocket } from 'ws';
 import { Writable } from 'stream';
+import { WebSocket } from 'ws';
 import type {
   APICommand,
   APIError,
@@ -68,7 +68,11 @@ export class APIClient {
         const RequestTimeout = 408;
         const ServiceUnavailable = 503;
         const CfRequestTimeout = 524;
-        if (res.statusCode === ServiceUnavailable || res.statusCode === RequestTimeout || res.statusCode === CfRequestTimeout) {
+        if (
+          res.statusCode === ServiceUnavailable ||
+          res.statusCode === RequestTimeout ||
+          res.statusCode === CfRequestTimeout
+        ) {
           console.warn(
             `Connection to ${this.server} failed: ${res.statusMessage ?? ''} (${res.statusCode}).`,
           );
