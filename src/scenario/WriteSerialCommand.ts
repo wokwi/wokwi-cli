@@ -22,6 +22,5 @@ export class WriteSerialCommand implements IScenarioCommand {
   async run(scenario: TestScenario, client: APIClient, text: string | number[]) {
     const data = text instanceof Array ? new Uint8Array(text) : encoder.encode(text);
     await client.serialMonitorWrite(data);
-    await scenario.resume();
   }
 }

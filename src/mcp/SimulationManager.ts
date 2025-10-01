@@ -2,7 +2,6 @@ import { existsSync, readFileSync } from 'fs';
 import path from 'path';
 import { APIClient } from '../APIClient.js';
 import type { APIEvent } from '../APITypes.js';
-import { EventManager } from '../EventManager.js';
 import { parseConfig } from '../config.js';
 import { loadChips } from '../loadChips.js';
 import { uploadFirmware } from '../uploadFirmware.js';
@@ -16,7 +15,6 @@ export interface SimulationStatus {
 
 export class SimulationManager {
   private client?: APIClient;
-  private readonly eventManager: EventManager;
   private isConnected = false;
   private currentProject?: string;
   private serialBuffer: string[] = [];
@@ -25,10 +23,8 @@ export class SimulationManager {
   constructor(
     private readonly rootDir: string,
     private readonly token: string,
-    private readonly quiet = false
-  ) {
-    this.eventManager = new EventManager();
-  }
+    private readonly quiet = false,
+  ) {}
 
   async connect(): Promise<void> {
     if (this.isConnected) {
@@ -36,7 +32,7 @@ export class SimulationManager {
     }
 
     this.client = new APIClient(this.token);
-    
+
     this.client.onConnected = (hello) => {
       this.isConnected = true;
       if (!this.quiet) {
@@ -75,7 +71,7 @@ export class SimulationManager {
     const targetDir = projectPath ?? this.rootDir;
     const configPath = path.join(targetDir, 'wokwi.toml');
     const diagramFilePath = path.join(targetDir, 'diagram.json');
-    
+
     if (!existsSync(configPath)) {
       throw new Error(`wokwi.toml not found in ${targetDir}`);
     }
@@ -106,7 +102,7 @@ export class SimulationManager {
     }
     await this.client.fileUpload('diagram.json', diagram);
     const firmwareName = await uploadFirmware(this.client, firmwarePath);
-    
+
     if (elfPath) {
       await this.client.fileUpload('firmware.elf', readFileSync(elfPath));
     }
@@ -168,7 +164,7 @@ export class SimulationManager {
       throw new Error('Not connected to simulation');
     }
 
-    const bytes = Array.from(text).map(char => char.charCodeAt(0));
+    const bytes = Array.from(text).map((char) => char.charCodeAt(0));
     await this.client.serialMonitorWrite(bytes);
   }
 

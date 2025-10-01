@@ -10,6 +10,7 @@ import type {
   APISimStartParams,
   PinReadResponse,
 } from './APITypes.js';
+import { PausePoint, type PausePointParams } from './PausePoint.js';
 import { readVersion } from './readVersion.js';
 
 const DEFAULT_SERVER = process.env.WOKWI_CLI_SERVER ?? 'wss://wokwi.com/api/ws/beta';
@@ -19,10 +20,12 @@ export class APIClient {
   private socket: WebSocket;
   private connectionAttempts = 0;
   private lastId = 0;
+  private lastPausePointId = 0;
   private closed = false;
   private _running = false;
   private _lastNanos = 0;
   private readonly apiEvents = new EventTarget();
+  private readonly pausePoints = new Map<string, PausePoint>();
   private readonly pendingCommands = new Map<
     string,
     [(result: any) => void, (error: Error) => void]
@@ -139,9 +142,9 @@ export class APIClient {
     return await this.sendCommand('sim:pause');
   }
 
-  async simResume(pauseAfter?: number, { waitForBytes }: { waitForBytes?: number[] } = {}) {
+  async simResume(pauseAfter?: number) {
     this._running = true;
-    return await this.sendCommand('sim:resume', { pauseAfter, waitForBytes });
+    return await this.sendCommand('sim:resume', { pauseAfter });
   }
 
   async simRestart({ pause }: { pause?: boolean } = {}) {
@@ -159,6 +162,15 @@ export class APIClient {
   async serialMonitorWrite(bytes: number[] | Uint8Array) {
     return await this.sendCommand('serial-monitor:write', {
       bytes: Array.from(bytes),
+    });
+  }
+
+  get pausedPromise() {
+    if (!this._running) {
+      return Promise.resolve();
+    }
+    return new Promise<APIEvent<any>>((resolve) => {
+      this.listen('sim:pause', resolve, { once: true });
     });
   }
 
@@ -194,6 +206,46 @@ export class APIClient {
       part: partId,
       pin,
     });
+  }
+
+  async addPausePoint(params: PausePointParams, resume = false) {
+    const id = `pp${this.lastPausePointId++}_${params.type}`;
+    const commands = [this.sendCommand('pause-point:add', { id, ...params })];
+    if (resume && !this._running) {
+      commands.push(this.simResume());
+      this._running = true;
+    }
+    await Promise.all(commands);
+    const pausePoint = new PausePoint(id, params);
+    this.pausePoints.set(id, pausePoint);
+    return pausePoint;
+  }
+
+  async removePausePoint(pausePoint: PausePoint) {
+    if (this.pausePoints.has(pausePoint.id)) {
+      this.pausePoints.delete(pausePoint.id);
+      await this.sendCommand('pause-point:remove', { id: pausePoint.id });
+      return true;
+    }
+    return false;
+  }
+
+  async atNanos(nanos: number) {
+    const pausePoint = await this.addPausePoint({ type: 'time-absolute', nanos });
+    await pausePoint.promise;
+  }
+
+  async delay(nanos: number) {
+    const pausePoint = await this.addPausePoint({ type: 'time-relative', nanos }, true);
+    await pausePoint.promise;
+  }
+
+  async waitForSerialBytes(bytes: number[] | Uint8Array) {
+    if (bytes instanceof Uint8Array) {
+      bytes = Array.from(bytes);
+    }
+    const pausePoint = await this.addPausePoint({ type: 'serial-bytes', bytes }, true);
+    await pausePoint.promise;
   }
 
   async sendCommand<T = unknown>(command: string, params?: any) {
@@ -251,6 +303,12 @@ export class APIClient {
   processEvent(message: APIEvent) {
     if (message.event === 'sim:pause') {
       this._running = false;
+      const pausePointId: string = message.payload.pausePoint;
+      const pausePoint = this.pausePoints.get(pausePointId);
+      if (pausePoint) {
+        pausePoint.resolve(message.payload.pausePointInfo);
+        this.pausePoints.delete(pausePointId);
+      }
     }
     this._lastNanos = message.nanos;
     this.apiEvents.dispatchEvent(new CustomEvent<APIEvent>(message.event, { detail: message }));

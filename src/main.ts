@@ -5,8 +5,8 @@ import path, { join } from 'path';
 import YAML from 'yaml';
 import { APIClient } from './APIClient.js';
 import type { APIEvent, ChipsLogPayload, SerialMonitorDataPayload } from './APITypes.js';
-import { EventManager } from './EventManager.js';
 import { ExpectEngine } from './ExpectEngine.js';
+import { SimulationTimeoutError } from './SimulationTimeoutError.js';
 import { TestScenario } from './TestScenario.js';
 import { parseConfig } from './config.js';
 import { idfProjectConfig } from './esp/idfProjectConfig.js';
@@ -224,20 +224,16 @@ async function main() {
     process.exit(1);
   }
 
-  const eventManager = new EventManager();
   const expectEngine = new ExpectEngine();
 
-  let scenario;
+  let scenario: TestScenario | undefined;
   if (resolvedScenarioFile) {
-    scenario = new TestScenario(
-      YAML.parse(readFileSync(resolvedScenarioFile, 'utf-8')),
-      eventManager,
-    );
+    scenario = new TestScenario(YAML.parse(readFileSync(resolvedScenarioFile, 'utf-8')));
     scenario.registerCommands({
-      delay: new DelayCommand(eventManager),
+      delay: new DelayCommand(),
       'expect-pin': new ExpectPinCommand(),
       'set-control': new SetControlCommand(),
-      'wait-serial': new WaitSerialCommand(expectEngine),
+      'wait-serial': new WaitSerialCommand(),
       'write-serial': new WriteSerialCommand(),
       'take-screenshot': new TakeScreenshotCommand(path.dirname(resolvedScenarioFile)),
     });
@@ -300,50 +296,37 @@ async function main() {
       await client.fileUpload(`${chip.name}.chip.wasm`, readFileSync(chip.wasmPath));
     }
 
-    if (!quiet) {
-      console.log('Starting simulation...');
-    }
-
-    const scenarioPromise = scenario?.start(client);
-
-    if (timeoutNanos) {
-      eventManager.at(timeoutNanos, () => {
-        // We are using setImmediate to make sure other events (e.g. screen shot) are processed first
-        setImmediate(() => {
-          void eventManager.eventHandlersInProgress.then(() => {
-            console.error(`Timeout: simulation did not finish in ${timeout}ms`);
-            client.close();
-            process.exit(timeoutExitCode);
-          });
-        });
-      });
-    }
+    const promises = [];
+    let screenshotPromise = Promise.resolve();
 
     if (screenshotPart != null && screenshotTime != null) {
-      eventManager.at(screenshotTime * millis, async (t) => {
+      if (timeout && screenshotTime > timeout) {
+        console.error(
+          chalkTemplate`{red Error:} Screenshot time (${screenshotTime}ms) can't be greater than the timeout (${timeout}ms).`,
+        );
+        process.exit(1);
+      }
+      screenshotPromise = client.atNanos(screenshotTime * millis).then(async () => {
         try {
           const result = await client.framebufferRead(screenshotPart);
           writeFileSync(screenshotFile, result.png, 'base64');
+          await client.simResume();
         } catch (err) {
           console.error('Error taking screenshot:', (err as Error).toString());
-          client.close();
-          process.exit(1);
+          throw err;
         }
       });
     }
 
-    await client.serialMonitorListen();
-    const { timeToNextEvent } = eventManager;
+    if (!quiet) {
+      console.log('Starting simulation...');
+    }
 
-    client.listen('sim:pause', (event) => {
-      eventManager.processEvents(event.nanos);
-      if (eventManager.timeToNextEvent >= 0) {
-        void client.simResume(eventManager.timeToNextEvent);
-      }
-    });
+    await client.serialMonitorListen();
 
     client.listen('serial-monitor:data', (event: APIEvent<SerialMonitorDataPayload>) => {
-      const { bytes } = event.payload;
+      let { bytes } = event.payload;
+      bytes = scenario?.processSerialBytes(bytes) ?? bytes;
       for (const byte of bytes) {
         process.stdout.write(String.fromCharCode(byte));
       }
@@ -357,33 +340,54 @@ async function main() {
       console.log(chalkTemplate`[{magenta ${chip}}] ${message}`);
     });
 
+    if (timeoutNanos) {
+      promises.push(
+        client.atNanos(timeoutNanos).then(async () => {
+          await screenshotPromise; // wait for the screenshot to be saved, if any
+          console.error(chalkTemplate`\n{red Timeout}: simulation did not finish in ${timeout}ms`);
+          throw new SimulationTimeoutError(
+            timeoutExitCode,
+            `simulation did not finish in ${timeout}ms`,
+          );
+        }),
+      );
+    }
+
     await client.simStart({
       firmware: firmwareName,
       elf: elfPath != null ? 'firmware.elf' : undefined,
       chips: chips.map((chip) => chip.name),
-      pause: timeToNextEvent >= 0,
+      pause: scenario != null,
     });
 
     if (interactive) {
       process.stdin.pipe(client.serialMonitorWritable());
     }
 
-    if (timeToNextEvent > 0) {
-      await client.simResume(timeToNextEvent);
+    if (scenario != null) {
+      promises.push(scenario.start(client));
+    } else {
+      await client.simResume();
     }
 
-    if (scenarioPromise) {
-      await scenarioPromise;
-    } else {
-      // wait forever - until there's an error, timeout, serial output match, or the user presses Ctrl+C
+    if (promises.length === 0) {
+      // wait forever
       await new Promise(() => {});
     }
+
+    // wait until the scenario finishes or a timeout occurs
+    await Promise.race(promises);
+    // wait for the screenshot to be saved, if any
+    await screenshotPromise;
   } finally {
     client.close();
   }
 }
 
 main().catch((err) => {
+  if (err instanceof SimulationTimeoutError) {
+    process.exit(err.exitCode);
+  }
   console.error(err);
   process.exit(1);
 });

@@ -1,6 +1,5 @@
 import chalkTemplate from 'chalk-template';
 import type { APIClient } from './APIClient.js';
-import type { EventManager } from './EventManager.js';
 
 export interface IScenarioCommand {
   /** Validates the input to the command. Throws an exception of the input is not valid */
@@ -28,12 +27,12 @@ export class TestScenario {
   private stepIndex = 0;
   private client?: APIClient;
 
+  private serialNewLine = false;
+  private skipSerialNewline = false;
+
   readonly handlers: Record<string, IScenarioCommand> = {};
 
-  constructor(
-    readonly scenario: IScenarioDefinition,
-    readonly eventManager: EventManager,
-  ) {}
+  constructor(readonly scenario: IScenarioDefinition) {}
 
   registerCommands(commands: Record<string, IScenarioCommand>) {
     Object.assign(this.handlers, commands);
@@ -77,9 +76,6 @@ export class TestScenario {
     this.stepIndex = 0;
     this.client = client;
     for (const step of this.scenario.steps) {
-      if (client.running) {
-        void client.simPause();
-      }
       if (step.name) {
         this.log(chalkTemplate`{gray Executing step:} {yellow ${step.name}}`);
       }
@@ -102,17 +98,34 @@ export class TestScenario {
     process.exit(1);
   }
 
+  /**
+   * The purpose of the method is to ensure that scenario logs don't appear in the middle of a line
+   * printed by the simulated project.
+   * @param bytes - incoming serial bytes
+   * @returns processed bytes (with leading newline removed if needed)
+   */
+  processSerialBytes(bytes: number[]) {
+    if (((bytes[0] === 13 && bytes[1] === 10) || bytes[0] === 10) && this.skipSerialNewline) {
+      bytes = bytes.slice(bytes[0] === 13 ? 2 : 1);
+    }
+    this.skipSerialNewline = false;
+    if (bytes.length > 0) {
+      this.serialNewLine = bytes[bytes.length - 1] === 10;
+    }
+    return bytes;
+  }
+
   log(message: string) {
-    console.log(chalkTemplate`{cyan [${this.scenario.name}]}`, message);
+    let prefix = '';
+    if (!this.serialNewLine) {
+      prefix = '\n';
+      this.skipSerialNewline = true;
+      this.serialNewLine = true;
+    }
+    console.log(prefix + chalkTemplate`{cyan [${this.scenario.name}]}`, message);
   }
 
   fail(message: string) {
-    throw new Error(`[${this.client?.lastNanos}ns] ${message}`);
-  }
-
-  async resume() {
-    await this.client?.simResume(
-      this.eventManager.timeToNextEvent >= 0 ? this.eventManager.timeToNextEvent : undefined,
-    );
+    throw new Error(`[${this.client?.lastNanos.toFixed(0)}ns] ${message}`);
   }
 }
