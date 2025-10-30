@@ -324,12 +324,11 @@ async function main() {
 
     await client.serialMonitorListen();
 
+    const utf8Decoder = new TextDecoder('utf-8');
     client.listen('serial-monitor:data', (event: APIEvent<SerialMonitorDataPayload>) => {
       let { bytes } = event.payload;
       bytes = scenario?.processSerialBytes(bytes) ?? bytes;
-      for (const byte of bytes) {
-        process.stdout.write(String.fromCharCode(byte));
-      }
+      process.stdout.write(utf8Decoder.decode(Buffer.from(bytes)));
 
       serialLogStream?.write(Buffer.from(bytes));
       expectEngine.feed(bytes);
