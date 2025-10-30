@@ -215,9 +215,9 @@ export class APIClient {
       commands.push(this.simResume());
       this._running = true;
     }
-    await Promise.all(commands);
     const pausePoint = new PausePoint(id, params);
     this.pausePoints.set(id, pausePoint);
+    await Promise.all(commands);
     return pausePoint;
   }
 
