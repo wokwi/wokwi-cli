@@ -1,7 +1,7 @@
 import { parse as tomlParse } from '@iarna/toml';
 import type { WokwiTOML } from './WokwiConfig.js';
 
-export async function parseConfig(data: string, configRoot: string) {
+export async function parseConfig(data: string, _configRoot: string) {
   const tomlSource = data.replace(/\r\n/g, '\n');
   try {
     const tomlData = tomlParse(tomlSource);

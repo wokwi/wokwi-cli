@@ -7,10 +7,9 @@
   "scripts": {
     "build": "node tools/build.js",
     "package": "npm run build && pkg --public -o dist/bin/wokwi-cli -t node20-linuxstatic-arm64,node20-linuxstatic-x64,node20-macos-arm64,node20-macos-x64,node20-win-x64 dist/cli.cjs",
-    "start": "tsx src/main.ts",
+    "cli": "tsx src/main.ts",
     "test": "npm run lint && vitest --run",
-    "test:watch": "vitest --watch",
-    "prepare": "husky install"
+    "test:watch": "vitest --watch"
   },
   "keywords": [
     "esp32",

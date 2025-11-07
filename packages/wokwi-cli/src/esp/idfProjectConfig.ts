@@ -13,7 +13,6 @@ type ICreateConfigForIDFProjectParams = Pick<
 >;
 
 export function createConfigForIDFProject(idfProjectDescription: ICreateConfigForIDFProjectParams) {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { build_dir, project_path, app_elf } = idfProjectDescription;
   const relativeBuildDir = path.relative(project_path, build_dir);
 

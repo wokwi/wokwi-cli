@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { parseTime } from './parseTime';
+import { parseTime } from './parseTime.js';
 
 describe('parseTime', () => {
   test('parses nanoseconds', () => {
