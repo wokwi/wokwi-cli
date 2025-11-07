@@ -9,8 +9,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: 'Install NPM dependencies'
-        run: npm ci
+      - name: 'Install pnpm'
+        uses: pnpm/action-setup@v4
+      - name: 'Setup Node.js'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'pnpm'
+      - name: 'Install dependencies'
+        run: pnpm install --frozen-lockfile
       - name: 'Install LDID'
         run: |
           wget -O /usr/local/bin/ldid https://github.com/ProcursusTeam/ldid/releases/download/v2.1.5-procursus7/ldid_linux_x86_64
@@ -20,7 +27,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y binfmt-support qemu-user-static
       - name: 'Build'
-        run: npm run package
+        run: pnpm run package
       - name: Upload Release
         uses: ncipollo/release-action@v1
         with:

@@ -158,12 +158,9 @@ export async function initProjectWizard(rootDir: string, opts: { diagramFile?: s
           name: 'Wokwi GDB',
           type: 'cppdbg',
           request: 'launch',
-          // eslint-disable-next-line no-template-curly-in-string
           program: '${workspaceFolder}/' + elfPath,
-          // eslint-disable-next-line no-template-curly-in-string
           cwd: '${workspaceFolder}',
           MIMode: 'gdb',
-          // eslint-disable-next-line no-template-curly-in-string
           miDebuggerPath: '${command:espIdf.getToolchainGdb}',
           miDebuggerServerAddress: 'localhost:3333',
         },

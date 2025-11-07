@@ -37,7 +37,7 @@ export class TakeScreenshotCommand {
       let compareWithData;
       try {
         compareWithData = await readFile(compareWithPath);
-      } catch (error) {
+      } catch {
         scenario.fail(`Failed to read comparison file for screenshot: ${compareWith}`);
         return;
       }

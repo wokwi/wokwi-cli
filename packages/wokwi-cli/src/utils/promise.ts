@@ -4,6 +4,5 @@ export function promiseAndResolver<T = void>() {
     resolve = _resolve;
     reject = _reject;
   });
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   return { promise, resolve: resolve!, reject: reject! };
 }

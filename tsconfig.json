@@ -1,6 +1,16 @@
 {
     "extends": "./tsconfig.base.json",
-    "include": [".eslintrc.cjs", "./test/**/*.test.ts", "./test/**/*.ts"],
+    "include": [
+        "eslint.config.ts",
+        "./test/**/*.test.ts",
+        "./test/**/*.ts",
+        "./packages/*/src/**/*.ts"
+    ],
+    "exclude": [
+        "node_modules",
+        "**/dist",
+        "**/build"
+    ],
     "compilerOptions": {
         "rootDir": ".",
         "allowJs": true,
