@@ -4,7 +4,6 @@ export { APIClient } from './APIClient.js';
 // Transport interfaces and implementations
 export { ITransport } from './transport/ITransport.js';
 export { MessagePortTransport } from './transport/MessagePortTransport.js';
-export { WebSocketTransport } from './transport/WebSocketTransport.js';
 
 // Pause Point
 export { PausePoint } from './PausePoint.js';

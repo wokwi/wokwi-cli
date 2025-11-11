@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'fs';
 import path from 'path';
-import { APIClient, WebSocketTransport, type APIEvent } from 'wokwi-client-js';
+import { APIClient, type APIEvent } from 'wokwi-client-js';
+import { WebSocketTransport } from '../transport/WebSocketTransport.js';
 import { DEFAULT_SERVER } from '../constants.js';
 import { parseConfig } from '../config.js';
 import { loadChips } from '../loadChips.js';

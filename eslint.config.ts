@@ -18,6 +18,8 @@ export default defineConfig(
       '**/.git/**',
       '**/coverage/**',
       '**/*.min.js',
+      '**/playwright-report/**',
+      '**/test-results/**',
     ],
   },
 

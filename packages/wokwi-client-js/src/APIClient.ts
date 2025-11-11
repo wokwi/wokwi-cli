@@ -1,4 +1,3 @@
-import { Writable } from 'stream';
 import type {
   APICommand,
   APIError,
@@ -107,9 +106,12 @@ export class APIClient {
     });
   }
 
-  serialMonitorWritable() {
+  async serialMonitorWritable() {
+    // Dynamic import for Node.js-only API
+    const { Writable } = await import('stream');
+    const { Buffer } = await import('buffer');
     return new Writable({
-      write: (chunk, encoding, callback) => {
+      write: (chunk: any, encoding: BufferEncoding, callback: (error?: Error | null) => void) => {
         if (typeof chunk === 'string') {
           chunk = Buffer.from(chunk, encoding);
         }

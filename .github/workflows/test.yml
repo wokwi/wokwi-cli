@@ -2,9 +2,9 @@ name: Tests
 
 on:
   push:
-    branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   test:
@@ -20,5 +20,11 @@ jobs:
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Build packages
+        run: pnpm run build
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps
       - name: Run tests
         run: pnpm test
+      - name: Test wokwi-embed with Playwright
+        run: pnpm test:embed:playwright

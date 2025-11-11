@@ -10,6 +10,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "pnpm run lint && vitest --run",
+    "test:embed:playwright": "playwright test test/wokwi-embed",
+    "test:embed:playwright:ui": "playwright test test/wokwi-embed --ui",
     "cli": "tsx packages/wokwi-cli/src/main.ts",
     "prepare": "husky install"
   },
@@ -21,6 +23,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@playwright/test": "^1.48.0",
     "esbuild": "^0.25.2",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",

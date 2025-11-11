@@ -3,7 +3,8 @@ import chalkTemplate from 'chalk-template';
 import { createWriteStream, existsSync, readFileSync, writeFileSync } from 'fs';
 import path, { join } from 'path';
 import YAML from 'yaml';
-import { APIClient, WebSocketTransport, type APIEvent, type ChipsLogPayload, type SerialMonitorDataPayload } from 'wokwi-client-js';
+import { APIClient, type APIEvent, type ChipsLogPayload, type SerialMonitorDataPayload } from 'wokwi-client-js';
+import { WebSocketTransport } from './transport/WebSocketTransport.js';
 import { DEFAULT_SERVER } from './constants.js';
 import { ExpectEngine } from './ExpectEngine.js';
 import { SimulationTimeoutError } from './SimulationTimeoutError.js';
@@ -361,7 +362,7 @@ async function main() {
 	});
 
 	if (interactive) {
-	  process.stdin.pipe(client.serialMonitorWritable());
+	  process.stdin.pipe(await client.serialMonitorWritable());
 	}
 
 	if (scenario != null) {

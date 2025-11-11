@@ -9,6 +9,14 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./transport/MessagePortTransport.js": {
+      "types": "./dist/transport/MessagePortTransport.d.ts",
+      "import": "./dist/transport/MessagePortTransport.js"
+    },
+    "./APIClient.js": {
+      "types": "./dist/APIClient.d.ts",
+      "import": "./dist/APIClient.js"
     }
   },
   "files": [
