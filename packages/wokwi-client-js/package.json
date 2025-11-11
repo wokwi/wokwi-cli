@@ -1,0 +1,47 @@
+{
+  "name": "wokwi-client-js",
+  "version": "0.18.3",
+  "description": "Wokwi Client JS Library",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "prebuild": "pnpm run clean",
+    "build": "tsc",
+    "clean": "rimraf dist",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix"
+  },
+  "keywords": [
+    "wokwi",
+    "simulator",
+    "api",
+    "client",
+    "websocket",
+    "iot",
+    "embedded"
+  ],
+  "author": "Uri Shaked",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wokwi/wokwi-cli"
+  },
+  "dependencies": {
+    "ws": "^8.13.0"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.18.1",
+    "rimraf": "^5.0.0",
+    "typescript": "^5.2.2"
+  }
+}

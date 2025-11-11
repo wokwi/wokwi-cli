@@ -1,4 +1,4 @@
-import { type APIClient } from '../APIClient.js';
+import { type APIClient } from 'wokwi-client-js';
 import { type TestScenario } from '../TestScenario.js';
 
 export interface ISetControlParams {

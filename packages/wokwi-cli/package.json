@@ -5,10 +5,15 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "build": "node tools/build.js",
-    "package": "npm run build && pkg --public -o dist/bin/wokwi-cli -t node20-linuxstatic-arm64,node20-linuxstatic-x64,node20-macos-arm64,node20-macos-x64,node20-win-x64 dist/cli.cjs",
+    "prebuild": "pnpm run clean",
+    "build": "tsc && pnpm run bundle",
+    "bundle": "node tools/bundle.js",
+    "package": "pnpm run build && pkg --public -o dist/bin/wokwi-cli -t node20-linuxstatic-arm64,node20-linuxstatic-x64,node20-macos-arm64,node20-macos-x64,node20-win-x64 dist/cli.cjs",
+    "clean": "rimraf dist",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
     "cli": "tsx src/main.ts",
-    "test": "npm run lint && vitest --run",
+    "test": "pnpm run lint && vitest --run",
     "test:watch": "vitest --watch"
   },
   "keywords": [
@@ -41,6 +46,7 @@
     "chalk": "^5.3.0",
     "chalk-template": "^1.1.0",
     "pngjs": "^7.0.0",
+    "wokwi-client-js": "workspace:*",
     "ws": "^8.13.0",
     "yaml": "^2.3.1"
   },

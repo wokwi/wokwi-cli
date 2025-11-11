@@ -57,4 +57,5 @@ export interface APISimStartParams {
 export interface PinReadResponse {
   pin: string;
   value: number;
+  voltage: number;
 }
