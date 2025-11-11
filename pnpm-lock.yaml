@@ -127,6 +127,9 @@ importers:
       '@types/ws':
         specifier: ^8.18.1
         version: 8.18.1
+      esbuild:
+        specifier: ^0.25.2
+        version: 0.25.11
       rimraf:
         specifier: ^5.0.0
         version: 5.0.10

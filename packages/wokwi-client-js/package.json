@@ -10,6 +10,10 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./browser": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/wokwi-client-js.browser.js"
+    },
     "./transport/MessagePortTransport.js": {
       "types": "./dist/transport/MessagePortTransport.d.ts",
       "import": "./dist/transport/MessagePortTransport.js"
@@ -24,7 +28,8 @@
   ],
   "scripts": {
     "prebuild": "pnpm run clean",
-    "build": "tsc",
+    "build": "tsc && pnpm run build:browser",
+    "build:browser": "node tools/bundle-browser.js",
     "clean": "rimraf dist",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix"
@@ -49,6 +54,7 @@
   },
   "devDependencies": {
     "@types/ws": "^8.18.1",
+    "esbuild": "^0.25.2",
     "rimraf": "^5.0.0",
     "typescript": "^5.2.2"
   }
