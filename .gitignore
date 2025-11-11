@@ -4,3 +4,6 @@ wokwi.toml
 *.bin
 diagram.json
 screenshot.png
+playwright-report/
+test-results/
+test-project/

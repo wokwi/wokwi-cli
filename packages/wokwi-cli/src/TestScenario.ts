@@ -1,5 +1,5 @@
 import chalkTemplate from 'chalk-template';
-import type { APIClient } from './APIClient.js';
+import type { APIClient } from 'wokwi-client-js';
 
 export interface IScenarioCommand {
   /** Validates the input to the command. Throws an exception of the input is not valid */

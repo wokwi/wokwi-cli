@@ -1,4 +1,4 @@
-import type { APIClient } from '../APIClient.js';
+import type { APIClient } from 'wokwi-client-js';
 import type { IScenarioCommand, TestScenario } from '../TestScenario.js';
 
 const encoder = new TextEncoder();

@@ -1,7 +1,7 @@
 import { readFile, writeFile } from 'fs/promises';
 import path from 'path';
 import { PNG } from 'pngjs';
-import { type APIClient } from '../APIClient.js';
+import { base64ToByteArray, type APIClient } from 'wokwi-client-js';
 import { type TestScenario } from '../TestScenario.js';
 
 export interface ITakeScreenshotParams {
@@ -24,7 +24,7 @@ export class TakeScreenshotCommand {
 
   async run(scenario: TestScenario, client: APIClient, params: ITakeScreenshotParams) {
     const framebuffer = await client.framebufferRead(params['part-id']);
-    const png = Buffer.from(framebuffer.png, 'base64');
+    const png = base64ToByteArray(framebuffer.png);
     const saveTo = params['save-to'];
     const compareWith = params['compare-with'];
     if (saveTo) {
@@ -32,7 +32,7 @@ export class TakeScreenshotCommand {
     }
     if (compareWith) {
       const compareWithPath = path.join(this.scenarioDir, compareWith);
-      const originalPng = PNG.sync.read(png);
+      const originalPng = PNG.sync.read(Buffer.from(png));
 
       let compareWithData;
       try {

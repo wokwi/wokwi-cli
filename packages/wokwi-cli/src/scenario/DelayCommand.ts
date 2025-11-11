@@ -1,5 +1,5 @@
 import chalkTemplate from 'chalk-template';
-import { type APIClient } from '../APIClient.js';
+import { type APIClient } from 'wokwi-client-js';
 import { type TestScenario } from '../TestScenario.js';
 import { parseTime } from '../utils/parseTime.js';
 
