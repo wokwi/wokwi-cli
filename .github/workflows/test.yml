@@ -24,7 +24,11 @@ jobs:
         run: pnpm run build
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps
-      - name: Run tests
-        run: pnpm test
-      - name: Test wokwi-embed with Playwright
-        run: pnpm test:embed:playwright
+      - name: Run vitest tests
+        run: pnpm run test:vitest
+      - name: Run Playwright embed tests
+        run: pnpm run test:embed:playwright
+      - name: Run CLI integration tests
+        run: pnpm run test:cli:integration
+        env:
+          WOKWI_CLI_TOKEN: ${{ secrets.WOKWI_CLI_TOKEN }}

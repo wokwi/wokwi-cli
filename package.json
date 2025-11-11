@@ -9,9 +9,11 @@
     "clean": "pnpm -r run clean",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "test": "pnpm run lint && vitest --run",
+    "test": "pnpm run test:vitest && pnpm run test:embed:playwright && pnpm run test:cli:integration",
+    "test:vitest": "pnpm run lint && vitest --run",
     "test:embed:playwright": "playwright test test/wokwi-embed",
     "test:embed:playwright:ui": "playwright test test/wokwi-embed --ui",
+    "test:cli:integration": "bash scripts/test-cli-integration.sh",
     "cli": "tsx packages/wokwi-cli/src/main.ts",
     "prepare": "husky install"
   },
