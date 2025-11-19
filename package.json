@@ -43,8 +43,8 @@
   },
   "lint-staged": {
     "*.{js,ts}": [
-      "prettier --write",
-      "eslint"
+      "pnpm run format:check",
+      "pnpm run lint"
     ]
   }
 }
