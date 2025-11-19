@@ -3,7 +3,12 @@ import chalkTemplate from 'chalk-template';
 import { createWriteStream, existsSync, readFileSync, writeFileSync } from 'fs';
 import path, { join } from 'path';
 import YAML from 'yaml';
-import { APIClient, type APIEvent, type ChipsLogPayload, type SerialMonitorDataPayload } from 'wokwi-client-js';
+import {
+  APIClient,
+  type APIEvent,
+  type ChipsLogPayload,
+  type SerialMonitorDataPayload,
+} from 'wokwi-client-js';
 import { WebSocketTransport } from './transport/WebSocketTransport.js';
 import { DEFAULT_SERVER } from './constants.js';
 import { createSerialMonitorWritable } from './utils/serialMonitorWritable.js';
@@ -297,7 +302,10 @@ async function main() {
 
     for (const chip of chips) {
       await client.fileUpload(`${chip.name}.chip.json`, readFileSync(chip.jsonPath, 'utf-8'));
-      await client.fileUpload(`${chip.name}.chip.wasm`, new Uint8Array(readFileSync(chip.wasmPath)));
+      await client.fileUpload(
+        `${chip.name}.chip.wasm`,
+        new Uint8Array(readFileSync(chip.wasmPath)),
+      );
     }
 
     const promises = [];
@@ -374,7 +382,7 @@ async function main() {
 
     if (promises.length === 0) {
       // wait forever
-      await new Promise(() => { });
+      await new Promise(() => {});
     }
 
     // wait until the scenario finishes or a timeout occurs

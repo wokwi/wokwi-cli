@@ -1,4 +1,4 @@
-import { ITransport } from "./ITransport.js";
+import { ITransport } from './ITransport.js';
 
 /**
  * Transport for communicating with a Wokwi Simulator over a MessagePort.

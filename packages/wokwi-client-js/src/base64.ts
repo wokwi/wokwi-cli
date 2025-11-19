@@ -11,8 +11,7 @@ export function base64ToByteArray(base64str: string): Uint8Array {
   }
 }
 
-
-export function byteArrayToBase64(bytes: Uint8Array): string {  
+export function byteArrayToBase64(bytes: Uint8Array): string {
   if (typeof Buffer !== 'undefined') {
     // Node.js
     return Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength).toString('base64');

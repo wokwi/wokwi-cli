@@ -1,0 +1,27 @@
+# Ignore node_modules
+node_modules/
+
+# Ignore build outputs
+dist/
+build/
+
+# Ignore logs
+*.log
+
+# Ignore package-lock.json if present
+package-lock.json
+
+# Ignore Arduino-specific files
+*.hex
+*.elf
+*.bin
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+
+# repo specific ignores
+playwright-report/
+test-results/
+test-project/
+wokwi-part-tests/

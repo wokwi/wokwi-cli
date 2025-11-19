@@ -20,12 +20,12 @@ export class WebSocketTransport implements ITransport {
 
   private socket: WebSocket;
   private connectionAttempts = 0;
-  
+
   // to suppress close events when intentionally closing
-  private ignoreClose = false;  
-  
+  private ignoreClose = false;
+
   // retryable error statuses
-  private readonly errorStates = [ 
+  private readonly errorStates = [
     ErrorStatus.RequestTimeout,
     ErrorStatus.ServiceUnavailable,
     ErrorStatus.CfRequestTimeout,
@@ -35,7 +35,7 @@ export class WebSocketTransport implements ITransport {
     private readonly token: string,
     private readonly server: string,
     private readonly version: string,
-    private readonly sha: string
+    private readonly sha: string,
   ) {
     this.socket = this.createSocket();
   }

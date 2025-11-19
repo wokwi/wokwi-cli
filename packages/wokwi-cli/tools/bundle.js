@@ -45,4 +45,3 @@ const options = {
 };
 
 build(options).catch(() => process.exit(1));
-

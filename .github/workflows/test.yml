@@ -24,6 +24,8 @@ jobs:
         run: pnpm run build
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps
+      - name: Format check
+        run: pnpm run format:check
       - name: Run vitest tests
         run: pnpm run test:vitest
       - name: Run Playwright embed tests

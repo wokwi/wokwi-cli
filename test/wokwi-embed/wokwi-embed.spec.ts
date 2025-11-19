@@ -18,4 +18,3 @@ test.describe('Wokwi Embed', () => {
     await expect(outputText).toContainText('Hello, World 4', { timeout: 60000 });
   });
 });
-

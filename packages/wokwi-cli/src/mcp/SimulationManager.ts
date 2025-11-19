@@ -110,7 +110,10 @@ export class SimulationManager {
 
     for (const chip of chips) {
       await this.client.fileUpload(`${chip.name}.chip.json`, readFileSync(chip.jsonPath, 'utf-8'));
-      await this.client.fileUpload(`${chip.name}.chip.wasm`, new Uint8Array(readFileSync(chip.wasmPath)));
+      await this.client.fileUpload(
+        `${chip.name}.chip.wasm`,
+        new Uint8Array(readFileSync(chip.wasmPath)),
+      );
     }
 
     // Start simulation

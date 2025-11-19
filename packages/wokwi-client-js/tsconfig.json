@@ -7,4 +7,3 @@
   "include": ["src/**/*.ts"],
   "exclude": ["src/**/*.spec.ts", "node_modules"]
 }
-

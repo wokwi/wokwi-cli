@@ -30,12 +30,16 @@ export class APIClient {
   onConnected?: (helloMessage: APIHello) => void;
   onError?: (error: APIError) => void;
 
-  constructor(
-    private readonly transport: ITransport,
-  ) {
-    this.transport.onMessage = (message) => { this.processMessage(message); };
-    this.transport.onClose = (code, reason) => { this.handleTransportClose(code, reason); };
-    this.transport.onError = (error) => { this.handleTransportError(error); };
+  constructor(private readonly transport: ITransport) {
+    this.transport.onMessage = (message) => {
+      this.processMessage(message);
+    };
+    this.transport.onClose = (code, reason) => {
+      this.handleTransportClose(code, reason);
+    };
+    this.transport.onError = (error) => {
+      this.handleTransportError(error);
+    };
 
     // Initiate connection
     this.connected = this.transport.connect();
@@ -53,7 +57,9 @@ export class APIClient {
   }
 
   async fileDownload(name: string): Promise<string | Uint8Array> {
-    const result = await this.sendCommand<{ text?: string; binary?: string }>('file:download', { name });
+    const result = await this.sendCommand<{ text?: string; binary?: string }>('file:download', {
+      name,
+    });
     if (typeof result.text === 'string') {
       return result.text;
     } else if (typeof result.binary === 'string') {
