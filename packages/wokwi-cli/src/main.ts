@@ -6,6 +6,7 @@ import YAML from 'yaml';
 import { APIClient, type APIEvent, type ChipsLogPayload, type SerialMonitorDataPayload } from 'wokwi-client-js';
 import { WebSocketTransport } from './transport/WebSocketTransport.js';
 import { DEFAULT_SERVER } from './constants.js';
+import { createSerialMonitorWritable } from './utils/serialMonitorWritable.js';
 import { ExpectEngine } from './ExpectEngine.js';
 import { SimulationTimeoutError } from './SimulationTimeoutError.js';
 import { TestScenario } from './TestScenario.js';
@@ -362,7 +363,7 @@ async function main() {
     });
 
     if (interactive) {
-      process.stdin.pipe(await client.serialMonitorWritable());
+      process.stdin.pipe(await createSerialMonitorWritable(client));
     }
 
     if (scenario != null) {

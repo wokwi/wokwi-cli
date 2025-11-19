@@ -2,7 +2,7 @@
 export { APIClient } from './APIClient.js';
 
 // Transport interfaces and implementations
-export { ITransport } from './transport/ITransport.js';
+export { type ITransport } from './transport/ITransport.js';
 export { MessagePortTransport } from './transport/MessagePortTransport.js';
 
 // Pause Point

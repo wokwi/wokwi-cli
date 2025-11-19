@@ -16,7 +16,7 @@
     "test:embed:playwright": "playwright test test/wokwi-embed",
     "test:embed:playwright:ui": "playwright test test/wokwi-embed --ui",
     "test:cli:integration": "pnpm exec tsx scripts/test-cli-integration.ts",
-    "package": "pnpm -r run package",
+    "package": "pnpm --filter wokwi-cli run package",
     "cli": "tsx packages/wokwi-cli/src/main.ts",
     "prepare": "husky install"
   },

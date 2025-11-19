@@ -13,7 +13,6 @@ import { ITransport } from './transport/ITransport.js';
 import { base64ToByteArray, byteArrayToBase64 } from './base64.js';
 
 export class APIClient {
-  private connectionAttempts = 0;
   private lastId = 0;
   private lastPausePointId = 0;
   private closed = false;
@@ -30,7 +29,6 @@ export class APIClient {
 
   onConnected?: (helloMessage: APIHello) => void;
   onError?: (error: APIError) => void;
-  onEvent?: (event: APIEvent) => void;
 
   constructor(
     private readonly transport: ITransport,
@@ -103,22 +101,6 @@ export class APIClient {
     }
     return new Promise<APIEvent<any>>((resolve) => {
       this.listen('sim:pause', resolve, { once: true });
-    });
-  }
-
-  async serialMonitorWritable() {
-    // Dynamic import for Node.js-only API
-    const { Writable } = await import('stream');
-    const { Buffer } = await import('buffer');
-    return new Writable({
-      write: (chunk: any, encoding: BufferEncoding, callback: (error?: Error | null) => void) => {
-        if (typeof chunk === 'string') {
-          chunk = Buffer.from(chunk, encoding);
-        }
-        this.serialMonitorWrite(chunk).then(() => {
-          callback(null);
-        }, callback);
-      },
     });
   }
 
@@ -249,7 +231,6 @@ export class APIClient {
       }
     }
     this._lastNanos = message.nanos;
-    this.onEvent?.(message);
     this.apiEvents.dispatchEvent(new CustomEvent<APIEvent>(message.event, { detail: message }));
   }
 
@@ -292,14 +273,10 @@ export class APIClient {
     if (this.closed) return;
     const target = (this as any).server ?? 'transport';
     const msg = `Connection to ${target} closed unexpectedly: code ${code}${reason ? ` (${reason})` : ''}`;
-    const errorObj: APIError = { type: 'error', message: msg };
-    this.onError?.(errorObj);
-    console.error(msg);
+    this.onError?.({ type: 'error', message: msg });
   }
 
   private handleTransportError(error: Error) {
-    const errorObj: APIError = { type: 'error', message: error.message };
-    this.onError?.(errorObj);
-    console.error('Transport error:', error.message);
+    this.onError?.({ type: 'error', message: error.message });
   }
 }

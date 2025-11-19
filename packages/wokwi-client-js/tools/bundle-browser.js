@@ -13,12 +13,9 @@ const options = {
   platform: 'browser',
   format: 'esm',
   target: 'es2020',
-  // Explicitly mark Node.js-only packages as external
-  external: ['ws', 'stream', 'buffer'],
   banner: {
     js: `// Browser bundle of wokwi-client-js
-// Note: serialMonitorWritable() requires Node.js and won't work in browsers
-// Use MessagePortTransport for browser communication with Wokwi Simulator
+    // Use MessagePortTransport for browser communication with Wokwi Simulator
 `,
   },
 };
@@ -32,4 +29,3 @@ build(options)
     console.error('✗ Browser bundle failed:', error);
     process.exit(1);
   });
-

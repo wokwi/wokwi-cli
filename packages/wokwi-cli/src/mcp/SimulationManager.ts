@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'fs';
 import path from 'path';
-import { APIClient, type APIEvent } from 'wokwi-client-js';
+import { APIClient, SerialMonitorDataPayload, type APIEvent } from 'wokwi-client-js';
 import { WebSocketTransport } from '../transport/WebSocketTransport.js';
 import { DEFAULT_SERVER } from '../constants.js';
 import { parseConfig } from '../config.js';
@@ -49,13 +49,10 @@ export class SimulationManager {
       throw new Error(`API Error: ${error.message}`);
     };
 
-    this.client.onEvent = (event: APIEvent) => {
-      if (event.event === 'serial-monitor:data') {
-        const bytes = (event as any).payload.bytes;
-        const text = bytes.map((byte: number) => String.fromCharCode(byte)).join('');
-        this.addToSerialBuffer(text);
-      }
-    };
+    this.client.listen('serial-monitor:data', (event: APIEvent<SerialMonitorDataPayload>) => {
+      const { bytes } = event.payload;
+      this.addToSerialBuffer(String.fromCharCode(...bytes));
+    });
 
     await this.client.connected;
   }
