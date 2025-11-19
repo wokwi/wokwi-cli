@@ -1,6 +1,5 @@
 import { defineConfig } from 'eslint/config';
 import eslint from '@eslint/js';
-import eslintConfigPrettier from 'eslint-config-prettier';
 import tseslint from 'typescript-eslint';
 
 export default defineConfig(
@@ -66,7 +65,4 @@ export default defineConfig(
       'no-undef': 'off',
     },
   },
-
-  // Prettier config (must be last to override conflicting rules)
-  eslintConfigPrettier,
 );

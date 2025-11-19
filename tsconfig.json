@@ -6,7 +6,8 @@
         "vitest.config.ts",
         "./test/**/*.test.ts",
         "./test/**/*.ts",
-        "./packages/*/src/**/*.ts"
+        "./packages/*/src/**/*.ts",
+        "./scripts/**/*.ts"
     ],
     "exclude": [
         "node_modules",
