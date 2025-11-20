@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MicroPython + ESP32 on Wokwi</title>
+    <script type="importmap">
+      {
+        "imports": {
+          "wokwi-client-js": "/packages/wokwi-client-js/dist/index.js"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <h1>MicroPython + ESP32 on Wokwi</h1>
+    <div>
+      <button class="start-button">Start</button>
+    </div>
+    <iframe
+      src="https://wokwi.com/experimental/embed?client_id=wokwi_client_omf4ejkz6n6twj7d3x2eqmyp"
+      width="50%"
+      height="500"
+      id="wokwi-embed"
+    ></iframe>
+    <h2>Serial Monitor Output</h2>
+    <div id="output"><pre id="output-text"></pre></div>
+    <script type="module" src="script.js"></script>
+  </body>
+</html>

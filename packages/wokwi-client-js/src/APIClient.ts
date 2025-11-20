@@ -1,5 +1,3 @@
-import { Writable } from 'stream';
-import { WebSocket } from 'ws';
 import type {
   APICommand,
   APIError,
@@ -11,14 +9,10 @@ import type {
   PinReadResponse,
 } from './APITypes.js';
 import { PausePoint, type PausePointParams } from './PausePoint.js';
-import { readVersion } from './readVersion.js';
-
-const DEFAULT_SERVER = process.env.WOKWI_CLI_SERVER ?? 'wss://wokwi.com/api/ws/beta';
-const retryDelays = [1000, 2000, 5000, 10000, 20000];
+import { ITransport } from './transport/ITransport.js';
+import { base64ToByteArray, byteArrayToBase64 } from './base64.js';
 
 export class APIClient {
-  private socket: WebSocket;
-  private connectionAttempts = 0;
   private lastId = 0;
   private lastPausePointId = 0;
   private closed = false;
@@ -31,105 +25,47 @@ export class APIClient {
     [(result: any) => void, (error: Error) => void]
   >();
 
-  readonly connected;
+  readonly connected: Promise<void>;
 
   onConnected?: (helloMessage: APIHello) => void;
   onError?: (error: APIError) => void;
 
-  constructor(
-    readonly token: string,
-    readonly server = DEFAULT_SERVER,
-  ) {
-    this.socket = this.createSocket(token, server);
-    this.connected = this.connectSocket(this.socket);
+  constructor(private readonly transport: ITransport) {
+    this.transport.onMessage = (message) => {
+      this.processMessage(message);
+    };
+    this.transport.onClose = (code, reason) => {
+      this.handleTransportClose(code, reason);
+    };
+    this.transport.onError = (error) => {
+      this.handleTransportError(error);
+    };
+
+    // Initiate connection
+    this.connected = this.transport.connect();
   }
 
-  private createSocket(token: string, server: string) {
-    const { sha, version } = readVersion();
-    return new WebSocket(server, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'User-Agent': `wokwi-cli/${version} (${sha})`,
-      },
-    });
-  }
-
-  private async connectSocket(socket: WebSocket) {
-    await new Promise((resolve, reject) => {
-      socket.addEventListener('message', ({ data }) => {
-        if (typeof data === 'string') {
-          const message = JSON.parse(data);
-          this.processMessage(message);
-        } else {
-          console.error('Unsupported binary message');
-        }
-      });
-      this.socket.addEventListener('open', resolve);
-      this.socket.on('unexpected-response', (req, res) => {
-        this.closed = true;
-        this.socket.close();
-        const RequestTimeout = 408;
-        const ServiceUnavailable = 503;
-        const CfRequestTimeout = 524;
-        if (
-          res.statusCode === ServiceUnavailable ||
-          res.statusCode === RequestTimeout ||
-          res.statusCode === CfRequestTimeout
-        ) {
-          console.warn(
-            `Connection to ${this.server} failed: ${res.statusMessage ?? ''} (${res.statusCode}).`,
-          );
-          resolve(this.retryConnection());
-        } else {
-          reject(
-            new Error(
-              `Error connecting to ${this.server}: ${res.statusCode} ${res.statusMessage ?? ''}`,
-            ),
-          );
-        }
-      });
-      this.socket.addEventListener('error', (event) => {
-        reject(new Error(`Error connecting to ${this.server}: ${event.message}`));
-      });
-      this.socket.addEventListener('close', (event) => {
-        if (this.closed) {
-          return;
-        }
-
-        const message = `Connection to ${this.server} closed unexpectedly: code ${event.code}`;
-        if (this.onError) {
-          this.onError({ type: 'error', message });
-        } else {
-          console.error(message);
-        }
-      });
-    });
-  }
-
-  private async retryConnection() {
-    const delay = retryDelays[this.connectionAttempts++];
-    if (delay == null) {
-      throw new Error(`Failed to connect to ${this.server}. Giving up.`);
-    }
-
-    console.log(`Will retry in ${delay}ms...`);
-
-    await new Promise((resolve) => setTimeout(resolve, delay));
-
-    console.log(`Retrying connection to ${this.server}...`);
-    this.socket = this.createSocket(this.token, this.server);
-    this.closed = false;
-    await this.connectSocket(this.socket);
-  }
-
-  async fileUpload(name: string, content: string | ArrayBuffer) {
+  async fileUpload(name: string, content: string | Uint8Array) {
     if (typeof content === 'string') {
       return await this.sendCommand('file:upload', { name, text: content });
     } else {
       return await this.sendCommand('file:upload', {
         name,
-        binary: Buffer.from(content).toString('base64'),
+        binary: byteArrayToBase64(content),
       });
+    }
+  }
+
+  async fileDownload(name: string): Promise<string | Uint8Array> {
+    const result = await this.sendCommand<{ text?: string; binary?: string }>('file:download', {
+      name,
+    });
+    if (typeof result.text === 'string') {
+      return result.text;
+    } else if (typeof result.binary === 'string') {
+      return base64ToByteArray(result.binary);
+    } else {
+      throw new Error('Invalid file download response');
     }
   }
 
@@ -171,19 +107,6 @@ export class APIClient {
     }
     return new Promise<APIEvent<any>>((resolve) => {
       this.listen('sim:pause', resolve, { once: true });
-    });
-  }
-
-  serialMonitorWritable() {
-    return new Writable({
-      write: (chunk, encoding, callback) => {
-        if (typeof chunk === 'string') {
-          chunk = Buffer.from(chunk, encoding);
-        }
-        this.serialMonitorWrite(chunk).then(() => {
-          callback(null);
-        }, callback);
-      },
     });
   }
 
@@ -258,7 +181,7 @@ export class APIClient {
         params,
         id: id.toString(),
       };
-      this.socket.send(JSON.stringify(message));
+      this.transport.send(message);
     });
   }
 
@@ -278,8 +201,11 @@ export class APIClient {
         }
         console.error('API Error:', message.message);
         if (this.pendingCommands.size > 0) {
-          const [, reject] = this.pendingCommands.values().next().value;
-          reject(new Error(message.message));
+          const entry = this.pendingCommands.values().next().value;
+          if (entry) {
+            const [, reject] = entry;
+            reject(new Error(message.message));
+          }
         }
         break;
 
@@ -346,8 +272,17 @@ export class APIClient {
 
   close() {
     this.closed = true;
-    if (this.socket.readyState === WebSocket.OPEN) {
-      this.socket.close();
-    }
+    this.transport.close();
+  }
+
+  private handleTransportClose(code: number, reason?: string) {
+    if (this.closed) return;
+    const target = (this as any).server ?? 'transport';
+    const msg = `Connection to ${target} closed unexpectedly: code ${code}${reason ? ` (${reason})` : ''}`;
+    this.onError?.({ type: 'error', message: msg });
+  }
+
+  private handleTransportError(error: Error) {
+    this.onError?.({ type: 'error', message: error.message });
   }
 }

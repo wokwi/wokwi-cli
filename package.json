@@ -9,7 +9,14 @@
     "clean": "pnpm -r run clean",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "test": "npm run lint && vitest --run",
+    "format": "prettier --write packages scripts test",
+    "format:check": "prettier --check packages scripts test",
+    "test": "pnpm run test:vitest && pnpm run test:embed:playwright && pnpm run test:cli:integration",
+    "test:vitest": "pnpm run lint && vitest --run",
+    "test:embed:playwright": "playwright test test/wokwi-embed",
+    "test:embed:playwright:ui": "playwright test test/wokwi-embed --ui",
+    "test:cli:integration": "pnpm exec tsx scripts/test-cli-integration.ts",
+    "package": "pnpm --filter wokwi-cli run package",
     "cli": "tsx packages/wokwi-cli/src/main.ts",
     "prepare": "husky install"
   },
@@ -19,26 +26,15 @@
     "type": "git",
     "url": "https://github.com/wokwi/wokwi-cli"
   },
-  "dependencies": {
-    "@clack/prompts": "^0.7.0",
-    "@iarna/toml": "2.2.5",
-    "@modelcontextprotocol/sdk": "^1.0.0",
-    "arg": "^5.0.2",
-    "chalk": "^5.3.0",
-    "chalk-template": "^1.1.0",
-    "pngjs": "^7.0.0",
-    "ws": "^8.13.0",
-    "yaml": "^2.3.1"
-  },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@playwright/test": "^1.48.0",
     "esbuild": "^0.25.2",
     "eslint": "^9.39.1",
-    "eslint-config-prettier": "^10.1.8",
     "husky": "^8.0.0",
     "jiti": "^2.6.1",
     "lint-staged": "^15.4.3",
-    "prettier": "^3.5.0",
+    "prettier": "^3.6.2",
     "rimraf": "^5.0.0",
     "tsx": "^4.19.2",
     "typescript": "^5.9.3",
@@ -47,8 +43,8 @@
   },
   "lint-staged": {
     "*.{js,ts}": [
-      "prettier --write",
-      "eslint"
+      "pnpm run format:check",
+      "pnpm run lint"
     ]
   }
 }

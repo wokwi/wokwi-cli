@@ -1,9 +1,11 @@
 import { existsSync, readFileSync } from 'fs';
 import path from 'path';
-import { APIClient } from '../APIClient.js';
-import type { APIEvent } from '../APITypes.js';
+import { APIClient, SerialMonitorDataPayload, type APIEvent } from 'wokwi-client-js';
+import { WebSocketTransport } from '../transport/WebSocketTransport.js';
+import { DEFAULT_SERVER } from '../constants.js';
 import { parseConfig } from '../config.js';
 import { loadChips } from '../loadChips.js';
+import { readVersion } from '../readVersion.js';
 import { uploadFirmware } from '../uploadFirmware.js';
 
 export interface SimulationStatus {
@@ -31,7 +33,9 @@ export class SimulationManager {
       return;
     }
 
-    this.client = new APIClient(this.token);
+    const { sha, version } = readVersion();
+    const transport = new WebSocketTransport(this.token, DEFAULT_SERVER, version, sha);
+    this.client = new APIClient(transport);
 
     this.client.onConnected = (hello) => {
       this.isConnected = true;
@@ -45,13 +49,10 @@ export class SimulationManager {
       throw new Error(`API Error: ${error.message}`);
     };
 
-    this.client.onEvent = (event: APIEvent) => {
-      if (event.event === 'serial-monitor:data') {
-        const bytes = (event as any).payload.bytes;
-        const text = bytes.map((byte: number) => String.fromCharCode(byte)).join('');
-        this.addToSerialBuffer(text);
-      }
-    };
+    this.client.listen('serial-monitor:data', (event: APIEvent<SerialMonitorDataPayload>) => {
+      const { bytes } = event.payload;
+      this.addToSerialBuffer(String.fromCharCode(...bytes));
+    });
 
     await this.client.connected;
   }
@@ -104,12 +105,15 @@ export class SimulationManager {
     const firmwareName = await uploadFirmware(this.client, firmwarePath);
 
     if (elfPath) {
-      await this.client.fileUpload('firmware.elf', readFileSync(elfPath));
+      await this.client.fileUpload('firmware.elf', new Uint8Array(readFileSync(elfPath)));
     }
 
     for (const chip of chips) {
       await this.client.fileUpload(`${chip.name}.chip.json`, readFileSync(chip.jsonPath, 'utf-8'));
-      await this.client.fileUpload(`${chip.name}.chip.wasm`, readFileSync(chip.wasmPath));
+      await this.client.fileUpload(
+        `${chip.name}.chip.wasm`,
+        new Uint8Array(readFileSync(chip.wasmPath)),
+      );
     }
 
     // Start simulation

@@ -25,7 +25,7 @@ export async function detectProjectType(root: string): Promise<ProjectType | nul
 
   const cmakeLists = await readFileOrNull(join(root, 'CMakeLists.txt'));
   if (cmakeLists) {
-    const cmakeListStr = Buffer.from(cmakeLists).toString();
+    const cmakeListStr = cmakeLists.toString('utf-8');
     if (cmakeListStr.includes('$ENV{IDF_PATH}')) {
       return 'esp-idf';
     }

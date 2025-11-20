@@ -74,20 +74,7 @@ To configure your AI agent to use the MCP server, add the following to your agen
 
 ## Development
 
-Clone the repository, install the npm depenedencies, and then run the CLI:
-
-```bash
-git clone https://github.com/wokwi/wokwi-cli
-cd wokwi-cli
-npm install
-npm start
-```
-
-To pass command line arguments to the cli, use `npm start -- [arguments]`. For example, to see the help screen, run:
-
-```
-npm start -- -h
-```
+All information about developing the Wokwi CLI can be found in [DEVELOPMENT.md](DEVELOPMENT.md).
 
 ## License
 

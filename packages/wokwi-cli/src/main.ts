@@ -3,8 +3,15 @@ import chalkTemplate from 'chalk-template';
 import { createWriteStream, existsSync, readFileSync, writeFileSync } from 'fs';
 import path, { join } from 'path';
 import YAML from 'yaml';
-import { APIClient } from './APIClient.js';
-import type { APIEvent, ChipsLogPayload, SerialMonitorDataPayload } from './APITypes.js';
+import {
+  APIClient,
+  type APIEvent,
+  type ChipsLogPayload,
+  type SerialMonitorDataPayload,
+} from 'wokwi-client-js';
+import { WebSocketTransport } from './transport/WebSocketTransport.js';
+import { DEFAULT_SERVER } from './constants.js';
+import { createSerialMonitorWritable } from './utils/serialMonitorWritable.js';
 import { ExpectEngine } from './ExpectEngine.js';
 import { SimulationTimeoutError } from './SimulationTimeoutError.js';
 import { TestScenario } from './TestScenario.js';
@@ -22,6 +29,7 @@ import { TakeScreenshotCommand } from './scenario/TakeScreenshotCommand.js';
 import { WaitSerialCommand } from './scenario/WaitSerialCommand.js';
 import { WriteSerialCommand } from './scenario/WriteSerialCommand.js';
 import { uploadFirmware } from './uploadFirmware.js';
+const { sha, version } = readVersion();
 
 const millis = 1_000_000;
 
@@ -272,7 +280,8 @@ async function main() {
     });
   }
 
-  const client = new APIClient(token);
+  const transport = new WebSocketTransport(token, DEFAULT_SERVER, version, sha);
+  const client = new APIClient(transport);
   client.onConnected = (hello) => {
     if (!quiet) {
       console.log(`Connected to Wokwi Simulation API ${hello.appVersion}`);
@@ -288,12 +297,15 @@ async function main() {
     await client.fileUpload('diagram.json', diagram);
     const firmwareName = await uploadFirmware(client, firmwarePath);
     if (elfPath != null) {
-      await client.fileUpload('firmware.elf', readFileSync(elfPath));
+      await client.fileUpload('firmware.elf', new Uint8Array(readFileSync(elfPath)));
     }
 
     for (const chip of chips) {
       await client.fileUpload(`${chip.name}.chip.json`, readFileSync(chip.jsonPath, 'utf-8'));
-      await client.fileUpload(`${chip.name}.chip.wasm`, readFileSync(chip.wasmPath));
+      await client.fileUpload(
+        `${chip.name}.chip.wasm`,
+        new Uint8Array(readFileSync(chip.wasmPath)),
+      );
     }
 
     const promises = [];
@@ -359,7 +371,7 @@ async function main() {
     });
 
     if (interactive) {
-      process.stdin.pipe(client.serialMonitorWritable());
+      process.stdin.pipe(await createSerialMonitorWritable(client));
     }
 
     if (scenario != null) {

@@ -1,10 +1,10 @@
 import { Server as McpServer } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { 
-  CallToolRequestSchema, 
+import {
+  CallToolRequestSchema,
   ListToolsRequestSchema,
   ListResourcesRequestSchema,
-  ReadResourceRequestSchema
+  ReadResourceRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { readVersion } from '../readVersion.js';
 import { SimulationManager } from './SimulationManager.js';
@@ -25,16 +25,19 @@ export class WokwiMCPServer {
 
   constructor(private readonly options: MCPServerOptions) {
     const { version } = readVersion();
-    
-    this.server = new McpServer({
-      name: 'wokwi-cli',
-      version,
-    }, {
-      capabilities: {
-        tools: {},
-        resources: {},
+
+    this.server = new McpServer(
+      {
+        name: 'wokwi-cli',
+        version,
       },
-    });
+      {
+        capabilities: {
+          tools: {},
+          resources: {},
+        },
+      },
+    );
 
     this.simulationManager = new SimulationManager(options.rootDir, options.token, options.quiet);
     this.tools = new WokwiMCPTools(this.simulationManager);
@@ -64,7 +67,7 @@ export class WokwiMCPServer {
   async start() {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-    
+
     if (!this.options.quiet) {
       console.error('Wokwi MCP Server started');
     }

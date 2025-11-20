@@ -14,7 +14,8 @@ export class WokwiMCPTools {
           properties: {
             projectPath: {
               type: 'string',
-              description: 'Path to the project directory (optional, defaults to current directory)',
+              description:
+                'Path to the project directory (optional, defaults to current directory)',
             },
           },
         },
@@ -135,7 +136,10 @@ export class WokwiMCPTools {
     ];
   }
 
-  async callTool(name: string, args: any): Promise<{ content: Array<{ type: 'text'; text: string }> }> {
+  async callTool(
+    name: string,
+    args: any,
+  ): Promise<{ content: Array<{ type: 'text'; text: string }> }> {
     try {
       switch (name) {
         case 'wokwi_start_simulation':

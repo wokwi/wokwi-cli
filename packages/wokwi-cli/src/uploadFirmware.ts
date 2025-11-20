@@ -1,11 +1,11 @@
 import { readFileSync } from 'fs';
 import { basename, dirname, resolve } from 'path';
-import { type APIClient } from './APIClient.js';
+import { type APIClient } from 'wokwi-client-js';
 import { type IESP32FlasherJSON } from './esp/flasherArgs.js';
 
 interface IFirmwarePiece {
   offset: number;
-  data: ArrayBuffer;
+  data: Uint8Array;
 }
 
 const MAX_FIRMWARE_SIZE = 4 * 1024 * 1024;
@@ -24,7 +24,7 @@ export async function uploadESP32Firmware(client: APIClient, firmwarePath: strin
       throw new Error(`Invalid offset in flasher_args.json flash_files: ${offset}`);
     }
 
-    const data = readFileSync(resolve(dirname(firmwarePath), file));
+    const data = new Uint8Array(readFileSync(resolve(dirname(firmwarePath), file)));
     firmwareParts.push({ offset: offsetNum, data });
     firmwareSize = Math.max(firmwareSize, offsetNum + data.byteLength);
   }
@@ -37,7 +37,7 @@ export async function uploadESP32Firmware(client: APIClient, firmwarePath: strin
 
   const firmwareData = new Uint8Array(firmwareSize);
   for (const { offset, data } of firmwareParts) {
-    firmwareData.set(new Uint8Array(data), offset);
+    firmwareData.set(data, offset);
   }
   await client.fileUpload('firmware.bin', firmwareData);
 
@@ -51,6 +51,6 @@ export async function uploadFirmware(client: APIClient, firmwarePath: string) {
 
   const extension = firmwarePath.split('.').pop();
   const firmwareName = `firmware.${extension}`;
-  await client.fileUpload(firmwareName, readFileSync(firmwarePath));
+  await client.fileUpload(firmwareName, new Uint8Array(readFileSync(firmwarePath)));
   return firmwareName;
 }
