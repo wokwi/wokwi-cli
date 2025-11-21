@@ -24,7 +24,9 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "../README.md",
+    "../LICENSE"
   ],
   "scripts": {
     "prebuild": "pnpm run clean",

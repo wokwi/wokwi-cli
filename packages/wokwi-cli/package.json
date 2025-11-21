@@ -2,8 +2,16 @@
   "name": "wokwi-cli",
   "version": "0.18.3",
   "description": "Wokwi Simulator CLI (for CI and local development)",
-  "main": "index.js",
+  "main": "dist/cli.cjs",
   "type": "module",
+  "bin": {
+    "wokwi-cli": "dist/cli.cjs"
+  },
+  "files": [
+    "dist",
+    "../README.md",
+    "../LICENSE"
+  ],
   "scripts": {
     "prebuild": "pnpm run clean",
     "build": "tsc && pnpm run bundle",
