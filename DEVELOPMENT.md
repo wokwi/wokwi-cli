@@ -31,7 +31,7 @@ pnpm exec playwright install
 
 The repository contains two main packages:
 - `wokwi-cli`: The command-line interface for Wokwi.
-- `wokwi-js`: The JavaScript client library used to interact with Wokwi from a browser iframe.
+- `wokwi-client-js`: The JavaScript client library used to interact with Wokwi from a browser iframe.
 
 When you run `pnpm` commands from the repository root, the monorepo configuration determines which packages the command runs in. For example, `pnpm build` runs the build across packages, while `pnpm lint` runs `eslint .` for the whole repository.
 
