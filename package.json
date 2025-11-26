@@ -16,7 +16,7 @@
     "test:embed:playwright": "playwright test test/wokwi-embed",
     "test:embed:playwright:ui": "playwright test test/wokwi-embed --ui",
     "test:cli:integration": "pnpm exec tsx scripts/test-cli-integration.ts",
-    "cli": "tsx packages/wokwi-cli/src/main.ts",
+    "cli": "tsx packages/cli/src/main.ts",
     "prepare": "husky install"
   },
   "author": "Uri Shaked",
