@@ -24,10 +24,13 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
-    "prebuild": "pnpm run clean",
+    "prepack": "shx cp ../../README.md . && shx cp ../../LICENSE .",
+    "postpack": "shx rm README.md LICENSE",
     "build": "tsc && pnpm run build:browser",
     "build:browser": "node tools/bundle-browser.js",
     "clean": "rimraf dist",

@@ -2,11 +2,21 @@
   "name": "wokwi-cli",
   "version": "0.18.3",
   "description": "Wokwi Simulator CLI (for CI and local development)",
-  "main": "index.js",
+  "main": "dist/cli.cjs",
   "type": "module",
+  "bin": {
+    "wokwi-cli": "dist/cli.cjs"
+  },
+  "files": [
+    "dist/bin/version.json",
+    "dist/cli.cjs",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
-    "prebuild": "pnpm run clean",
-    "build": "tsc && pnpm run bundle",
+    "prepack": "shx cp ../../README.md . && shx cp ../../LICENSE .",
+    "postpack": "shx rm README.md LICENSE",
+    "build": "tsc --noEmit && pnpm run bundle",
     "bundle": "node tools/bundle.js",
     "package": "pnpm run build && pkg --public -o dist/bin/wokwi-cli -t node20-linuxstatic-arm64,node20-linuxstatic-x64,node20-macos-arm64,node20-macos-x64,node20-win-x64 dist/cli.cjs",
     "clean": "rimraf dist",
