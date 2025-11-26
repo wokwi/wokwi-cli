@@ -1,4 +1,4 @@
-import { type ITransport } from 'wokwi-client-js';
+import { type ITransport } from '@wokwi/client';
 import { WebSocket } from 'ws';
 
 const retryDelays = [1000, 2000, 5000, 10000, 20000];

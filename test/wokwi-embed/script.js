@@ -1,4 +1,4 @@
-import { MessagePortTransport, APIClient } from 'wokwi-client-js';
+import { MessagePortTransport, APIClient } from '@wokwi/client';
 
 const diagram = `{
   "version": 1,

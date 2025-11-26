@@ -8,13 +8,13 @@ const rootDir = join(__dirname, '..');
 
 const options = {
   entryPoints: [join(rootDir, 'src/index.ts')],
-  outfile: join(rootDir, 'dist/wokwi-client-js.browser.js'),
+  outfile: join(rootDir, 'dist/wokwi-client.browser.js'),
   bundle: true,
   platform: 'browser',
   format: 'esm',
   target: 'es2020',
   banner: {
-    js: `// Browser bundle of wokwi-client-js
+    js: `// Browser bundle of @wokwi/client
     // Use MessagePortTransport for browser communication with Wokwi Simulator
 `,
   },
@@ -23,7 +23,7 @@ const options = {
 // Build the browser bundle
 build(options)
   .then(() => {
-    console.log('✓ Browser bundle created: dist/wokwi-client-js.browser.js');
+    console.log('✓ Browser bundle created: dist/wokwi-client.browser.js');
   })
   .catch((error) => {
     console.error('✗ Browser bundle failed:', error);

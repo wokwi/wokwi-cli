@@ -1,4 +1,4 @@
-import type { APIClient } from 'wokwi-client-js';
+import type { APIClient } from '@wokwi/client';
 import { Writable } from 'stream';
 import { Buffer } from 'buffer';
 

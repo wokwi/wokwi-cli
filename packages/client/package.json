@@ -1,5 +1,5 @@
 {
-  "name": "wokwi-client-js",
+  "name": "@wokwi/client",
   "version": "0.18.3",
   "description": "Wokwi Client JS Library",
   "main": "dist/index.js",
@@ -12,7 +12,7 @@
     },
     "./browser": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/wokwi-client-js.browser.js"
+      "import": "./dist/wokwi-client.browser.js"
     },
     "./transport/MessagePortTransport.js": {
       "types": "./dist/transport/MessagePortTransport.d.ts",

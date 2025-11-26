@@ -8,7 +8,7 @@ import {
   type APIEvent,
   type ChipsLogPayload,
   type SerialMonitorDataPayload,
-} from 'wokwi-client-js';
+} from '@wokwi/client';
 import { WebSocketTransport } from './transport/WebSocketTransport.js';
 import { DEFAULT_SERVER } from './constants.js';
 import { createSerialMonitorWritable } from './utils/serialMonitorWritable.js';

@@ -1,5 +1,5 @@
 import chalkTemplate from 'chalk-template';
-import type { APIClient } from 'wokwi-client-js';
+import type { APIClient } from '@wokwi/client';
 import type { IScenarioCommand, TestScenario } from '../TestScenario.js';
 
 export interface IExpectPinParams {

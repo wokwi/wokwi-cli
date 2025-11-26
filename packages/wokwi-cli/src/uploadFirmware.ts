@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import { basename, dirname, resolve } from 'path';
-import { type APIClient } from 'wokwi-client-js';
+import { type APIClient } from '@wokwi/client';
 import { type IESP32FlasherJSON } from './esp/flasherArgs.js';
 
 interface IFirmwarePiece {
