@@ -27,10 +27,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y binfmt-support qemu-user-static
       - name: 'Build'
-        run: pnpm run build && pnpm --filter wokwi-cli run package
+        run: pnpm run build && pnpm --filter @wokwi/cli run package
       - name: Upload Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: 'packages/wokwi-cli/dist/bin/wokwi-cli-*,packages/wokwi-cli/dist/bin/version.json'
+          artifacts: 'packages/cli/dist/bin/wokwi-cli-*,packages/cli/dist/bin/version.json'
           token: ${{ secrets.GITHUB_TOKEN }}
           generateReleaseNotes: true

@@ -29,7 +29,7 @@ jobs:
       - name: Lint check
         run: pnpm run lint
       - name: Test creating CLI packages
-        run: pnpm --filter wokwi-cli run package
+        run: pnpm --filter @wokwi/cli run package
       - name: Test Packing the packages
         run: pnpm -r pack
       - name: Run vitest tests
