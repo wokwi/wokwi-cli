@@ -51,26 +51,7 @@ importers:
         specifier: ^3.0.5
         version: 3.2.4(@types/node@24.9.2)(jiti@2.6.1)(tsx@4.20.6)(yaml@2.8.1)
 
-  packages/client:
-    dependencies:
-      ws:
-        specifier: ^8.13.0
-        version: 8.18.3
-    devDependencies:
-      '@types/ws':
-        specifier: ^8.18.1
-        version: 8.18.1
-      esbuild:
-        specifier: ^0.25.2
-        version: 0.25.11
-      rimraf:
-        specifier: ^5.0.0
-        version: 5.0.10
-      typescript:
-        specifier: ^5.2.2
-        version: 5.9.3
-
-  packages/wokwi-cli:
+  packages/cli:
     dependencies:
       '@clack/prompts':
         specifier: ^0.7.0
@@ -136,6 +117,25 @@ importers:
       vitest:
         specifier: ^3.0.5
         version: 3.2.4(@types/node@24.9.2)(jiti@2.6.1)(tsx@4.20.6)(yaml@2.8.1)
+
+  packages/client:
+    dependencies:
+      ws:
+        specifier: ^8.13.0
+        version: 8.18.3
+    devDependencies:
+      '@types/ws':
+        specifier: ^8.18.1
+        version: 8.18.1
+      esbuild:
+        specifier: ^0.25.2
+        version: 0.25.11
+      rimraf:
+        specifier: ^5.0.0
+        version: 5.0.10
+      typescript:
+        specifier: ^5.2.2
+        version: 5.9.3
 
 packages:
 
