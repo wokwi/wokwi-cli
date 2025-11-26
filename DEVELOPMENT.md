@@ -111,3 +111,100 @@ If you fork the repository, you must enable GitHub Actions for your fork and add
 Set the `WOKWI_CLI_TOKEN` secret in your fork under `Settings` > `Secrets and variables` > `Actions` > `New repository secret`.
 
 Instructions for obtaining the `WOKWI_CLI_TOKEN` are in the `README.md` (see the Usage section).
+
+
+## Deployment
+
+Packages are published manually using `pnpm` tools. Before publishing, ensure you have:
+- Updated the version number in the package's `package.json`
+- Committed all changes
+- Built and tested the packages
+
+### Publishing wokwi-cli
+
+The `wokwi-cli` package includes binary executables for multiple platforms. To publish:
+
+1. Navigate to the package directory:
+   ```bash
+   cd packages/wokwi-cli
+   ```
+
+2. Clean previous builds:
+   ```bash
+   pnpm clean
+   ```
+
+3. Build the package:
+   ```bash
+   pnpm build
+   ```
+
+4. Package binaries for all platforms (optional, for verification):
+   This is used only in CI to produce platform-specific binaries, those are not published to npm.
+   ```bash
+   pnpm package
+   ```
+   This creates platform-specific binaries in `dist/bin/` using `pkg`.
+
+5. Create the tarball (optional, for verification):
+   ```bash
+   pnpm pack
+   ```
+
+6. Publish to npm:
+   ```bash
+   pnpm publish
+   ```
+
+### Publishing wokwi-client-js
+
+The `wokwi-client-js` package is a JavaScript library without binaries. To publish:
+
+1. Navigate to the package directory:
+   ```bash
+   cd packages/wokwi-client-js
+   ```
+
+2. Clean previous builds:
+   ```bash
+   pnpm clean
+   ```
+
+3. Build the package:
+   ```bash
+   pnpm build
+   ```
+
+4. Create the tarball (optional, for verification):
+   ```bash
+   pnpm pack
+   ```
+
+5. Publish to npm:
+   ```bash
+   pnpm publish
+   ```
+
+### Publishing both packages
+
+To publish both packages in sequence:
+
+```bash
+# Publish wokwi-client-js first (it's a dependency of wokwi-cli)
+cd packages/wokwi-client-js
+pnpm clean && pnpm build && pnpm publish
+
+# Then publish wokwi-cli
+cd ../wokwi-cli
+pnpm clean && pnpm build && pnpm publish
+```
+
+### Test GitHub Actions publishing (optional)
+GitHub Actions are set up to publish CLI tool compiled for multiple platforms. To test the publishing commands locally, you can run:
+
+```bash
+pnpm run build && pnpm --filter wokwi-cli run package
+```
+
+It should produce the platform-specific binaries in `packages/wokwi-cli/dist/bin/`.
+

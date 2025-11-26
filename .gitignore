@@ -8,3 +8,7 @@ playwright-report/
 test-results/
 test-project/
 wokwi-part-tests/
+
+# Ignore packed tarballs
+wokwi-cli-*.tgz
+wokwi-client-js-*.tgz
