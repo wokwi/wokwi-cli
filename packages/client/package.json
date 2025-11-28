@@ -1,6 +1,6 @@
 {
   "name": "@wokwi/client",
-  "version": "0.19.0",
+  "version": "0.19.1",
   "description": "Wokwi Client JS Library",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
