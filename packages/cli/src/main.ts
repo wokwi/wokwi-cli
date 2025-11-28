@@ -84,7 +84,7 @@ async function main() {
 
   if (args['--version'] === true || args['--short-version'] === true) {
     printVersion(args['--short-version']);
-    process.exit(0);
+    return;
   }
 
   if (!quiet) {
@@ -93,12 +93,12 @@ async function main() {
 
   if (args['--help']) {
     cliHelp();
-    process.exit(0);
+    return;
   }
 
   if (args._[0] === 'init') {
     await initProjectWizard(args._[1] ?? '.', { diagramFile });
-    process.exit(0);
+    return;
   }
 
   const token = process.env.WOKWI_CLI_TOKEN;
@@ -250,36 +250,6 @@ async function main() {
 
   const serialLogStream = serialLogFile ? createWriteStream(serialLogFile) : null;
 
-  if (expectText) {
-    expectEngine.expectTexts.push(expectText);
-    expectEngine.on('match', (text) => {
-      if (text !== expectText) {
-        return;
-      }
-
-      if (!quiet) {
-        console.log(chalkTemplate`\n\nExpected text found: {green "${expectText}"}`);
-        console.log('TEST PASSED.');
-      }
-      client.close();
-      process.exit(0);
-    });
-  }
-
-  if (failText) {
-    expectEngine.failTexts.push(failText);
-    expectEngine.on('fail', (text) => {
-      if (text !== failText) {
-        return;
-      }
-
-      console.error(chalkTemplate`\n\n{red Error:} Unexpected text found: {yellow "${text}"}`);
-      console.error('TEST FAILED.');
-      client.close();
-      process.exit(1);
-    });
-  }
-
   const transport = new WebSocketTransport(token, DEFAULT_SERVER, version, sha);
   const client = new APIClient(transport);
   client.onConnected = (hello) => {
@@ -309,8 +279,29 @@ async function main() {
     }
 
     const promises = [];
-    let screenshotPromise = Promise.resolve();
 
+    if (expectText) {
+      promises.push(
+        expectEngine.waitForMatch(expectText).then(() => {
+          if (!quiet) {
+            console.log(chalkTemplate`\n\nExpected text found: {green "${expectText}"}`);
+            console.log('TEST PASSED.');
+          }
+        }),
+      );
+    }
+    if (failText) {
+      void expectEngine.waitForMatch(failText).then(() => {
+        console.error(
+          chalkTemplate`\n\n{red Error:} Unexpected text found: {yellow "${failText}"}`,
+        );
+        console.error('TEST FAILED.');
+        client.close();
+        process.exit(1);
+      });
+    }
+
+    let screenshotPromise = Promise.resolve();
     if (screenshotPart != null && screenshotTime != null) {
       if (timeout && screenshotTime > timeout) {
         console.error(

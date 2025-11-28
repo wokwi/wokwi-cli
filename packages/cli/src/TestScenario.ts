@@ -82,7 +82,6 @@ export class TestScenario {
       await this.executeStep(client, step);
     }
     this.log(chalkTemplate`{green Scenario completed successfully}`);
-    process.exit(0);
   }
 
   async executeStep(client: APIClient, step: IStepDefinition) {
