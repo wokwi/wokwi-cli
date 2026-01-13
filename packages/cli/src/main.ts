@@ -1,21 +1,20 @@
-import arg from 'arg';
-import chalkTemplate from 'chalk-template';
-import { createWriteStream, existsSync, readFileSync, writeFileSync } from 'fs';
-import path, { join } from 'path';
-import YAML from 'yaml';
 import {
   APIClient,
   type APIEvent,
   type ChipsLogPayload,
   type SerialMonitorDataPayload,
 } from '@wokwi/client';
-import { WebSocketTransport } from './transport/WebSocketTransport.js';
-import { DEFAULT_SERVER } from './constants.js';
-import { createSerialMonitorWritable } from './utils/serialMonitorWritable.js';
+import arg from 'arg';
+import chalkTemplate from 'chalk-template';
+import { createWriteStream, existsSync, readFileSync, writeFileSync } from 'fs';
+import path, { join } from 'path';
+import YAML from 'yaml';
 import { ExpectEngine } from './ExpectEngine.js';
 import { SimulationTimeoutError } from './SimulationTimeoutError.js';
 import { TestScenario } from './TestScenario.js';
+import { handleChipCommand } from './chip/index.js';
 import { parseConfig } from './config.js';
+import { DEFAULT_SERVER } from './constants.js';
 import { idfProjectConfig } from './esp/idfProjectConfig.js';
 import { cliHelp } from './help.js';
 import { loadChips } from './loadChips.js';
@@ -23,12 +22,15 @@ import { WokwiMCPServer } from './mcp/MCPServer.js';
 import { initProjectWizard } from './project/initProjectWizard.js';
 import { readVersion } from './readVersion.js';
 import { DelayCommand } from './scenario/DelayCommand.js';
+import { ExpectChipOutputCommand } from './scenario/ExpectChipOutputCommand.js';
 import { ExpectPinCommand } from './scenario/ExpectPinCommand.js';
 import { SetControlCommand } from './scenario/SetControlCommand.js';
 import { TakeScreenshotCommand } from './scenario/TakeScreenshotCommand.js';
 import { WaitSerialCommand } from './scenario/WaitSerialCommand.js';
 import { WriteSerialCommand } from './scenario/WriteSerialCommand.js';
+import { WebSocketTransport } from './transport/WebSocketTransport.js';
 import { uploadFirmware } from './uploadFirmware.js';
+import { createSerialMonitorWritable } from './utils/serialMonitorWritable.js';
 const { sha, version } = readVersion();
 
 const millis = 1_000_000;
@@ -43,6 +45,24 @@ function printVersion(short = false) {
 }
 
 async function main() {
+  const rawArgv = process.argv.slice(2);
+
+  // Handle subcommands that need their own argument parsing before global parsing
+  // This prevents global flags like --help from being consumed before subcommands can process them
+  const firstArg = rawArgv[0];
+
+  if (firstArg === 'chip') {
+    // Check for global quiet flag before chip subcommand
+    const quietIndex = rawArgv.indexOf('-q');
+    const quietLongIndex = rawArgv.indexOf('--quiet');
+    const quiet = quietIndex !== -1 || quietLongIndex !== -1;
+    if (!quiet) {
+      printVersion();
+    }
+    await handleChipCommand(rawArgv.slice(1), quiet);
+    return;
+  }
+
   const args = arg(
     {
       '--help': Boolean,
@@ -64,7 +84,7 @@ async function main() {
       '-h': '--help',
       '-q': '--quiet',
     },
-    { argv: process.argv.slice(2) },
+    { argv: rawArgv, permissive: true },
   );
 
   const quiet = args['--quiet'];
@@ -239,6 +259,7 @@ async function main() {
     scenario = new TestScenario(YAML.parse(readFileSync(resolvedScenarioFile, 'utf-8')));
     scenario.registerCommands({
       delay: new DelayCommand(),
+      'expect-chip-output': new ExpectChipOutputCommand(),
       'expect-pin': new ExpectPinCommand(),
       'set-control': new SetControlCommand(),
       'wait-serial': new WaitSerialCommand(),

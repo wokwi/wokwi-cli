@@ -1,0 +1,8 @@
+[wokwi]
+version=1
+firmware='dummy-firmware'
+
+[[chip]]
+name = "test-chip"
+binary = "test-chip.chip.wasm"
+json = "test-chip.chip.json"

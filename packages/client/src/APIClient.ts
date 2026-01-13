@@ -171,6 +171,21 @@ export class APIClient {
     await pausePoint.promise;
   }
 
+  async waitForChipOutput(text: string) {
+    return new Promise<void>((resolve) => {
+      const listener = this.listen('chips:log', (event: any) => {
+        if (event.payload.message.includes(text)) {
+          listener();
+          resolve();
+        }
+      });
+      // Resume simulation if not running
+      if (!this._running) {
+        void this.simResume();
+      }
+    });
+  }
+
   async sendCommand<T = unknown>(command: string, params?: any) {
     return await new Promise<T>((resolve, reject) => {
       const id = this.lastId++;

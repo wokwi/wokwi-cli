@@ -9,8 +9,8 @@ export function cliHelp() {
   {bold OPTIONS}
       {green --help}, {green -h}                  Shows this help message and exit
       {green --quiet}, {green -q}                 Quiet: do not print version or status messages
-      {green --expect-text} <string>      Expect the given text in the output
-      {green --fail-text} <string>        Fail if the given text is found in the output
+      {green --expect-text} <string>      Expect the given text in the serial output
+      {green --fail-text} <string>        Fail if the given text is found in the serial output
       {green --elf} <path>                ELF file to simulate (default: read from wokwi.toml)
       {green --diagram-file} <path>       Path to the diagram.json file, relative to project root (default: diagram.json)
       {green --interactive}               Redirect stdin to the simulated serial port
@@ -25,6 +25,8 @@ export function cliHelp() {
   {bold COMMANDS}
 
       {green init} [path]                     Initialize a new Wokwi project
+      {green chip compile} <source...>        Compile a custom chip to WebAssembly
+      {green chip makefile} [source...]       Generate a Makefile for building custom chips
       {green mcp} [path]                      Start MCP server for AI integration (experimental)
 
   {bold PROJECT CONFIGURATION}

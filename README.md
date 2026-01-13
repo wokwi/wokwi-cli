@@ -50,6 +50,30 @@ This will ask you a few questions and will create the necessary files in the cur
 wokwi-cli init my-project
 ```
 
+## Custom Chip Compilation
+
+The CLI can compile custom chips written in C to WebAssembly for use in Wokwi simulations. It automatically downloads and installs the required WASI-SDK toolchain.
+
+```bash
+# Compile a custom chip
+wokwi-cli chip compile my-chip.c
+
+# Compile multiple source files
+wokwi-cli chip compile main.c utils.c -o chip.wasm
+
+# Generate a Makefile for advanced users
+wokwi-cli chip makefile -n my-chip main.c utils.c
+```
+
+The compiler will automatically:
+- Download and install WASI-SDK if not present (`~/.wokwi/wasi-sdk`)
+- Download `wokwi-api.h` if not present in the project directory
+- Generate a `.wasm` file ready for use in Wokwi
+
+You can also set the `WASI_SDK_PATH` environment variable to use a custom WASI-SDK installation.
+
+For more information about creating custom chips, see the [Custom Chips documentation](https://docs.wokwi.com/chips-api/getting-started).
+
 ## MCP Server
 
 The MCP server is an experimental feature that allows you to use the Wokwi CLI as a MCP server. You can use it to integrate the Wokwi CLI with AI agents.

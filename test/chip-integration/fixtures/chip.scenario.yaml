@@ -1,0 +1,6 @@
+name: 'Custom chip integration test'
+version: 1
+author: 'Uri Shaked'
+
+steps:
+  - expect-chip-output: 'TEST_CHIP_READY'
