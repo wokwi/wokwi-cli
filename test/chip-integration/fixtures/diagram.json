@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "author": "Wokwi Test",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "chip-test-chip",
+      "id": "chip1",
+      "top": 150,
+      "left": 200,
+      "attrs": {}
+    }
+  ],
+  "connections": []
+}

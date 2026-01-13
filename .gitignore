@@ -1,13 +1,16 @@
 dist
 node_modules
-wokwi.toml
 *.bin
-diagram.json
+*.wasm
 screenshot.png
 playwright-report/
 test-results/
 test-project/
+test-chip-project/
 wokwi-part-tests/
+
+# Downloaded header file (auto-downloaded by chip compile)
+test/chip-integration/fixtures/wokwi-api.h
 
 # Ignore packed tarballs
 wokwi-cli-*.tgz
