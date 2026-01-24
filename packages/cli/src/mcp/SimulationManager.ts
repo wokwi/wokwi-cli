@@ -1,11 +1,11 @@
+import { APIClient, SerialMonitorDataPayload, type APIEvent } from '@wokwi/client';
 import { existsSync, readFileSync } from 'fs';
 import path from 'path';
-import { APIClient, SerialMonitorDataPayload, type APIEvent } from '@wokwi/client';
-import { WebSocketTransport } from '../transport/WebSocketTransport.js';
-import { DEFAULT_SERVER } from '../constants.js';
 import { parseConfig } from '../config.js';
+import { DEFAULT_SERVER } from '../constants.js';
 import { loadChips } from '../loadChips.js';
 import { readVersion } from '../readVersion.js';
+import { WebSocketTransport } from '../transport/WebSocketTransport.js';
 import { uploadFirmware } from '../uploadFirmware.js';
 
 export interface SimulationStatus {

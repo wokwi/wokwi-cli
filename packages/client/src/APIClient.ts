@@ -8,9 +8,9 @@ import type {
   APISimStartParams,
   PinReadResponse,
 } from './APITypes.js';
+import { base64ToByteArray, byteArrayToBase64 } from './base64.js';
 import { PausePoint, type PausePointParams } from './PausePoint.js';
 import { ITransport } from './transport/ITransport.js';
-import { base64ToByteArray, byteArrayToBase64 } from './base64.js';
 
 export class APIClient {
   private lastId = 0;

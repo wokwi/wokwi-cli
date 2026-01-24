@@ -2,14 +2,14 @@ import { Server as McpServer } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
   CallToolRequestSchema,
-  ListToolsRequestSchema,
   ListResourcesRequestSchema,
+  ListToolsRequestSchema,
   ReadResourceRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { readVersion } from '../readVersion.js';
 import { SimulationManager } from './SimulationManager.js';
-import { WokwiMCPTools } from './WokwiMCPTools.js';
 import { WokwiMCPResources } from './WokwiMCPResources.js';
+import { WokwiMCPTools } from './WokwiMCPTools.js';
 
 export interface MCPServerOptions {
   rootDir: string;

@@ -1,7 +1,7 @@
+import { base64ToByteArray, type APIClient } from '@wokwi/client';
 import { readFile, writeFile } from 'fs/promises';
 import path from 'path';
 import { PNG } from 'pngjs';
-import { base64ToByteArray, type APIClient } from '@wokwi/client';
 import { type TestScenario } from '../TestScenario.js';
 
 export interface ITakeScreenshotParams {

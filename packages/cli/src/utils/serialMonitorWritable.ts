@@ -1,6 +1,6 @@
 import type { APIClient } from '@wokwi/client';
-import { Writable } from 'stream';
 import { Buffer } from 'buffer';
+import { Writable } from 'stream';
 
 /**
  * Creates a Node.js Writable stream that forwards data to the serial monitor.

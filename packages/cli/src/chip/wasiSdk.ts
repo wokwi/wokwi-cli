@@ -4,11 +4,11 @@ import {
   existsSync,
   mkdirSync,
   readFileSync,
+  renameSync,
   rmSync,
   unlinkSync,
-  renameSync,
 } from 'fs';
-import { homedir, platform, arch } from 'os';
+import { arch, homedir, platform } from 'os';
 import { join } from 'path';
 import { pipeline } from 'stream/promises';
 import { extract } from 'tar';

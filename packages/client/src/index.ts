@@ -8,24 +8,24 @@ export { MessagePortTransport } from './transport/MessagePortTransport.js';
 // Pause Point
 export { PausePoint } from './PausePoint.js';
 export type {
-  PausePointType,
-  PausePointParams,
-  ITimePausePoint,
   ISerialBytesPausePoint,
+  ITimePausePoint,
+  PausePointParams,
+  PausePointType,
 } from './PausePoint.js';
 
 // API Types
 export type {
-  APIError,
-  APIHello,
   APICommand,
-  APIResponse,
+  APIError,
   APIEvent,
+  APIHello,
+  APIResponse,
   APIResultError,
   APISimStartParams,
-  SerialMonitorDataPayload,
   ChipsLogPayload,
   PinReadResponse,
+  SerialMonitorDataPayload,
 } from './APITypes.js';
 
 // Utilities

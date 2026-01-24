@@ -1,6 +1,6 @@
 import { execSync } from 'child_process';
-import fs from 'node:fs/promises';
 import fsSync from 'node:fs';
+import fs from 'node:fs/promises';
 import path from 'node:path';
 
 const TEST_PROJECT_DIR = 'test-project';
