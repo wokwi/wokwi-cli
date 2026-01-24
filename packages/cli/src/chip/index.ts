@@ -1,4 +1,3 @@
-export { chipCommandHelp, handleChipCommand } from './chipCommand.js';
 export { chipCompile, type ChipCompileOptions } from './chipCompile.js';
 export { chipMakefile, type ChipMakefileOptions } from './chipMakefile.js';
 export {
