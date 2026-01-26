@@ -7,6 +7,7 @@ import type {
   APIResultError,
   APISimStartParams,
   PinReadResponse,
+  VCDReadResponse,
 } from './APITypes.js';
 import { base64ToByteArray, byteArrayToBase64 } from './base64.js';
 import { PausePoint, type PausePointParams } from './PausePoint.js';
@@ -129,6 +130,10 @@ export class APIClient {
       part: partId,
       pin,
     });
+  }
+
+  async readVCD() {
+    return await this.sendCommand<VCDReadResponse>('sim:read-vcd');
   }
 
   async addPausePoint(params: PausePointParams, resume = false) {

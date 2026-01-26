@@ -26,6 +26,7 @@ export type {
   ChipsLogPayload,
   PinReadResponse,
   SerialMonitorDataPayload,
+  VCDReadResponse,
 } from './APITypes.js';
 
 // Utilities

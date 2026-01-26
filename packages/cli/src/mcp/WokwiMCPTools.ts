@@ -133,6 +133,20 @@ export class WokwiMCPTools {
           required: ['partId'],
         },
       },
+      {
+        name: 'wokwi_export_vcd',
+        description: 'Export logic analyzer data as VCD (Value Change Dump) file',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            outputPath: {
+              type: 'string',
+              description: 'Path where VCD file will be saved',
+            },
+          },
+          required: ['outputPath'],
+        },
+      },
     ];
   }
 
@@ -224,6 +238,21 @@ export class WokwiMCPTools {
               {
                 type: 'text',
                 text: `Screenshot taken (base64): ${screenshot.substring(0, 100)}...`,
+              },
+            ],
+          };
+        }
+
+        case 'wokwi_export_vcd': {
+          const result = await this.simulationManager.exportVCD(args.outputPath);
+          return {
+            content: [
+              {
+                type: 'text',
+                text:
+                  result.sampleCount > 0
+                    ? `VCD exported to: ${args.outputPath} (${result.sampleCount} samples, ${result.channelCount} channels)`
+                    : 'No logic analyzer data to export',
               },
             ],
           };

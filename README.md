@@ -36,6 +36,14 @@ cd esp-idf-hello-world
 wokwi-cli .
 ```
 
+### Logic Analyzer VCD Export
+
+If your diagram includes a [logic analyzer](https://docs.wokwi.com/parts/wokwi-logic-analyzer), you can export the captured signals to a VCD file:
+
+```bash
+wokwi-cli . --vcd-file logic.vcd
+```
+
 ## Configuration Wizard
 
 To generate a `wokwi.toml` and a default `diagram.json` files for your project, run:

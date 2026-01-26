@@ -46,6 +46,7 @@ interface SimulateOptions {
   screenshotFile?: string;
   timeoutExitCode?: string;
   quiet?: boolean;
+  vcdFile?: string;
 }
 
 export function simulateCommand(program: Command): void {
@@ -64,6 +65,7 @@ export function simulateCommand(program: Command): void {
     .option('--screenshot-file <path>', 'Screenshot output file', 'screenshot.png')
     .option('--timeout-exit-code <code>', 'Exit code on timeout', '42')
     .option('-q, --quiet', 'Suppress status messages')
+    .option('--vcd-file <path>', 'Output path for VCD (logic analyzer) file')
     .action((projectPath: string, options: SimulateOptions, command: Command) => {
       return runSimulation(projectPath, options, command);
     });
@@ -96,6 +98,7 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
   const screenshotFile = options.screenshotFile ?? 'screenshot.png';
   const timeoutExitCode = parseInt(options.timeoutExitCode ?? '42', 10);
   const timeoutNanos = timeout * millis;
+  const vcdFile = options.vcdFile;
 
   const token = requireToken();
 
@@ -351,6 +354,23 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
     // wait for the screenshot to be saved, if any
     await screenshotPromise;
   } finally {
+    // Export VCD if requested
+    if (vcdFile) {
+      try {
+        const result = await client.readVCD();
+        if (result.sampleCount > 0) {
+          writeFileSync(vcdFile, result.vcd);
+          if (!quiet) {
+            console.log(`VCD file written to: ${vcdFile}`);
+          }
+        } else if (!quiet) {
+          console.log('No logic analyzer data to export');
+        }
+      } catch (err) {
+        console.error('Error exporting VCD:', (err as Error).message);
+      }
+    }
+
     client.close();
   }
 }

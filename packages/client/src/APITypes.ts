@@ -59,3 +59,9 @@ export interface PinReadResponse {
   value: number;
   voltage: number;
 }
+
+export interface VCDReadResponse {
+  vcd: string;
+  channelCount: number;
+  sampleCount: number;
+}

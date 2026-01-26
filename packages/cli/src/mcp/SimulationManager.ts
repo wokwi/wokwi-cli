@@ -1,5 +1,10 @@
-import { APIClient, SerialMonitorDataPayload, type APIEvent } from '@wokwi/client';
-import { existsSync, readFileSync } from 'fs';
+import {
+  APIClient,
+  SerialMonitorDataPayload,
+  type APIEvent,
+  type VCDReadResponse,
+} from '@wokwi/client';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 import { parseConfig } from '../config.js';
 import { DEFAULT_SERVER } from '../constants.js';
@@ -207,6 +212,18 @@ export class SimulationManager {
 
     const result = await this.client.framebufferRead(partId);
     return result.png;
+  }
+
+  async exportVCD(outputPath: string): Promise<VCDReadResponse> {
+    if (!this.client) {
+      throw new Error('Not connected to simulation');
+    }
+
+    const result = await this.client.readVCD();
+    if (result.sampleCount > 0) {
+      writeFileSync(outputPath, result.vcd);
+    }
+    return result;
   }
 
   async cleanup(): Promise<void> {
