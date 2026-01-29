@@ -1,5 +1,11 @@
 import { Command } from 'commander';
-import { chipCommand, initCommand, mcpCommand, simulateCommand } from './commands/index.js';
+import {
+  chipCommand,
+  initCommand,
+  lintCommand,
+  mcpCommand,
+  simulateCommand,
+} from './commands/index.js';
 import { readVersion } from './readVersion.js';
 import { handleUnknownCommand } from './utils/didYouMean.js';
 
@@ -36,6 +42,7 @@ export function createCLI(): Command {
 
   // Register other commands
   initCommand(program);
+  lintCommand(program);
   chipCommand(program);
   mcpCommand(program);
 

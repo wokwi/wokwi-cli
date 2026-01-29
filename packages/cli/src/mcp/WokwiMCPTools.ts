@@ -1,8 +1,20 @@
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
+import type { LintResult } from '@wokwi/diagram-lint';
 import type { SimulationManager } from './SimulationManager.js';
 
+export interface WokwiMCPToolsOptions {
+  getLintWarnings?: () => LintResult | null;
+}
+
 export class WokwiMCPTools {
-  constructor(private readonly simulationManager: SimulationManager) {}
+  private readonly getLintWarnings?: () => LintResult | null;
+
+  constructor(
+    private readonly simulationManager: SimulationManager,
+    options?: WokwiMCPToolsOptions,
+  ) {
+    this.getLintWarnings = options?.getLintWarnings;
+  }
 
   listTools(): Tool[] {
     return [
@@ -156,11 +168,23 @@ export class WokwiMCPTools {
   ): Promise<{ content: Array<{ type: 'text'; text: string }> }> {
     try {
       switch (name) {
-        case 'wokwi_start_simulation':
+        case 'wokwi_start_simulation': {
           await this.simulationManager.startSimulation(args.projectPath);
+
+          let responseText = 'Simulation started successfully';
+          const warnings = this.getLintWarnings?.();
+          if (warnings && warnings.stats.warnings > 0) {
+            const warningList = warnings.issues
+              .filter((i) => i.severity === 'warning')
+              .map((i) => `- [${i.rule}] ${i.message}`)
+              .join('\n');
+            responseText += `\n\nDiagram warnings:\n${warningList}`;
+          }
+
           return {
-            content: [{ type: 'text', text: 'Simulation started successfully' }],
+            content: [{ type: 'text', text: responseText }],
           };
+        }
 
         case 'wokwi_stop_simulation':
           await this.simulationManager.stopSimulation();

@@ -20,7 +20,7 @@ export type {
 
 // Registry
 export { partDefinitions } from './registry/part-definitions.js';
-export { PartRegistry } from './registry/part-registry.js';
+export { PartRegistry, REMOTE_BOARDS_URL } from './registry/part-registry.js';
 
 // Rules
 export {

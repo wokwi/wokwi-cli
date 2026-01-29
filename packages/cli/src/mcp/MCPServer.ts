@@ -6,6 +6,9 @@ import {
   ListToolsRequestSchema,
   ReadResourceRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
+import { DiagramLinter, type LintResult } from '@wokwi/diagram-lint';
+import { existsSync, readFileSync } from 'fs';
+import path from 'path';
 import { readVersion } from '../readVersion.js';
 import { SimulationManager } from './SimulationManager.js';
 import { WokwiMCPResources } from './WokwiMCPResources.js';
@@ -22,6 +25,7 @@ export class WokwiMCPServer {
   private readonly simulationManager: SimulationManager;
   private readonly tools: WokwiMCPTools;
   private readonly resources: WokwiMCPResources;
+  private lintWarnings: LintResult | null = null;
 
   constructor(private readonly options: MCPServerOptions) {
     const { version } = readVersion();
@@ -40,7 +44,9 @@ export class WokwiMCPServer {
     );
 
     this.simulationManager = new SimulationManager(options.rootDir, options.token, options.quiet);
-    this.tools = new WokwiMCPTools(this.simulationManager);
+    this.tools = new WokwiMCPTools(this.simulationManager, {
+      getLintWarnings: () => this.getLintWarnings(),
+    });
     this.resources = new WokwiMCPResources(options.rootDir);
 
     this.setupHandlers();
@@ -65,12 +71,40 @@ export class WokwiMCPServer {
   }
 
   async start() {
+    // Validate diagram before starting
+    const diagramPath = path.join(this.options.rootDir, 'diagram.json');
+    if (existsSync(diagramPath)) {
+      const linter = new DiagramLinter();
+      const diagram = readFileSync(diagramPath, 'utf8');
+      const result = linter.lintJSON(diagram);
+
+      if (result.stats.errors > 0) {
+        const errorMessages = result.issues
+          .filter((i) => i.severity === 'error')
+          .map((i) => `[${i.rule}] ${i.message}`)
+          .join('\n');
+        throw new Error(`Diagram lint errors:\n${errorMessages}`);
+      }
+
+      // Store warnings to include in start_simulation response
+      if (result.stats.warnings > 0) {
+        this.lintWarnings = result;
+      }
+    }
+
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
 
     if (!this.options.quiet) {
       console.error('Wokwi MCP Server started');
     }
+  }
+
+  /**
+   * Get lint warnings from startup validation
+   */
+  getLintWarnings(): LintResult | null {
+    return this.lintWarnings;
   }
 
   async stop() {
