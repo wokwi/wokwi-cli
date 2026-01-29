@@ -1,0 +1,16 @@
+{
+  "type": "wokwi-hub75-matrix",
+  "pins": ["R1", "G1", "B1", "R2", "G2", "B2", "A", "B", "C", "D", "E", "CLK", "LAT", "OE", "GND"],
+  "attrs": [
+    {
+      "name": "rows",
+      "type": "number"
+    },
+    {
+      "name": "cols",
+      "type": "number"
+    }
+  ],
+  "documented": false,
+  "category": "displays"
+}

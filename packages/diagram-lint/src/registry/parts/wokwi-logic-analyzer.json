@@ -1,0 +1,28 @@
+{
+  "type": "wokwi-logic-analyzer",
+  "pins": ["D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7", "GND"],
+  "attrs": [
+    {
+      "name": "bufferSize",
+      "type": "number"
+    },
+    {
+      "name": "filename",
+      "type": "string"
+    },
+    {
+      "name": "triggerPin",
+      "type": "string"
+    },
+    {
+      "name": "triggerMode",
+      "type": "string"
+    },
+    {
+      "name": "triggerLevel",
+      "type": "string"
+    }
+  ],
+  "documented": true,
+  "category": "communication"
+}

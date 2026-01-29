@@ -1,0 +1,17 @@
+{
+  "type": "wokwi-membrane-keypad",
+  "pins": ["R1", "R2", "R3", "R4", "C1", "C2", "C3", "C4"],
+  "attrs": [
+    {
+      "name": "columns",
+      "type": "string",
+      "validValues": ["3", "4"]
+    },
+    {
+      "name": "keys",
+      "type": "string"
+    }
+  ],
+  "documented": true,
+  "category": "input"
+}

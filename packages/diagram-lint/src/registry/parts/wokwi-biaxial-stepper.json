@@ -1,0 +1,16 @@
+{
+  "type": "wokwi-biaxial-stepper",
+  "pins": ["A1-", "A1+", "B1+", "B1-", "A2-", "A2+", "B2+", "B2-"],
+  "attrs": [
+    {
+      "name": "innerHand",
+      "type": "string"
+    },
+    {
+      "name": "outerHand",
+      "type": "string"
+    }
+  ],
+  "documented": true,
+  "category": "motors"
+}

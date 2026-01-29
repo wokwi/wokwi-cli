@@ -1,0 +1,7 @@
+{
+  "type": "board-epaper-2in9",
+  "pins": ["BUSY", "CLK", "CS", "DC", "DIN", "GND", "RST", "VCC"],
+  "documented": false,
+  "isBoard": true,
+  "category": "boards"
+}

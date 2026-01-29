@@ -1,0 +1,30 @@
+{
+  "type": "board-notecarrier-a",
+  "pins": [
+    "ATTN",
+    "AUX1",
+    "AUX2",
+    "AUX3",
+    "AUX4",
+    "AUXEN",
+    "AUXRX",
+    "AUXTX",
+    "BAT",
+    "EN",
+    "GND",
+    "MAIN",
+    "NC1",
+    "NC2",
+    "RST",
+    "RX",
+    "SCL",
+    "SDA",
+    "TX",
+    "V+",
+    "VIO",
+    "VUSB"
+  ],
+  "documented": false,
+  "isBoard": true,
+  "category": "boards"
+}

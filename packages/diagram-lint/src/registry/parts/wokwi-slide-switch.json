@@ -1,0 +1,12 @@
+{
+  "type": "wokwi-slide-switch",
+  "pins": ["1", "2", "3"],
+  "attrs": [
+    {
+      "name": "bounce",
+      "type": "string"
+    }
+  ],
+  "documented": true,
+  "category": "input"
+}

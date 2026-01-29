@@ -1,0 +1,6 @@
+{
+  "type": "wokwi-splendida",
+  "pins": ["DIN", "VDD", "VSS", "DOUT"],
+  "documented": false,
+  "category": "leds"
+}

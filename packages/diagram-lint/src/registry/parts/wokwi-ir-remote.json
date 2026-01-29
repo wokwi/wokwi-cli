@@ -1,0 +1,12 @@
+{
+  "type": "wokwi-ir-remote",
+  "pins": [],
+  "attrs": [
+    {
+      "name": "key",
+      "type": "string"
+    }
+  ],
+  "documented": true,
+  "category": "communication"
+}

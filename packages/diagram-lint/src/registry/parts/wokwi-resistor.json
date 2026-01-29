@@ -1,0 +1,12 @@
+{
+  "type": "wokwi-resistor",
+  "pins": ["1", "2"],
+  "attrs": [
+    {
+      "name": "value",
+      "type": "string"
+    }
+  ],
+  "documented": true,
+  "category": "passive"
+}

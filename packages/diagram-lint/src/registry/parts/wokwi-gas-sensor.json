@@ -1,0 +1,16 @@
+{
+  "type": "wokwi-gas-sensor",
+  "pins": ["VCC", "GND", "DOUT", "AOUT"],
+  "attrs": [
+    {
+      "name": "ppm",
+      "type": "number"
+    },
+    {
+      "name": "threshold",
+      "type": "number"
+    }
+  ],
+  "documented": true,
+  "category": "sensors"
+}

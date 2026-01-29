@@ -1,0 +1,12 @@
+{
+  "type": "wokwi-analog-joystick",
+  "pins": ["VCC", "VERT", "HORZ", "SEL", "GND"],
+  "attrs": [
+    {
+      "name": "bounce",
+      "type": "string"
+    }
+  ],
+  "documented": true,
+  "category": "input"
+}

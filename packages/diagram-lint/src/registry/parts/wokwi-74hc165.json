@@ -1,0 +1,23 @@
+{
+  "type": "wokwi-74hc165",
+  "pins": [
+    "PL",
+    "CP",
+    "D4",
+    "D5",
+    "D6",
+    "D7",
+    "Q7_N",
+    "GND",
+    "Q7",
+    "DS",
+    "D0",
+    "D1",
+    "D2",
+    "D3",
+    "CE",
+    "VCC"
+  ],
+  "documented": true,
+  "category": "logic"
+}

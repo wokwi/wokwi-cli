@@ -1,0 +1,17 @@
+{
+  "type": "wokwi-buzzer",
+  "pins": ["1", "2"],
+  "attrs": [
+    {
+      "name": "volume",
+      "type": "number"
+    },
+    {
+      "name": "mode",
+      "type": "string",
+      "validValues": ["smooth", "accurate"]
+    }
+  ],
+  "documented": true,
+  "category": "passive"
+}

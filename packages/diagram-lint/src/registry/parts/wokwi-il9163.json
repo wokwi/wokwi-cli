@@ -1,0 +1,6 @@
+{
+  "type": "wokwi-il9163",
+  "pins": ["D/C", "CS", "SDA", "SCL", "RST", "LED", "VCC", "GND"],
+  "documented": false,
+  "category": "displays"
+}

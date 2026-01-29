@@ -1,0 +1,12 @@
+{
+  "type": "wokwi-clock-generator",
+  "pins": ["CLK", "GND"],
+  "attrs": [
+    {
+      "name": "frequency",
+      "type": "number"
+    }
+  ],
+  "documented": false,
+  "category": "timing"
+}

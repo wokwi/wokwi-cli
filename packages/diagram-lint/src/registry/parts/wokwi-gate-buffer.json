@@ -1,0 +1,6 @@
+{
+  "type": "wokwi-gate-buffer",
+  "pins": ["IN", "OUT"],
+  "documented": false,
+  "category": "logic"
+}

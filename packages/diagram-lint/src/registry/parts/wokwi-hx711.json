@@ -1,0 +1,17 @@
+{
+  "type": "wokwi-hx711",
+  "pins": ["GND", "DT", "SCK", "VCC"],
+  "attrs": [
+    {
+      "name": "type",
+      "type": "string",
+      "validValues": ["50kg", "5kg", "gauge"]
+    },
+    {
+      "name": "weight",
+      "type": "number"
+    }
+  ],
+  "documented": true,
+  "category": "sensors"
+}

@@ -1,0 +1,6 @@
+{
+  "type": "wokwi-ky-040",
+  "pins": ["CLK", "DT", "SW", "VCC", "GND"],
+  "documented": true,
+  "category": "input"
+}

@@ -1,0 +1,23 @@
+{
+  "type": "board-xiao-esp32-c6",
+  "pins": [
+    "3V3",
+    "5V",
+    "$gpio15",
+    "D0",
+    "D1",
+    "D10",
+    "D2",
+    "D3",
+    "D4",
+    "D5",
+    "D6",
+    "D7",
+    "D8",
+    "D9",
+    "GND"
+  ],
+  "documented": false,
+  "isBoard": true,
+  "category": "boards"
+}

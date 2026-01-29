@@ -1,0 +1,21 @@
+{
+  "type": "wokwi-pir-motion-sensor",
+  "pins": ["VCC", "OUT", "GND"],
+  "attrs": [
+    {
+      "name": "delayTime",
+      "type": "number"
+    },
+    {
+      "name": "inhibitTime",
+      "type": "number"
+    },
+    {
+      "name": "retrigger",
+      "type": "string",
+      "validValues": ["yes", "no"]
+    }
+  ],
+  "documented": true,
+  "category": "sensors"
+}

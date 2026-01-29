@@ -1,0 +1,6 @@
+{
+  "type": "wokwi-microphone",
+  "pins": ["1", "2"],
+  "documented": false,
+  "category": "sensors"
+}

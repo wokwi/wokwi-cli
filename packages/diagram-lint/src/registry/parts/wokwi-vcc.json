@@ -1,0 +1,12 @@
+{
+  "type": "wokwi-vcc",
+  "pins": ["VCC"],
+  "attrs": [
+    {
+      "name": "voltage",
+      "type": "number"
+    }
+  ],
+  "documented": false,
+  "category": "power"
+}

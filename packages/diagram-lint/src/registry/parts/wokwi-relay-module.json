@@ -1,0 +1,13 @@
+{
+  "type": "wokwi-relay-module",
+  "pins": ["IN", "NO", "NC", "COM", "VCC", "GND"],
+  "attrs": [
+    {
+      "name": "transistor",
+      "type": "string",
+      "validValues": ["npn", "pnp"]
+    }
+  ],
+  "documented": true,
+  "category": "motors"
+}

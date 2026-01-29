@@ -1,0 +1,6 @@
+{
+  "type": "wokwi-tv",
+  "pins": ["IN", "SYNC", "GND"],
+  "documented": true,
+  "category": "displays"
+}

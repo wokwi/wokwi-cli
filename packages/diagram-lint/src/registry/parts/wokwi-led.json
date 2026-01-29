@@ -1,0 +1,33 @@
+{
+  "type": "wokwi-led",
+  "pins": ["A", "C"],
+  "attrs": [
+    {
+      "name": "color",
+      "type": "string",
+      "validValues": ["red", "green", "blue", "yellow", "orange", "white", "purple", "cyan"]
+    },
+    {
+      "name": "lightColor",
+      "type": "string"
+    },
+    {
+      "name": "label",
+      "type": "string"
+    },
+    {
+      "name": "gamma",
+      "type": "number"
+    },
+    {
+      "name": "flip",
+      "type": "string"
+    },
+    {
+      "name": "fps",
+      "type": "number"
+    }
+  ],
+  "documented": true,
+  "category": "leds"
+}

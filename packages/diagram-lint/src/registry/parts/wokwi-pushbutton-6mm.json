@@ -1,0 +1,20 @@
+{
+  "type": "wokwi-pushbutton-6mm",
+  "pins": ["1.l", "2.l", "1.r", "2.r"],
+  "attrs": [
+    {
+      "name": "color",
+      "type": "string"
+    },
+    {
+      "name": "bounce",
+      "type": "string"
+    },
+    {
+      "name": "key",
+      "type": "string"
+    }
+  ],
+  "documented": true,
+  "category": "input"
+}

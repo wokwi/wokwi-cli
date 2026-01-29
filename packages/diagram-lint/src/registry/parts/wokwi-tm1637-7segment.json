@@ -1,0 +1,12 @@
+{
+  "type": "wokwi-tm1637-7segment",
+  "pins": ["CLK", "DIO", "GND", "VCC"],
+  "attrs": [
+    {
+      "name": "color",
+      "type": "string"
+    }
+  ],
+  "documented": true,
+  "category": "displays"
+}

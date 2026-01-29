@@ -1,0 +1,6 @@
+{
+  "type": "wokwi-flip-flop-sr",
+  "pins": ["S", "CLK", "R", "Q", "NOTQ"],
+  "documented": false,
+  "category": "logic"
+}

@@ -1,0 +1,43 @@
+{
+  "name": "@wokwi/diagram-lint",
+  "version": "0.1.0",
+  "description": "Linter for Wokwi diagram.json files",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "sync:boards": "node scripts/sync-boards.mjs",
+    "build:parts": "node scripts/build-parts.mjs",
+    "prebuild": "npm run build:parts",
+    "build": "tsc",
+    "clean": "rimraf dist",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "test": "vitest --run",
+    "test:watch": "vitest --watch"
+  },
+  "keywords": [
+    "wokwi",
+    "diagram",
+    "linter",
+    "validation",
+    "electronics",
+    "circuit"
+  ],
+  "author": "Uri Shaked",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wokwi/wokwi-cli"
+  },
+  "devDependencies": {
+    "rimraf": "^5.0.0",
+    "typescript": "^5.2.2",
+    "vitest": "^3.0.5"
+  }
+}

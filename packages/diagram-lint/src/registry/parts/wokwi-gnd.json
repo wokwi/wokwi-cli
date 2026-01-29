@@ -1,0 +1,6 @@
+{
+  "type": "wokwi-gnd",
+  "pins": ["GND"],
+  "documented": false,
+  "category": "power"
+}

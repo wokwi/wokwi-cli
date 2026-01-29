@@ -1,0 +1,6 @@
+{
+  "type": "wokwi-ir-receiver",
+  "pins": ["VCC", "DAT", "GND"],
+  "documented": true,
+  "category": "communication"
+}

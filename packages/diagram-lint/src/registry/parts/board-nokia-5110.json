@@ -1,0 +1,24 @@
+{
+  "type": "board-nokia-5110",
+  "pins": [
+    "BL",
+    "BL.2",
+    "CE",
+    "CE.2",
+    "CLK",
+    "CLK.2 ",
+    "DC",
+    "DC.2",
+    "DIN",
+    "DIN.2 ",
+    "GND",
+    "GND.2 ",
+    "RST",
+    "RST.2 ",
+    "VCC",
+    "VCC.2 "
+  ],
+  "documented": false,
+  "isBoard": true,
+  "category": "boards"
+}

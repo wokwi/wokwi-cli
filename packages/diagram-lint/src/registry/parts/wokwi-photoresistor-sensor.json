@@ -1,0 +1,24 @@
+{
+  "type": "wokwi-photoresistor-sensor",
+  "pins": ["VCC", "GND", "DO", "AO"],
+  "attrs": [
+    {
+      "name": "lux",
+      "type": "number"
+    },
+    {
+      "name": "threshold",
+      "type": "number"
+    },
+    {
+      "name": "rl10",
+      "type": "number"
+    },
+    {
+      "name": "gamma",
+      "type": "number"
+    }
+  ],
+  "documented": true,
+  "category": "sensors"
+}

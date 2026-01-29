@@ -1,0 +1,7 @@
+{
+  "type": "board-grove-oled-sh1107",
+  "pins": ["GND.1", "SCL.1", "SDA", "VCC"],
+  "documented": true,
+  "isBoard": true,
+  "category": "boards"
+}

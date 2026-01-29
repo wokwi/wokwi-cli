@@ -1,0 +1,24 @@
+{
+  "type": "wokwi-apa102-matrix",
+  "pins": ["DI", "CI", "VCC", "GND", "DO", "CO"],
+  "attrs": [
+    {
+      "name": "rows",
+      "type": "number"
+    },
+    {
+      "name": "cols",
+      "type": "number"
+    },
+    {
+      "name": "matrixLayout",
+      "type": "string"
+    },
+    {
+      "name": "matrixBrightness",
+      "type": "number"
+    }
+  ],
+  "documented": false,
+  "category": "leds"
+}

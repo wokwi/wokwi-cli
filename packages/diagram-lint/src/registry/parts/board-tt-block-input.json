@@ -1,0 +1,28 @@
+{
+  "type": "board-tt-block-input",
+  "pins": [
+    "CLK",
+    "EXTCLK",
+    "EXTIN0",
+    "EXTIN1",
+    "EXTIN2",
+    "EXTIN3",
+    "EXTIN4",
+    "EXTIN5",
+    "EXTIN6",
+    "EXTIN7",
+    "EXTRST_N",
+    "IN0",
+    "IN1",
+    "IN2",
+    "IN3",
+    "IN4",
+    "IN5",
+    "IN6",
+    "IN7",
+    "RST_N"
+  ],
+  "documented": false,
+  "isBoard": true,
+  "category": "boards"
+}

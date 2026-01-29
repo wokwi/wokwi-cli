@@ -1,0 +1,17 @@
+{
+  "type": "wokwi-rgb-led",
+  "pins": ["COM", "R", "G", "B"],
+  "attrs": [
+    {
+      "name": "common",
+      "type": "string",
+      "validValues": ["anode", "cathode"]
+    },
+    {
+      "name": "fps",
+      "type": "number"
+    }
+  ],
+  "documented": true,
+  "category": "leds"
+}

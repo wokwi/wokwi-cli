@@ -1,0 +1,7 @@
+{
+  "type": "board-lm35",
+  "pins": ["GND", "OUT", "VCC"],
+  "documented": false,
+  "isBoard": true,
+  "category": "boards"
+}

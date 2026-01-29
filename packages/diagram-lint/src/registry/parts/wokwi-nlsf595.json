@@ -1,0 +1,23 @@
+{
+  "type": "wokwi-nlsf595",
+  "pins": [
+    "QA",
+    "QB",
+    "QC",
+    "QD",
+    "QE",
+    "QF",
+    "QG",
+    "QH",
+    "GND",
+    "SQH",
+    "SCLR",
+    "SCK",
+    "RCK",
+    "OE",
+    "SI",
+    "VCC"
+  ],
+  "documented": true,
+  "category": "logic"
+}

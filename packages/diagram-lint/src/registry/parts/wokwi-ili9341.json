@@ -1,0 +1,20 @@
+{
+  "type": "wokwi-ili9341",
+  "pins": ["D/C", "CS", "SCK", "MOSI", "MISO", "RST", "LED", "VCC", "GND"],
+  "attrs": [
+    {
+      "name": "flipHorizontal",
+      "type": "boolean"
+    },
+    {
+      "name": "flipVertical",
+      "type": "boolean"
+    },
+    {
+      "name": "swapXY",
+      "type": "boolean"
+    }
+  ],
+  "documented": true,
+  "category": "displays"
+}

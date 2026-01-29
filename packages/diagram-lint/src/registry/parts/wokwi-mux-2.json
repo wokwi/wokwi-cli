@@ -1,0 +1,6 @@
+{
+  "type": "wokwi-mux-2",
+  "pins": ["A", "B", "SEL", "OUT"],
+  "documented": false,
+  "category": "logic"
+}

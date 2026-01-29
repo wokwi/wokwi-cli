@@ -1,0 +1,54 @@
+{
+  "type": "wokwi-lcd1602",
+  "pins": [
+    "A",
+    "K",
+    "V0",
+    "RS",
+    "RW",
+    "E",
+    "D0",
+    "D1",
+    "D2",
+    "D3",
+    "D4",
+    "D5",
+    "D6",
+    "D7",
+    "VSS",
+    "VDD",
+    "GND",
+    "VCC",
+    "SCL",
+    "SDA"
+  ],
+  "attrs": [
+    {
+      "name": "i2cAddress",
+      "type": "string"
+    },
+    {
+      "name": "i2c-address",
+      "type": "string"
+    },
+    {
+      "name": "pins",
+      "type": "string",
+      "validValues": ["full", "i2c"]
+    },
+    {
+      "name": "variant",
+      "type": "string"
+    },
+    {
+      "name": "color",
+      "type": "string"
+    },
+    {
+      "name": "background",
+      "type": "string"
+    }
+  ],
+  "documented": true,
+  "category": "displays"
+}

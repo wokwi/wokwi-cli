@@ -1,0 +1,6 @@
+{
+  "type": "wokwi-nokia-5110-screen",
+  "pins": ["RST", "CE", "DC", "DIN", "CLK", "BL", "VCC", "GND"],
+  "documented": true,
+  "category": "displays"
+}

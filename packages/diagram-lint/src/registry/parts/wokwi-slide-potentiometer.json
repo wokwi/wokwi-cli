@@ -1,0 +1,16 @@
+{
+  "type": "wokwi-slide-potentiometer",
+  "pins": ["GND", "SIG", "VCC"],
+  "attrs": [
+    {
+      "name": "value",
+      "type": "number"
+    },
+    {
+      "name": "travelLength",
+      "type": "number"
+    }
+  ],
+  "documented": true,
+  "category": "input"
+}

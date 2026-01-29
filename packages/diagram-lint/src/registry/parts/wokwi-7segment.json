@@ -1,0 +1,42 @@
+{
+  "type": "wokwi-7segment",
+  "pins": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "DP",
+    "DIG1",
+    "DIG2",
+    "DIG3",
+    "DIG4",
+    "COM",
+    "COM.1",
+    "COM.2",
+    "CLN"
+  ],
+  "attrs": [
+    {
+      "name": "color",
+      "type": "string"
+    },
+    {
+      "name": "colon",
+      "type": "string"
+    },
+    {
+      "name": "common",
+      "type": "string",
+      "validValues": ["anode", "cathode"]
+    },
+    {
+      "name": "digits",
+      "type": "string"
+    }
+  ],
+  "documented": true,
+  "category": "displays"
+}

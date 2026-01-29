@@ -1,0 +1,32 @@
+{
+  "type": "board-cd74hc4067",
+  "pins": [
+    "COM",
+    "EN",
+    "GND",
+    "I0",
+    "I1",
+    "I10",
+    "I11",
+    "I12",
+    "I13",
+    "I14",
+    "I15",
+    "I2",
+    "I3",
+    "I4",
+    "I5",
+    "I6",
+    "I7",
+    "I8",
+    "I9",
+    "S0",
+    "S1",
+    "S2",
+    "S3",
+    "VCC"
+  ],
+  "documented": false,
+  "isBoard": true,
+  "category": "boards"
+}

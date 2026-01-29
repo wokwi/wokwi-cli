@@ -1,0 +1,24 @@
+{
+  "type": "wokwi-text",
+  "pins": [],
+  "attrs": [
+    {
+      "name": "text",
+      "type": "string"
+    },
+    {
+      "name": "fontSize",
+      "type": "number"
+    },
+    {
+      "name": "fontFamily",
+      "type": "string"
+    },
+    {
+      "name": "color",
+      "type": "string"
+    }
+  ],
+  "documented": true,
+  "category": "misc"
+}

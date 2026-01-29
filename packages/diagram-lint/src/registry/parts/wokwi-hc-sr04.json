@@ -1,0 +1,12 @@
+{
+  "type": "wokwi-hc-sr04",
+  "pins": ["VCC", "TRIG", "ECHO", "GND"],
+  "attrs": [
+    {
+      "name": "distance",
+      "type": "number"
+    }
+  ],
+  "documented": true,
+  "category": "sensors"
+}

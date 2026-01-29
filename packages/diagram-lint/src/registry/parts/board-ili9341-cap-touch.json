@@ -1,0 +1,7 @@
+{
+  "type": "board-ili9341-cap-touch",
+  "pins": ["CS", "D/C", "GND", "LED", "MISO", "MOSI", "RST", "SCK", "SCL", "SDA", "VCC"],
+  "documented": false,
+  "isBoard": true,
+  "category": "boards"
+}

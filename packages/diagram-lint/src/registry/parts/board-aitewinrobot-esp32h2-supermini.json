@@ -1,0 +1,30 @@
+{
+  "type": "board-aitewinrobot-esp32h2-supermini",
+  "pins": [
+    "0",
+    "1",
+    "2",
+    "3",
+    "3V3",
+    "4",
+    "5",
+    "5V",
+    "8",
+    "9",
+    "10",
+    "11",
+    "12",
+    "13",
+    "14",
+    "22",
+    "25",
+    "26",
+    "27",
+    "GND",
+    "RX",
+    "TX"
+  ],
+  "documented": false,
+  "isBoard": true,
+  "category": "boards"
+}

@@ -1,0 +1,23 @@
+{
+  "type": "wokwi-74hc595",
+  "pins": [
+    "Q1",
+    "Q2",
+    "Q3",
+    "Q4",
+    "Q5",
+    "Q6",
+    "Q7",
+    "GND",
+    "Q7S",
+    "MR",
+    "SHCP",
+    "STCP",
+    "OE",
+    "DS",
+    "Q0",
+    "VCC"
+  ],
+  "documented": true,
+  "category": "logic"
+}

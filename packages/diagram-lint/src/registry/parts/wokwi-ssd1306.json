@@ -1,0 +1,16 @@
+{
+  "type": "wokwi-ssd1306",
+  "pins": ["DATA", "CLK", "DC", "RST", "CS", "3V3", "GND", "VIN"],
+  "attrs": [
+    {
+      "name": "i2cAddress",
+      "type": "string"
+    },
+    {
+      "name": "i2c-address",
+      "type": "string"
+    }
+  ],
+  "documented": true,
+  "category": "displays"
+}

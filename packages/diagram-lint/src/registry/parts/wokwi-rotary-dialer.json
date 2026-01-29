@@ -1,0 +1,6 @@
+{
+  "type": "wokwi-rotary-dialer",
+  "pins": ["GND", "DIAL", "PULSE"],
+  "documented": false,
+  "category": "input"
+}

@@ -1,0 +1,32 @@
+{
+  "type": "board-esp32-cam",
+  "pins": [
+    "0",
+    "2",
+    "3V3",
+    "4",
+    "5V.1",
+    "12",
+    "13",
+    "14",
+    "15",
+    "16",
+    "$gpio33",
+    "$gpio4",
+    "$sd_clk",
+    "$sd_cmd",
+    "$sd_d0",
+    "$sd_d1",
+    "$sd_d2",
+    "$sd_d3",
+    "GND.1",
+    "GND.2",
+    "GNd.3",
+    "RX",
+    "TX",
+    "VCC"
+  ],
+  "documented": false,
+  "isBoard": true,
+  "category": "boards"
+}

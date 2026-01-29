@@ -1,0 +1,17 @@
+{
+  "type": "wokwi-servo",
+  "pins": ["GND", "V+", "PWM"],
+  "attrs": [
+    {
+      "name": "horn",
+      "type": "string",
+      "validValues": ["single", "double", "cross"]
+    },
+    {
+      "name": "hornColor",
+      "type": "string"
+    }
+  ],
+  "documented": true,
+  "category": "motors"
+}

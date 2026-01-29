@@ -1,0 +1,12 @@
+{
+  "type": "wokwi-potentiometer",
+  "pins": ["GND", "SIG", "VCC"],
+  "attrs": [
+    {
+      "name": "value",
+      "type": "number"
+    }
+  ],
+  "documented": true,
+  "category": "input"
+}

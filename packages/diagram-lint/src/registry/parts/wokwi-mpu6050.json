@@ -1,0 +1,36 @@
+{
+  "type": "wokwi-mpu6050",
+  "pins": ["INT", "AD0", "XCL", "XDA", "SDA", "SCL", "GND", "VCC"],
+  "attrs": [
+    {
+      "name": "accelX",
+      "type": "number"
+    },
+    {
+      "name": "accelY",
+      "type": "number"
+    },
+    {
+      "name": "accelZ",
+      "type": "number"
+    },
+    {
+      "name": "rotationX",
+      "type": "number"
+    },
+    {
+      "name": "rotationY",
+      "type": "number"
+    },
+    {
+      "name": "rotationZ",
+      "type": "number"
+    },
+    {
+      "name": "temperature",
+      "type": "number"
+    }
+  ],
+  "documented": true,
+  "category": "sensors"
+}

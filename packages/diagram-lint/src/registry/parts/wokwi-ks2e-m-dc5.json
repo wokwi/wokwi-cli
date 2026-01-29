@@ -1,0 +1,12 @@
+{
+  "type": "wokwi-ks2e-m-dc5",
+  "pins": ["COIL1", "COIL2", "P1", "NO1", "NC1", "P2", "NO2", "NC2"],
+  "attrs": [
+    {
+      "name": "bounce",
+      "type": "string"
+    }
+  ],
+  "documented": true,
+  "category": "motors"
+}

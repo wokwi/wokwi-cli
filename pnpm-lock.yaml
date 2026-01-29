@@ -146,6 +146,18 @@ importers:
         specifier: ^5.2.2
         version: 5.9.3
 
+  packages/diagram-lint:
+    devDependencies:
+      rimraf:
+        specifier: ^5.0.0
+        version: 5.0.10
+      typescript:
+        specifier: ^5.2.2
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.5
+        version: 3.2.4(@types/node@24.9.2)(jiti@2.6.1)(tsx@4.20.6)(yaml@2.8.1)
+
 packages:
 
   '@babel/generator@7.28.5':

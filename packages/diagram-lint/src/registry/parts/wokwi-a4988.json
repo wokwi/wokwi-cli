@@ -1,0 +1,24 @@
+{
+  "type": "wokwi-a4988",
+  "pins": [
+    "ENABLE",
+    "MS1",
+    "MS2",
+    "MS3",
+    "RESET",
+    "SLEEP",
+    "STEP",
+    "DIR",
+    "GND",
+    "GND.1",
+    "GND.2",
+    "VDD",
+    "1B",
+    "1A",
+    "2A",
+    "2B",
+    "VMOT"
+  ],
+  "documented": true,
+  "category": "motors"
+}

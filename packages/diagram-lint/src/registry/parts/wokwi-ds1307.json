@@ -1,0 +1,12 @@
+{
+  "type": "wokwi-ds1307",
+  "pins": ["GND", "5V", "SDA", "SCL", "SQW"],
+  "attrs": [
+    {
+      "name": "initTime",
+      "type": "string"
+    }
+  ],
+  "documented": true,
+  "category": "timing"
+}

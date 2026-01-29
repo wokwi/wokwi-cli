@@ -1,0 +1,6 @@
+{
+  "type": "wokwi-gate-not",
+  "pins": ["IN", "OUT"],
+  "documented": false,
+  "category": "logic"
+}

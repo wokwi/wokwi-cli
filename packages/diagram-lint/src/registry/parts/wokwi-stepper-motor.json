@@ -1,0 +1,25 @@
+{
+  "type": "wokwi-stepper-motor",
+  "pins": ["A-", "A+", "B+", "B-"],
+  "attrs": [
+    {
+      "name": "arrow",
+      "type": "string"
+    },
+    {
+      "name": "display",
+      "type": "string",
+      "validValues": ["angle", "steps"]
+    },
+    {
+      "name": "gearRatio",
+      "type": "number"
+    },
+    {
+      "name": "size",
+      "type": "string"
+    }
+  ],
+  "documented": true,
+  "category": "motors"
+}

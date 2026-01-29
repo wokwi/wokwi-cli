@@ -1,0 +1,7 @@
+{
+  "type": "wokwi-franzininho",
+  "pins": ["GND.1", "VCC.1", "PB4", "PB5", "PB3", "PB2", "PB1", "PB0", "VIN", "GND.2", "VCC.2"],
+  "documented": true,
+  "isBoard": true,
+  "category": "boards"
+}

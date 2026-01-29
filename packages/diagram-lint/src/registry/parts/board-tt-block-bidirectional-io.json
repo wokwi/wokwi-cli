@@ -1,0 +1,7 @@
+{
+  "type": "board-tt-block-bidirectional-io",
+  "pins": ["IN", "OE", "OUT", "UIO"],
+  "documented": false,
+  "isBoard": true,
+  "category": "boards"
+}

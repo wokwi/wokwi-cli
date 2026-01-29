@@ -1,0 +1,21 @@
+{
+  "type": "wokwi-max7219-matrix",
+  "pins": ["DIN", "DOUT", "CS", "CS.2", "GND", "GND.2", "V+", "V+.2", "CLK", "CLK.2"],
+  "attrs": [
+    {
+      "name": "chain",
+      "type": "number"
+    },
+    {
+      "name": "layout",
+      "type": "string",
+      "validValues": ["parola", "fc16"]
+    },
+    {
+      "name": "color",
+      "type": "string"
+    }
+  ],
+  "documented": true,
+  "category": "displays"
+}

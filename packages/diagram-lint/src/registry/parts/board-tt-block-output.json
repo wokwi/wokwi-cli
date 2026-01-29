@@ -1,0 +1,24 @@
+{
+  "type": "board-tt-block-output",
+  "pins": [
+    "EXTOUT0",
+    "EXTOUT1",
+    "EXTOUT2",
+    "EXTOUT3",
+    "EXTOUT4",
+    "EXTOUT5",
+    "EXTOUT6",
+    "EXTOUT7",
+    "OUT0",
+    "OUT1",
+    "OUT2",
+    "OUT3",
+    "OUT4",
+    "OUT5",
+    "OUT6",
+    "OUT7"
+  ],
+  "documented": false,
+  "isBoard": true,
+  "category": "boards"
+}

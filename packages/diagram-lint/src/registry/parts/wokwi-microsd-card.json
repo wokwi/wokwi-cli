@@ -1,0 +1,6 @@
+{
+  "type": "wokwi-microsd-card",
+  "pins": ["CS", "SCK", "DI", "DO", "CD", "GND", "VCC"],
+  "documented": true,
+  "category": "communication"
+}

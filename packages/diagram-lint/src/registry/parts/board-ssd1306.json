@@ -1,0 +1,7 @@
+{
+  "type": "board-ssd1306",
+  "pins": ["GND", "SCL", "SDA", "VCC"],
+  "documented": true,
+  "isBoard": true,
+  "category": "boards"
+}

@@ -1,0 +1,7 @@
+{
+  "type": "board-esp-01",
+  "pins": ["CH_PD", "GND", "GPIO0", "GPIO2", "RESET", "RX", "TX", "VCC"],
+  "documented": false,
+  "isBoard": true,
+  "category": "boards"
+}

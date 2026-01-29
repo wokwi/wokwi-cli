@@ -1,0 +1,7 @@
+{
+  "type": "wokwi-attiny85",
+  "pins": ["PB0", "PB1", "PB2", "PB3", "PB4", "PB5", "GND", "VCC", "RST"],
+  "documented": true,
+  "isBoard": true,
+  "category": "boards"
+}

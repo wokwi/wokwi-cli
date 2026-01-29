@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "author": "Test",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-arduino-uno", "id": "uno", "top": 0, "left": 0 },
+    { "type": "wokwi-splendida", "id": "neo", "top": 100, "left": 200 }
+  ],
+  "connections": [
+    ["uno", "6", "neo", ["DIN"]],
+    ["neo", "VSS", "uno", ["GND"]],
+    ["neo", "VDD", "uno", ["5V"]]
+  ],
+  "dependencies": {}
+}

@@ -1,0 +1,12 @@
+{
+  "type": "wokwi-neopixel-meter",
+  "pins": ["DIN"],
+  "attrs": [
+    {
+      "name": "pixels",
+      "type": "number"
+    }
+  ],
+  "documented": false,
+  "category": "leds"
+}

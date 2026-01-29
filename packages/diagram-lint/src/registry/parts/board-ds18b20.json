@@ -1,0 +1,7 @@
+{
+  "type": "board-ds18b20",
+  "pins": ["DQ", "GND", "VCC"],
+  "documented": false,
+  "isBoard": true,
+  "category": "boards"
+}
