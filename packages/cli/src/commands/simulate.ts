@@ -4,6 +4,7 @@ import {
   type ChipsLogPayload,
   type SerialMonitorDataPayload,
 } from '@wokwi/client';
+import { DiagramLinter } from '@wokwi/diagram-lint';
 import chalkTemplate from 'chalk-template';
 import type { Command } from 'commander';
 import { createWriteStream, existsSync, readFileSync, writeFileSync } from 'fs';
@@ -15,6 +16,7 @@ import { TestScenario } from '../TestScenario.js';
 import { parseConfig } from '../config.js';
 import { DEFAULT_SERVER } from '../constants.js';
 import { idfProjectConfig } from '../esp/idfProjectConfig.js';
+import { displayLintResults } from '../lint/index.js';
 import { loadChips } from '../loadChips.js';
 import { readVersion } from '../readVersion.js';
 import { DelayCommand } from '../scenario/DelayCommand.js';
@@ -194,6 +196,17 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
   }
 
   const diagram = readFileSync(diagramFilePath, 'utf8');
+
+  // Lint the diagram before simulation
+  const linter = new DiagramLinter();
+  const lintResult = linter.lintJSON(diagram);
+
+  if (lintResult.stats.errors > 0 || lintResult.stats.warnings > 0) {
+    if (!quiet) {
+      console.error(chalkTemplate`{cyan Diagram issues} in {yellow ${diagramFilePath}}:`);
+    }
+    displayLintResults(lintResult, { quiet });
+  }
 
   const chips = loadChips(config?.chip ?? [], rootDir);
 

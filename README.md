@@ -82,6 +82,21 @@ You can also set the `WASI_SDK_PATH` environment variable to use a custom WASI-S
 
 For more information about creating custom chips, see the [Custom Chips documentation](https://docs.wokwi.com/chips-api/getting-started).
 
+## Diagram Linting
+
+Validate your `diagram.json` file for errors and warnings:
+
+```bash
+wokwi-cli lint
+```
+
+The linter checks for common issues like unknown part types, invalid pin connections, and missing components. By default, it fetches the latest board definitions from the Wokwi registry.
+
+Options:
+- `--ignore-warnings` - Only report errors
+- `--warnings-as-errors` - Exit with error code if warnings are found (useful for CI)
+- `--offline` - Skip downloading latest board definitions
+
 ## MCP Server
 
 The MCP server is an experimental feature that allows you to use the Wokwi CLI as a MCP server. You can use it to integrate the Wokwi CLI with AI agents.

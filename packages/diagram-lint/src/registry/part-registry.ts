@@ -2,6 +2,11 @@ import type { AttributeDefinition, BoardBundle, PartDefinition } from '../types.
 import { partDefinitions } from './part-definitions.js';
 
 /**
+ * URL for fetching remote board definitions from the wokwi-boards repository
+ */
+export const REMOTE_BOARDS_URL = 'https://wokwi.github.io/wokwi-boards/boards.json';
+
+/**
  * Registry for looking up part definitions by type
  */
 export class PartRegistry {
