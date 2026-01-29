@@ -5,7 +5,7 @@
 
 $ErrorActionPreference = 'Stop'
 
-$Version = if ($v) {
+$Version = if (Test-Path Variable:v) {
   $v
 }
 elseif ($args.Length -eq 1) {
