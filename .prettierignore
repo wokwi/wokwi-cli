@@ -25,3 +25,6 @@ playwright-report/
 test-results/
 test-project/
 wokwi-part-tests/
+
+# Auto-generated files
+packages/diagram-lint/src/registry/parts.json
