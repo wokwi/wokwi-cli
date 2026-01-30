@@ -4,14 +4,23 @@ import type { IScenarioCommand, TestScenario } from '../TestScenario.js';
 
 export interface IExpectPinParams {
   'part-id': string;
-  pin: string;
+  /** The pin name. */
+  name?: string;
+  /** @deprecated Use `name` instead. Kept for backward compatibility. */
+  pin?: string;
   value: number;
 }
 
 export class ExpectPinCommand implements IScenarioCommand {
+  validate(params: IExpectPinParams) {
+    if (!params.name && !params.pin) {
+      throw new Error('expect-pin: missing required parameter `name`');
+    }
+  }
+
   async run(scenario: TestScenario, client: APIClient, params: IExpectPinParams) {
     const partId = params['part-id'];
-    const pinName = params.pin;
+    const pinName = (params.name ?? params.pin)!;
     const expectedValue = params.value;
     scenario.log(
       chalkTemplate`expect-pin {yellow ${partId}}:{magenta ${pinName}} == {yellow ${expectedValue}}`,
