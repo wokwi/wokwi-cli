@@ -8,7 +8,7 @@ interface IFirmwarePiece {
   data: Uint8Array;
 }
 
-const MAX_FIRMWARE_SIZE = 4 * 1024 * 1024;
+const MAX_FIRMWARE_SIZE = 16 * 1024 * 1024;
 
 export async function uploadESP32Firmware(client: APIClient, firmwarePath: string) {
   const flasherArgs = JSON.parse(readFileSync(firmwarePath, 'utf-8')) as IESP32FlasherJSON;
