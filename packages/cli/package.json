@@ -1,6 +1,6 @@
 {
   "name": "@wokwi/cli",
-  "version": "0.22.0",
+  "version": "0.22.1",
   "description": "Wokwi Simulator CLI (for CI and local development)",
   "main": "dist/cli.cjs",
   "type": "module",
