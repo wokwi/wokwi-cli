@@ -9,6 +9,7 @@ export interface WokwiTOML {
     firmware: string;
     elf?: string;
     gdbServerPort?: number;
+    rfc2217ServerPort?: number;
   };
   chip?: WokwiTOMLChip[];
 }

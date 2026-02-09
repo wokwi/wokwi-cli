@@ -5,6 +5,7 @@ import {
   type SerialMonitorDataPayload,
 } from '@wokwi/client';
 import { DiagramLinter } from '@wokwi/diagram-lint';
+import { RFC2217Server } from '@wokwi/rfc2217';
 import chalkTemplate from 'chalk-template';
 import type { Command } from 'commander';
 import { createWriteStream, existsSync, readFileSync, writeFileSync } from 'fs';
@@ -208,6 +209,7 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
     displayLintResults(lintResult, { quiet });
   }
 
+  const rfc2217ServerPort = config?.wokwi.rfc2217ServerPort;
   const chips = loadChips(config?.chip ?? [], rootDir);
 
   const resolvedScenarioFile = scenarioFile ? path.resolve(rootDir, scenarioFile) : null;
@@ -247,6 +249,8 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
     console.error('API Error:', error.message);
     process.exit(1);
   };
+
+  let rfc2217Server: RFC2217Server | undefined;
 
   try {
     await client.connected;
@@ -313,6 +317,25 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
 
     await client.serialMonitorListen();
 
+    if (rfc2217ServerPort) {
+      rfc2217Server = new RFC2217Server();
+      rfc2217Server.on('error', (err) => {
+        console.error(`RFC 2217 server error: ${err}`);
+      });
+      rfc2217Server.on('connected', () => {
+        if (!quiet) {
+          console.log('RFC 2217 client connected');
+        }
+      });
+      rfc2217Server.on('data', (data) => {
+        void client.serialMonitorWrite(data);
+      });
+      rfc2217Server.listen(rfc2217ServerPort);
+      if (!quiet) {
+        console.log(`RFC 2217 server listening on port ${rfc2217ServerPort}`);
+      }
+    }
+
     client.listen('serial-monitor:data', (event: APIEvent<SerialMonitorDataPayload>) => {
       let { bytes } = event.payload;
       bytes = scenario?.processSerialBytes(bytes) ?? bytes;
@@ -320,6 +343,12 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
 
       serialLogStream?.write(Buffer.from(bytes));
       expectEngine.feed(bytes);
+
+      if (rfc2217Server) {
+        for (const byte of bytes) {
+          rfc2217Server.write(byte);
+        }
+      }
     });
 
     client.listen('chips:log', (event: APIEvent<ChipsLogPayload>) => {
@@ -384,6 +413,7 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
       }
     }
 
+    rfc2217Server?.dispose();
     client.close();
   }
 }

@@ -1,0 +1,29 @@
+{
+  "name": "@wokwi/rfc2217",
+  "version": "1.0.0",
+  "description": "RFC 2217 (Telnet Com Port Control) server implementation",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf dist",
+    "test": "vitest --run",
+    "test:watch": "vitest --watch"
+  },
+  "author": "Uri Shaked",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wokwi/wokwi-cli"
+  },
+  "devDependencies": {
+    "@types/node": "^24.9.2",
+    "rimraf": "^5.0.0",
+    "typescript": "^5.2.2",
+    "vitest": "^3.0.5"
+  }
+}

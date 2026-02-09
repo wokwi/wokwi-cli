@@ -71,6 +71,9 @@ importers:
       '@wokwi/diagram-lint':
         specifier: workspace:*
         version: link:../diagram-lint
+      '@wokwi/rfc2217':
+        specifier: workspace:*
+        version: link:../rfc2217
       chalk:
         specifier: ^5.3.0
         version: 5.6.2
@@ -151,6 +154,21 @@ importers:
 
   packages/diagram-lint:
     devDependencies:
+      rimraf:
+        specifier: ^5.0.0
+        version: 5.0.10
+      typescript:
+        specifier: ^5.2.2
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.5
+        version: 3.2.4(@types/node@24.9.2)(jiti@2.6.1)(tsx@4.20.6)(yaml@2.8.1)
+
+  packages/rfc2217:
+    devDependencies:
+      '@types/node':
+        specifier: ^24.9.2
+        version: 24.9.2
       rimraf:
         specifier: ^5.0.0
         version: 5.0.10
