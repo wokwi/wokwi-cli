@@ -1,0 +1,98 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://wokwi.com/schemas/chip.json",
+  "title": "Wokwi Custom Chip",
+  "description": "Configuration file for Wokwi custom chips",
+  "type": "object",
+  "required": ["name", "pins"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The name of the chip. This name will be displayed in the diagram editor."
+    },
+    "author": {
+      "type": "string",
+      "description": "The name of the chip author."
+    },
+    "docs": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL to the chip documentation."
+    },
+    "pins": {
+      "type": "array",
+      "description": "The list of pins for the chip, starting from pin 1. Use empty strings to skip pins.",
+      "items": {
+        "type": "string"
+      },
+      "examples": [["VCC", "GND", "RST", "", "SCL", "SDA"]]
+    },
+    "controls": {
+      "type": "array",
+      "description": "The list of interactive controls for the chip.",
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "type"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The identifier for the control. Use camelCase.",
+            "pattern": "^[a-zA-Z][a-zA-Z0-9]*$"
+          },
+          "label": {
+            "type": "string",
+            "description": "The name of the control that will be displayed to the user."
+          },
+          "type": {
+            "type": "string",
+            "enum": ["range", "boolean", "string"],
+            "description": "The type of control. 'range' displays a slider, 'boolean' displays a toggle, 'string' displays a text input."
+          },
+          "min": {
+            "type": "number",
+            "description": "Minimum value for range controls."
+          },
+          "max": {
+            "type": "number",
+            "description": "Maximum value for range controls."
+          },
+          "step": {
+            "type": "number",
+            "description": "Step increment for range controls.",
+            "exclusiveMinimum": 0
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": { "type": { "const": "range" } },
+              "required": ["type"]
+            },
+            "then": {
+              "required": ["min", "max"]
+            }
+          }
+        ]
+      }
+    },
+    "display": {
+      "type": "object",
+      "description": "Configuration of an attached display.",
+      "required": ["width", "height"],
+      "properties": {
+        "width": {
+          "type": "integer",
+          "description": "The width of the display, in pixels.",
+          "minimum": 1
+        },
+        "height": {
+          "type": "integer",
+          "description": "The height of the display, in pixels.",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

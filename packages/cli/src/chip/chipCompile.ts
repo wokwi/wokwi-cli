@@ -2,6 +2,7 @@ import chalkTemplate from 'chalk-template';
 import { spawn } from 'child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { basename, dirname, join, resolve } from 'path';
+import { validateChipJson } from './validateChipJson.js';
 import { ensureWasiSdk } from './wasiSdk.js';
 
 const WOKWI_API_HEADER_URL = 'https://wokwi.com/api/chips/wokwi-api.h';
@@ -170,6 +171,7 @@ export async function chipCompile(
 
         if (chipJsonPath) {
           console.log(chalkTemplate`  chip.json: {cyan ${chipJsonPath}}`);
+          validateChipJson(chipJsonPath);
         } else {
           console.log();
           console.log(
