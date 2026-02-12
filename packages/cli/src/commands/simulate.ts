@@ -25,6 +25,10 @@ import { ExpectChipOutputCommand } from '../scenario/ExpectChipOutputCommand.js'
 import { ExpectPinCommand } from '../scenario/ExpectPinCommand.js';
 import { SetControlCommand } from '../scenario/SetControlCommand.js';
 import { TakeScreenshotCommand } from '../scenario/TakeScreenshotCommand.js';
+import { TouchCommand } from '../scenario/TouchCommand.js';
+import { TouchMoveCommand } from '../scenario/TouchMoveCommand.js';
+import { TouchPressCommand } from '../scenario/TouchPressCommand.js';
+import { TouchReleaseCommand } from '../scenario/TouchReleaseCommand.js';
 import { WaitSerialCommand } from '../scenario/WaitSerialCommand.js';
 import { WriteSerialCommand } from '../scenario/WriteSerialCommand.js';
 import { WebSocketTransport } from '../transport/WebSocketTransport.js';
@@ -232,6 +236,10 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
       'wait-serial': new WaitSerialCommand(),
       'write-serial': new WriteSerialCommand(),
       'take-screenshot': new TakeScreenshotCommand(path.dirname(resolvedScenarioFile)),
+      touch: new TouchCommand(),
+      'touch-press': new TouchPressCommand(),
+      'touch-release': new TouchReleaseCommand(),
+      'touch-move': new TouchMoveCommand(),
     });
     scenario.validate();
   }

@@ -125,6 +125,22 @@ export class APIClient {
     });
   }
 
+  async touchEvent(
+    partId: string,
+    x: number,
+    y: number,
+    event: 'press' | 'release' | 'move',
+    options?: { releaseAfter?: number },
+  ) {
+    return await this.sendCommand('touch:event', {
+      part: partId,
+      x,
+      y,
+      event,
+      ...(options?.releaseAfter != null ? { releaseAfter: options.releaseAfter } : {}),
+    });
+  }
+
   async pinRead(partId: string, pin: string) {
     return await this.sendCommand<PinReadResponse>('pin:read', {
       part: partId,
