@@ -11,14 +11,22 @@
       "type": "number"
     },
     {
-      "name": "matrixLayout",
+      "name": "layout",
       "type": "string"
     },
     {
-      "name": "matrixBrightness",
+      "name": "brightness",
       "type": "number"
+    },
+    {
+      "name": "pixelShape",
+      "type": "string"
+    },
+    {
+      "name": "pixelSize",
+      "type": "string"
     }
   ],
-  "documented": false,
+  "documented": true,
   "category": "leds"
 }

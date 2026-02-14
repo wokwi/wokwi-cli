@@ -1,16 +1,7 @@
 {
   "type": "wokwi-neopixel",
   "pins": ["DIN", "VDD", "VSS", "DOUT"],
-  "attrs": [
-    {
-      "name": "pixel",
-      "type": "string"
-    },
-    {
-      "name": "pixels",
-      "type": "string"
-    }
-  ],
-  "documented": false,
+  "attrs": [],
+  "documented": true,
   "category": "leds"
 }

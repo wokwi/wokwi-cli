@@ -1,0 +1,20 @@
+{
+  "type": "wokwi-led-strip",
+  "pins": ["VDD", "DIN", "VSS", "VDD.2", "DOUT", "VSS.2"],
+  "attrs": [
+    {
+      "name": "pixels",
+      "type": "number"
+    },
+    {
+      "name": "pixelShape",
+      "type": "string"
+    },
+    {
+      "name": "pixelSize",
+      "type": "string"
+    }
+  ],
+  "documented": true,
+  "category": "leds"
+}

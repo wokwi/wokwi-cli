@@ -1,6 +1,6 @@
 {
   "name": "@wokwi/diagram-lint",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Linter for Wokwi diagram.json files",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -3,14 +3,10 @@
   "pins": ["GND", "VCC", "DIN", "DOUT"],
   "attrs": [
     {
-      "name": "pixel",
-      "type": "string"
-    },
-    {
       "name": "pixels",
       "type": "number"
     }
   ],
-  "documented": false,
+  "documented": true,
   "category": "leds"
 }
