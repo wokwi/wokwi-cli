@@ -263,7 +263,7 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
   try {
     await client.connected;
     await client.fileUpload('diagram.json', diagram);
-    const firmwareName = await uploadFirmware(client, firmwarePath);
+    const firmwareParams = await uploadFirmware(client, firmwarePath);
     if (elfPath != null) {
       await client.fileUpload('firmware.elf', new Uint8Array(readFileSync(elfPath)));
     }
@@ -378,7 +378,7 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
     }
 
     await client.simStart({
-      firmware: firmwareName,
+      ...firmwareParams,
       elf: elfPath != null ? 'firmware.elf' : undefined,
       chips: chips.map((chip) => chip.name),
       pause: scenario != null,

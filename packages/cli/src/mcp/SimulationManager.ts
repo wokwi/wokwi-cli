@@ -107,7 +107,7 @@ export class SimulationManager {
       throw new Error('Not connected to API');
     }
     await this.client.fileUpload('diagram.json', diagram);
-    const firmwareName = await uploadFirmware(this.client, firmwarePath);
+    const firmwareParams = await uploadFirmware(this.client, firmwarePath);
 
     if (elfPath) {
       await this.client.fileUpload('firmware.elf', new Uint8Array(readFileSync(elfPath)));
@@ -124,7 +124,7 @@ export class SimulationManager {
     // Start simulation
     await this.client.serialMonitorListen();
     await this.client.simStart({
-      firmware: firmwareName,
+      ...firmwareParams,
       elf: elfPath ? 'firmware.elf' : undefined,
       chips: chips.map((chip) => chip.name),
     });

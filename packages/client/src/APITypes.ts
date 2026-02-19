@@ -47,8 +47,14 @@ export interface APIResultError {
   message: string;
 }
 
+export interface FlashSection {
+  offset: number;
+  file: string;
+}
+
 export interface APISimStartParams {
-  firmware: string;
+  firmware?: string | FlashSection[];
+  flashSize?: string;
   elf?: string;
   pause?: boolean;
   chips?: string[];

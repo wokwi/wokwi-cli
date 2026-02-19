@@ -1,23 +1,20 @@
-import { type APIClient } from '@wokwi/client';
+import { type APIClient, type APISimStartParams, type FlashSection } from '@wokwi/client';
 import { readFileSync } from 'fs';
 import { basename, dirname, resolve } from 'path';
 import { type IESP32FlasherJSON } from './esp/flasherArgs.js';
 
-interface IFirmwarePiece {
-  offset: number;
-  data: Uint8Array;
-}
+type FirmwareParams = Pick<APISimStartParams, 'firmware' | 'flashSize'>;
 
-const MAX_FIRMWARE_SIZE = 16 * 1024 * 1024;
-
-export async function uploadESP32Firmware(client: APIClient, firmwarePath: string) {
+export async function uploadESP32Firmware(
+  client: APIClient,
+  firmwarePath: string,
+): Promise<FirmwareParams> {
   const flasherArgs = JSON.parse(readFileSync(firmwarePath, 'utf-8')) as IESP32FlasherJSON;
   if (!('flash_files' in flasherArgs)) {
     throw new Error('flash_files is not defined in flasher_args.json');
   }
 
-  const firmwareParts: IFirmwarePiece[] = [];
-  let firmwareSize = 0;
+  const flashSections: FlashSection[] = [];
   for (const [offset, file] of Object.entries(flasherArgs.flash_files)) {
     const offsetNum = parseInt(offset, 16);
     if (isNaN(offsetNum)) {
@@ -25,26 +22,21 @@ export async function uploadESP32Firmware(client: APIClient, firmwarePath: strin
     }
 
     const data = new Uint8Array(readFileSync(resolve(dirname(firmwarePath), file)));
-    firmwareParts.push({ offset: offsetNum, data });
-    firmwareSize = Math.max(firmwareSize, offsetNum + data.byteLength);
+    const fileName = `flash-${offset}.bin`;
+    await client.fileUpload(fileName, data);
+    flashSections.push({ offset: offsetNum, file: fileName });
   }
 
-  if (firmwareSize > MAX_FIRMWARE_SIZE) {
-    throw new Error(
-      `Firmware size (${firmwareSize} bytes) exceeds the maximum supported size (${MAX_FIRMWARE_SIZE} bytes)`,
-    );
-  }
-
-  const firmwareData = new Uint8Array(firmwareSize);
-  for (const { offset, data } of firmwareParts) {
-    firmwareData.set(data, offset);
-  }
-  await client.fileUpload('firmware.bin', firmwareData);
-
-  return 'firmware.bin';
+  return {
+    firmware: flashSections,
+    flashSize: flasherArgs.flash_settings?.flash_size,
+  };
 }
 
-export async function uploadFirmware(client: APIClient, firmwarePath: string) {
+export async function uploadFirmware(
+  client: APIClient,
+  firmwarePath: string,
+): Promise<FirmwareParams> {
   if (basename(firmwarePath) === 'flasher_args.json') {
     return await uploadESP32Firmware(client, firmwarePath);
   }
@@ -52,5 +44,5 @@ export async function uploadFirmware(client: APIClient, firmwarePath: string) {
   const extension = firmwarePath.split('.').pop();
   const firmwareName = `firmware.${extension}`;
   await client.fileUpload(firmwareName, new Uint8Array(readFileSync(firmwarePath)));
-  return firmwareName;
+  return { firmware: firmwareName };
 }

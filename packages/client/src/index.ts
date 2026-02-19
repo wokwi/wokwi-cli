@@ -24,6 +24,7 @@ export type {
   APIResultError,
   APISimStartParams,
   ChipsLogPayload,
+  FlashSection,
   PinReadResponse,
   SerialMonitorDataPayload,
   VCDReadResponse,
