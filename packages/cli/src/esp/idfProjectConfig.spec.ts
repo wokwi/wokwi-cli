@@ -1,5 +1,8 @@
+import { mkdtempSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
+import path from 'path';
 import { describe, expect, it } from 'vitest';
-import { createConfigForIDFProject } from './idfProjectConfig.js';
+import { createConfigForIDFProject, idfProjectConfig } from './idfProjectConfig.js';
 
 describe('createConfigForIDFProject', () => {
   it('should create a config for an IDF project', () => {
@@ -18,5 +21,52 @@ describe('createConfigForIDFProject', () => {
       gdbServerPort = 3333
       "
     `);
+  });
+});
+
+describe('idfProjectConfig', () => {
+  function setupTempProject(boardType: string, idfTarget: string) {
+    const dir = mkdtempSync(path.join(tmpdir(), 'wokwi-test-'));
+    const diagramPath = path.join(dir, 'diagram.json');
+    const projectDescPath = path.join(dir, 'project_description.json');
+    const configPath = path.join(dir, 'wokwi.toml');
+    writeFileSync(
+      diagramPath,
+      JSON.stringify({ version: 1, parts: [{ type: boardType, id: 'esp' }], connections: [] }),
+    );
+    writeFileSync(projectDescPath, JSON.stringify({ target: idfTarget }));
+    return { dir, diagramPath, projectDescPath, configPath };
+  }
+
+  it('should accept esp32-s3-box-3 diagram with esp32s3 IDF target', () => {
+    const { dir, diagramPath, projectDescPath, configPath } = setupTempProject(
+      'board-esp32-s3-box-3',
+      'esp32s3',
+    );
+
+    const result = idfProjectConfig({
+      rootDir: dir,
+      configPath,
+      diagramFilePath: diagramPath,
+      projectDescriptionPath: projectDescPath,
+    });
+
+    expect(result).toBe(true);
+  });
+
+  it('should reject esp32-s3-box-3 diagram with esp32 IDF target', () => {
+    const { dir, diagramPath, projectDescPath, configPath } = setupTempProject(
+      'board-esp32-s3-box-3',
+      'esp32',
+    );
+
+    const result = idfProjectConfig({
+      rootDir: dir,
+      configPath,
+      diagramFilePath: diagramPath,
+      projectDescriptionPath: projectDescPath,
+    });
+
+    expect(result).toBe(false);
   });
 });
