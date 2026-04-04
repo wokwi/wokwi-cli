@@ -1,0 +1,13 @@
+{
+  "type": "wokwi-wifi-ap",
+  "pins": [],
+  "attrs": [
+    { "name": "ssid", "type": "string" },
+    { "name": "password", "type": "string" },
+    { "name": "channel", "type": "string" },
+    { "name": "internet", "type": "string" },
+    { "name": "bssid", "type": "string" }
+  ],
+  "documented": true,
+  "category": "misc"
+}

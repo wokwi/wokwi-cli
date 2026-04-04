@@ -8,6 +8,7 @@ const EXCLUDED_TYPES = [
   'wokwi-text',
   'wokwi-logo',
   'wokwi-ir-remote', // IR remote sends signals wirelessly
+  'wokwi-wifi-ap', // WiFi AP communicates wirelessly
 ];
 
 /**
