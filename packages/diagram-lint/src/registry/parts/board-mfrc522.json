@@ -1,15 +1,6 @@
 {
   "type": "board-mfrc522",
-  "pins": [
-    "3.3V",
-    "GND",
-    "IRQ",
-    "MISO",
-    "MOSI",
-    "RST",
-    "SCK",
-    "SDA"
-  ],
+  "pins": ["3.3V", "GND", "IRQ", "MISO", "MOSI", "RST", "SCK", "SDA"],
   "documented": false,
   "isBoard": true,
   "category": "boards"

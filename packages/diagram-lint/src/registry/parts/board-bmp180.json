@@ -1,12 +1,6 @@
 {
   "type": "board-bmp180",
-  "pins": [
-    "3.3V",
-    "GND",
-    "SCL",
-    "SDA",
-    "VCC"
-  ],
+  "pins": ["3.3V", "GND", "SCL", "SDA", "VCC"],
   "documented": false,
   "isBoard": true,
   "category": "boards"
