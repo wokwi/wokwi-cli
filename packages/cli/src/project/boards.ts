@@ -68,6 +68,14 @@ export const boards: IBoard[] = [
     idfTarget: 'esp32s3',
     serialInterfaces: ['uart', 'usb', 'usb-serialjtag'],
   },
+  {
+    title: 'ESP32-S31 Function CoreBoard',
+    type: 'board-esp32-s31-function-coreboard-1',
+    family: 'esp32',
+    idfTarget: 'esp32s31',
+    serialPins: { RX: 'RX0', TX: 'TX0' },
+    serialInterfaces: ['uart'],
+  },
 
   // ESP32-based boards
   {
