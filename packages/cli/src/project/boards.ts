@@ -33,10 +33,24 @@ export const boards: IBoard[] = [
     serialInterfaces: ['uart', 'usb-serialjtag'],
   },
   {
+    title: 'ESP32-C5 DevKit',
+    type: 'board-esp32-c5-devkitc-1',
+    family: 'esp32',
+    idfTarget: 'esp32c5',
+    serialInterfaces: ['uart', 'usb-serialjtag'],
+  },
+  {
     title: 'ESP32-C6 DevKit',
     type: 'board-esp32-c6-devkitc-1',
     family: 'esp32',
     idfTarget: 'esp32c6',
+    serialInterfaces: ['uart', 'usb-serialjtag'],
+  },
+  {
+    title: 'ESP32-C61 DevKit',
+    type: 'board-esp32-c61-devkitc-1',
+    family: 'esp32',
+    idfTarget: 'esp32c61',
     serialInterfaces: ['uart', 'usb-serialjtag'],
   },
   {
