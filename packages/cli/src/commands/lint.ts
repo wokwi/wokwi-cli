@@ -14,6 +14,8 @@ interface LintOptions {
   ignoreWarnings?: boolean;
   warningsAsErrors?: boolean;
   offline?: boolean;
+  boardsUrl?: string;
+  boardsFile?: string;
 }
 
 export function lintCommand(program: Command): void {
@@ -24,14 +26,16 @@ export function lintCommand(program: Command): void {
     .option('--ignore-warnings', 'Do not report warnings')
     .option('--warnings-as-errors', 'Treat warnings as errors (exit code 1)')
     .option('--offline', 'Skip downloading latest board definitions')
+    .option('--boards-url <url>', 'Custom URL for board definitions bundle')
+    .option('--boards-file <path>', 'Local path to board definitions bundle.json')
     .action(async (projectPath: string, options: LintOptions) => {
       await runLint(projectPath, options);
     });
 }
 
 async function runLint(projectPath: string, options: LintOptions) {
-  const { ignoreWarnings, warningsAsErrors, offline } = options;
-  const shouldFetch = !offline;
+  const { ignoreWarnings, warningsAsErrors, offline, boardsUrl, boardsFile } = options;
+  const shouldFetch = !offline || boardsUrl || boardsFile;
 
   // Resolve diagram path
   let diagramPath = path.resolve(projectPath);
@@ -56,7 +60,9 @@ async function runLint(projectPath: string, options: LintOptions) {
 
   // Try to fetch remote boards (only for lint command)
   if (shouldFetch) {
-    const remoteBoards = await fetchRemoteBoards();
+    const remoteBoards = await fetchRemoteBoards(
+      boardsFile ? { file: boardsFile } : boardsUrl ? { url: boardsUrl } : undefined,
+    );
     if (remoteBoards) {
       linter.getRegistry().loadBoardsBundle(remoteBoards);
     }

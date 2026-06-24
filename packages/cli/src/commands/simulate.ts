@@ -17,7 +17,7 @@ import { TestScenario } from '../TestScenario.js';
 import { parseConfig } from '../config.js';
 import { DEFAULT_SERVER } from '../constants.js';
 import { idfProjectConfig } from '../esp/idfProjectConfig.js';
-import { displayLintResults } from '../lint/index.js';
+import { displayLintResults, fetchRemoteBoards } from '../lint/index.js';
 import { loadChips } from '../loadChips.js';
 import { readVersion } from '../readVersion.js';
 import { DelayCommand } from '../scenario/DelayCommand.js';
@@ -54,6 +54,8 @@ interface SimulateOptions {
   timeoutExitCode?: string;
   quiet?: boolean;
   vcdFile?: string;
+  boardsUrl?: string;
+  boardsFile?: string;
 }
 
 export function simulateCommand(program: Command): void {
@@ -73,6 +75,8 @@ export function simulateCommand(program: Command): void {
     .option('--timeout-exit-code <code>', 'Exit code on timeout', '42')
     .option('-q, --quiet', 'Suppress status messages')
     .option('--vcd-file <path>', 'Output path for VCD (logic analyzer) file')
+    .option('--boards-url <url>', 'Custom URL for board definitions bundle')
+    .option('--boards-file <path>', 'Local path to board definitions bundle.json')
     .action((projectPath: string, options: SimulateOptions, command: Command) => {
       return runSimulation(projectPath, options, command);
     });
@@ -204,6 +208,26 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
 
   // Lint the diagram before simulation
   const linter = new DiagramLinter();
+
+  // Fetch and load custom board definitions if --boards-url or --boards-file is provided
+  if (options.boardsUrl || options.boardsFile) {
+    const remoteBoards = await fetchRemoteBoards(
+      options.boardsFile ? { file: options.boardsFile } : { url: options.boardsUrl },
+    );
+    if (remoteBoards) {
+      const count = linter.getRegistry().loadBoardsBundle(remoteBoards);
+      if (!quiet) {
+        const source = options.boardsFile ? options.boardsFile : options.boardsUrl;
+        console.log(`Loaded ${count} board definitions from ${source}`);
+      }
+    } else {
+      const source = options.boardsFile ? options.boardsFile : options.boardsUrl;
+      console.error(
+        chalkTemplate`{yellow Warning:} Failed to fetch boards from {yellow ${source}}`,
+      );
+    }
+  }
+
   const lintResult = linter.lintJSON(diagram);
 
   if (lintResult.stats.errors > 0 || lintResult.stats.warnings > 0) {

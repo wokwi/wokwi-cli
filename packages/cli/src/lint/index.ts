@@ -9,6 +9,7 @@ import {
   type LintResult,
 } from '@wokwi/diagram-lint';
 import chalkTemplate from 'chalk-template';
+import { readFileSync } from 'fs';
 
 export interface LintDisplayOptions {
   /** Only show errors, hide warnings and info */
@@ -90,18 +91,36 @@ export function formatLintSummary(result: LintResult): string {
 export interface FetchBoardsOptions {
   /** Timeout in milliseconds (default: 5000) */
   timeout?: number;
+  /** Custom URL for board definitions (overrides default) */
+  url?: string;
+  /** Local path to bundle.json file */
+  file?: string;
 }
 
 /**
- * Fetch board definitions from the remote registry
+ * Fetch board definitions from the remote registry or local file
  *
  * @returns Board bundle, or null if fetch fails
  */
 export async function fetchRemoteBoards(options?: FetchBoardsOptions): Promise<BoardBundle | null> {
   const timeout = options?.timeout ?? 5000;
+  const url = options?.url ?? REMOTE_BOARDS_URL;
+  const filePath = options?.file;
 
+  // Load from local file if specified
+  if (filePath) {
+    try {
+      const content = readFileSync(filePath, 'utf-8');
+      return JSON.parse(content) as BoardBundle;
+    } catch (err) {
+      console.error(`Error reading local bundle file: ${(err as Error).message}`);
+      return null;
+    }
+  }
+
+  // Fetch from remote URL
   try {
-    const response = await fetch(REMOTE_BOARDS_URL, {
+    const response = await fetch(url, {
       signal: AbortSignal.timeout(timeout),
     });
 

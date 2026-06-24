@@ -96,6 +96,22 @@ Options:
 - `--ignore-warnings` - Only report errors
 - `--warnings-as-errors` - Exit with error code if warnings are found (useful for CI)
 - `--offline` - Skip downloading latest board definitions
+- `--boards-url <url>` - Load board definitions from a custom URL
+- `--boards-file <path>` - Load board definitions from a local bundle.json file
+
+### Custom Board Definitions
+
+To use custom board definitions, you can specify a remote URL or a local bundle.json file:
+
+```bash
+# Load from remote URL
+wokwi-cli . --boards-url https://wokwi.com/custom-boards/bundle.json
+
+# Load from local file
+wokwi-cli . --boards-file /path/to/wokwi-boards/boards/bundle.json
+```
+
+The bundle.json file format is defined in the [wokwi-boards repository](https://github.com/wokwi/wokwi-boards). You can generate a bundle.json by running the `make-bundle.js` script in the wokwi-boards tools directory.
 
 ## MCP Server
 
