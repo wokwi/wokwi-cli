@@ -17,7 +17,7 @@ import { TestScenario } from '../TestScenario.js';
 import { parseConfig } from '../config.js';
 import { DEFAULT_SERVER } from '../constants.js';
 import { idfProjectConfig } from '../esp/idfProjectConfig.js';
-import { displayLintResults } from '../lint/index.js';
+import { displayLintResults, fetchRemoteBoards } from '../lint/index.js';
 import { loadChips } from '../loadChips.js';
 import { readVersion } from '../readVersion.js';
 import { DelayCommand } from '../scenario/DelayCommand.js';
@@ -54,6 +54,171 @@ interface SimulateOptions {
   timeoutExitCode?: string;
   quiet?: boolean;
   vcdFile?: string;
+  boardsUrl?: string;
+  boardsFile?: string;
+}
+
+/**
+ * Expand custom board definitions into inline parts
+ *
+ * For boards not known to the server, we expand them into:
+ * - ESP32 devkit part (for the MCU)
+ * - LCD part (for displays)
+ * - Touch part (for touch controllers)
+ * - Internal connections
+ */
+function expandCustomBoards(
+  diagramJson: string,
+  remoteBoards: Record<string, { def: any; rev: string }>,
+  quiet: boolean,
+): { diagram: string; partIdMap: Record<string, string>; lcdIdMap: Record<string, string> } {
+  const diagram = JSON.parse(diagramJson);
+  const parts = diagram.parts || [];
+  const connections = diagram.connections || [];
+  const newParts: any[] = [];
+  const newConnections: any[] = [];
+
+  // Track part ID mapping: old board ID -> new MCU part ID
+  const partIdMap: Record<string, string> = {};
+  const lcdIdMap: Record<string, string> = {};
+
+  for (const part of parts) {
+    const boardId = part.type.replace('board-', '');
+
+    if (remoteBoards[boardId]) {
+      const boardDef = remoteBoards[boardId].def;
+      const mcuType = boardDef.mcu;
+
+      // Map MCU type to devkit board type
+      let devkitType = 'board-esp32-devkitc-1';
+      if (mcuType === 'esp32-s3') {
+        devkitType = 'board-esp32-s3-devkitc-1';
+      } else if (mcuType === 'esp32-c3') {
+        devkitType = 'board-esp32-c3-devkitm-1';
+      }
+
+      // Create MCU part
+      const mcuPartId = `${part.id}-mcu`;
+      const mcuPart: any = {
+        type: devkitType,
+        id: mcuPartId,
+        attrs: {
+          psramSize: boardDef.mcuAttrs?.psramSize || '8',
+          psramType: boardDef.mcuAttrs?.psramType || 'quad',
+          flashSize: boardDef.mcuAttrs?.flashSize || '8',
+        },
+      };
+      newParts.push(mcuPart);
+      partIdMap[part.id] = mcuPartId;
+
+      // Store LCD ID for screenshot mapping
+      let lcdPartId: string | undefined;
+      if (boardDef.displays && boardDef.displays.length > 0) {
+        const display = boardDef.displays[0];
+
+        // Map unsupported LCD chips to supported ones
+        // Most common supported chip: ili9341
+        const supportedChips = ['ili9341', 'ili9342', 'st7789', 'ssd1306'];
+        const lcdChip = supportedChips.includes(display.chip) ? display.chip : 'ili9341';
+
+        const lcdPart: any = {
+          type: `wokwi-${lcdChip}`,
+          id: display.id,
+          attrs: {
+            width: String(display.pixelWidth),
+            height: String(display.pixelHeight),
+            rotate: '0',
+          },
+        };
+        newParts.push(lcdPart);
+        if (lcdPartId) {
+          lcdIdMap[part.id] = lcdPartId;
+        }
+
+        // Add internal connections from board definition
+        for (const [pinName, pinDef] of Object.entries(boardDef.pins || {})) {
+          // Handle $gpioXX special pins that map to LCD/touch pins
+          if (
+            pinName.startsWith('$gpio') &&
+            typeof pinDef === 'object' &&
+            pinDef !== null &&
+            'target' in pinDef
+          ) {
+            const target = (pinDef as any).target;
+            if (Array.isArray(target) && target.length >= 2) {
+              // First element is GPIO pin, second is LCD/touch pin
+              const gpioPin = target[0]; // "GPIO18"
+              const lcdPin = target[1]; // "lcd1:SCK"
+
+              if (
+                typeof gpioPin === 'string' &&
+                typeof lcdPin === 'string' &&
+                lcdPin.includes(':')
+              ) {
+                const [, targetPin] = lcdPin.split(':');
+                const targetPartId = lcdPin.split(':')[0]; // "lcd1" or "touch1"
+
+                // Convert GPIO pin to devkit pin format (GPIO18 -> G18)
+                const devkitPin = gpioPin.replace('GPIO', 'G');
+
+                newConnections.push([
+                  `${mcuPartId}:${devkitPin}`,
+                  `${targetPartId}:${targetPin}`,
+                  '',
+                ]);
+              }
+            }
+          }
+        }
+
+        // Create touch part if exists
+        if (display.touch) {
+          const touchPart: any = {
+            type: `wokwi-${display.touch.chip}`,
+            id: display.touch.id,
+            attrs: {},
+          };
+          newParts.push(touchPart);
+        }
+      }
+
+      // Remap existing connections to use new MCU part ID
+      for (const conn of connections) {
+        if (conn[0]?.startsWith(`${part.id}:`) || conn[1]?.startsWith(`${part.id}:`)) {
+          const newConn = [...conn];
+          if (newConn[0]?.startsWith(`${part.id}:`)) {
+            newConn[0] = newConn[0].replace(`${part.id}:`, `${mcuPartId}:`);
+          }
+          if (newConn[1]?.startsWith(`${part.id}:`)) {
+            newConn[1] = newConn[1].replace(`${part.id}:`, `${mcuPartId}:`);
+          }
+          newConnections.push(newConn);
+        } else {
+          newConnections.push(conn);
+        }
+      }
+
+      if (!quiet) {
+        console.log(`Expanded custom board: ${part.type} → ${devkitType} + LCD`);
+      }
+    } else {
+      // Not a custom board, keep as-is
+      newParts.push(part);
+    }
+  }
+
+  diagram.parts = newParts;
+  diagram.connections = newConnections;
+
+  const expanded = JSON.stringify(diagram, null, 2);
+
+  // Log expanded diagram for diagnostics
+  if (!quiet) {
+    console.log('Expanded diagram (for diagnostics):');
+    console.log(expanded);
+  }
+
+  return { diagram: expanded, partIdMap, lcdIdMap };
 }
 
 export function simulateCommand(program: Command): void {
@@ -73,6 +238,8 @@ export function simulateCommand(program: Command): void {
     .option('--timeout-exit-code <code>', 'Exit code on timeout', '42')
     .option('-q, --quiet', 'Suppress status messages')
     .option('--vcd-file <path>', 'Output path for VCD (logic analyzer) file')
+    .option('--boards-url <url>', 'Custom URL for board definitions bundle')
+    .option('--boards-file <path>', 'Local path to board definitions bundle.json')
     .action((projectPath: string, options: SimulateOptions, command: Command) => {
       return runSimulation(projectPath, options, command);
     });
@@ -200,10 +367,31 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
     process.exit(1);
   }
 
-  const diagram = readFileSync(diagramFilePath, 'utf8');
+  let diagram = readFileSync(diagramFilePath, 'utf8');
 
   // Lint the diagram before simulation
   const linter = new DiagramLinter();
+
+  // Fetch and load custom board definitions if --boards-url or --boards-file is provided
+  let remoteBoards: Awaited<ReturnType<typeof fetchRemoteBoards>> = null;
+  if (options.boardsUrl || options.boardsFile) {
+    remoteBoards = await fetchRemoteBoards(
+      options.boardsFile ? { file: options.boardsFile } : { url: options.boardsUrl },
+    );
+    if (remoteBoards) {
+      const count = linter.getRegistry().loadBoardsBundle(remoteBoards);
+      if (!quiet) {
+        const source = options.boardsFile ? options.boardsFile : options.boardsUrl;
+        console.log(`Loaded ${count} board definitions from ${source}`);
+      }
+    } else {
+      const source = options.boardsFile ? options.boardsFile : options.boardsUrl;
+      console.error(
+        chalkTemplate`{yellow Warning:} Failed to fetch boards from {yellow ${source}}`,
+      );
+    }
+  }
+
   const lintResult = linter.lintJSON(diagram);
 
   if (lintResult.stats.errors > 0 || lintResult.stats.warnings > 0) {
@@ -211,6 +399,28 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
       console.error(chalkTemplate`{cyan Diagram issues} in {yellow ${diagramFilePath}}:`);
     }
     displayLintResults(lintResult, { quiet });
+  }
+
+  // Expand custom boards into inline parts
+  let expandedScreenshotPart = screenshotPart;
+  if (remoteBoards) {
+    try {
+      const expansionResult = expandCustomBoards(diagram, remoteBoards, quiet ?? false);
+      diagram = expansionResult.diagram;
+      // Map screenshot part if board was expanded
+      if (screenshotPart && expansionResult.partIdMap[screenshotPart]) {
+        const lcdId = expansionResult.lcdIdMap[screenshotPart];
+        if (lcdId) {
+          expandedScreenshotPart = lcdId;
+          if (!quiet) {
+            console.log(`Mapped screenshot part: ${screenshotPart} → ${lcdId}`);
+          }
+        }
+      }
+    } catch (err) {
+      console.error(chalkTemplate`{red Error expanding custom boards:} ${(err as Error).message}`);
+      process.exit(1);
+    }
   }
 
   const rfc2217ServerPort = config?.wokwi.rfc2217ServerPort;
@@ -263,6 +473,7 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
   try {
     await client.connected;
     await client.fileUpload('diagram.json', diagram);
+
     const firmwareParams = await uploadFirmware(client, firmwarePath);
     if (elfPath != null) {
       await client.fileUpload('firmware.elf', new Uint8Array(readFileSync(elfPath)));
@@ -309,7 +520,7 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
       }
       screenshotPromise = client.atNanos(screenshotTime * millis).then(async () => {
         try {
-          const result = await client.framebufferRead(screenshotPart);
+          const result = await client.framebufferRead(expandedScreenshotPart ?? screenshotPart);
           writeFileSync(screenshotFile, result.png, 'base64');
           await client.simResume();
         } catch (err) {
