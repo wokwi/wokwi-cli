@@ -6,8 +6,15 @@ export interface APIError {
 export interface APIHello {
   type: 'hello';
   protocolVersion: number;
+  /** Optional capabilities beyond the base protocol, e.g. `gdb`. Absent on older servers. */
+  features?: string[];
   appName: string;
   appVersion: string;
+}
+
+export interface APISimStartResponse {
+  /** Absent on older servers */
+  warnings?: string[];
 }
 
 export interface APICommand<T = any> {
@@ -34,6 +41,11 @@ export interface APIEvent<T = any> {
 }
 
 export interface SerialMonitorDataPayload {
+  bytes: number[];
+}
+
+export interface GDBDataPayload {
+  part: string;
   bytes: number[];
 }
 

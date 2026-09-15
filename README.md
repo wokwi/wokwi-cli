@@ -44,6 +44,26 @@ If your diagram includes a [logic analyzer](https://docs.wokwi.com/parts/wokwi-l
 wokwi-cli . --vcd-file logic.vcd
 ```
 
+### Debugging with GDB
+
+Set `gdbServerPort` in `wokwi.toml` to debug the simulated firmware with gdb:
+
+```toml
+[wokwi]
+version = 1
+firmware = 'build/hello_world.bin'
+elf = 'build/hello_world.elf'
+gdbServerPort = 3333
+```
+
+The CLI then listens for gdb on that port and starts the simulation paused, so you can set breakpoints before the firmware runs. Connect with the gdb that matches your target, for example:
+
+```bash
+xtensa-esp32-elf-gdb build/hello_world.elf -ex 'target remote localhost:3333'
+```
+
+The default 30 second simulation timeout still applies; pass `--timeout 0` for an open-ended debugging session.
+
 ## Configuration Wizard
 
 To generate a `wokwi.toml` and a default `diagram.json` files for your project, run:
@@ -74,6 +94,7 @@ wokwi-cli chip makefile -n my-chip main.c utils.c
 ```
 
 The compiler will automatically:
+
 - Download and install WASI-SDK if not present (`~/.wokwi/wasi-sdk`)
 - Download `wokwi-api.h` if not present in the project directory
 - Generate a `.wasm` file ready for use in Wokwi
@@ -93,6 +114,7 @@ wokwi-cli lint
 The linter checks for common issues like unknown part types, invalid pin connections, and missing components. By default, it fetches the latest board definitions from the Wokwi registry.
 
 Options:
+
 - `--ignore-warnings` - Only report errors
 - `--warnings-as-errors` - Exit with error code if warnings are found (useful for CI)
 - `--offline` - Skip downloading latest board definitions
@@ -117,7 +139,6 @@ To configure your AI agent to use the MCP server, add the following to your agen
   }
 }
 ```
-
 
 ## Development
 

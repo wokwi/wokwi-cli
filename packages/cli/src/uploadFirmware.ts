@@ -33,6 +33,20 @@ export async function uploadESP32Firmware(
   };
 }
 
+/**
+ * Uploads the ELF that provides debug symbols. `--elf` doubles as the firmware path, so it is often
+ * a .bin or .uf2 with no symbols to offer; those are skipped. Returns the uploaded file name.
+ */
+export async function uploadELF(client: APIClient, elfPath: string) {
+  const elf = new Uint8Array(readFileSync(elfPath));
+  const isELF = elf[0] === 0x7f && elf[1] === 0x45 && elf[2] === 0x4c && elf[3] === 0x46;
+  if (!isELF) {
+    return undefined;
+  }
+  await client.fileUpload('firmware.elf', elf);
+  return 'firmware.elf';
+}
+
 export async function uploadFirmware(
   client: APIClient,
   firmwarePath: string,

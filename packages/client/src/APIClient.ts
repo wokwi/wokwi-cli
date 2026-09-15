@@ -6,6 +6,7 @@ import type {
   APIResponse,
   APIResultError,
   APISimStartParams,
+  APISimStartResponse,
   PinReadResponse,
   VCDReadResponse,
 } from './APITypes.js';
@@ -72,7 +73,7 @@ export class APIClient {
 
   async simStart(params: APISimStartParams) {
     this._running = false;
-    return await this.sendCommand('sim:start', params);
+    return await this.sendCommand<APISimStartResponse>('sim:start', params);
   }
 
   async simPause() {
@@ -100,6 +101,18 @@ export class APIClient {
     return await this.sendCommand('serial-monitor:write', {
       bytes: Array.from(bytes),
     });
+  }
+
+  async gdbListen(part?: string) {
+    return await this.sendCommand('gdb:listen', { part });
+  }
+
+  async gdbWrite(bytes: number[] | Uint8Array, part?: string) {
+    return await this.sendCommand('gdb:write', { part, bytes: Array.from(bytes) });
+  }
+
+  async gdbClose(part?: string) {
+    return await this.sendCommand('gdb:close', { part });
   }
 
   get pausedPromise() {

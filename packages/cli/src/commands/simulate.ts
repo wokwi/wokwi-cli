@@ -1,7 +1,9 @@
 import {
   APIClient,
   type APIEvent,
+  type APIHello,
   type ChipsLogPayload,
+  type GDBDataPayload,
   type SerialMonitorDataPayload,
 } from '@wokwi/client';
 import { DiagramLinter } from '@wokwi/diagram-lint';
@@ -17,6 +19,7 @@ import { TestScenario } from '../TestScenario.js';
 import { parseConfig } from '../config.js';
 import { DEFAULT_SERVER } from '../constants.js';
 import { idfProjectConfig } from '../esp/idfProjectConfig.js';
+import { GDBServer } from '../gdb/GDBServer.js';
 import { displayLintResults } from '../lint/index.js';
 import { loadChips } from '../loadChips.js';
 import { readVersion } from '../readVersion.js';
@@ -32,7 +35,7 @@ import { TouchReleaseCommand } from '../scenario/TouchReleaseCommand.js';
 import { WaitSerialCommand } from '../scenario/WaitSerialCommand.js';
 import { WriteSerialCommand } from '../scenario/WriteSerialCommand.js';
 import { WebSocketTransport } from '../transport/WebSocketTransport.js';
-import { uploadFirmware } from '../uploadFirmware.js';
+import { uploadELF, uploadFirmware } from '../uploadFirmware.js';
 import { checkForCommandTypo } from '../utils/didYouMean.js';
 import { createSerialMonitorWritable } from '../utils/serialMonitorWritable.js';
 import { requireToken } from '../utils/token.js';
@@ -214,6 +217,7 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
   }
 
   const rfc2217ServerPort = config?.wokwi.rfc2217ServerPort;
+  const gdbServerPort = config?.wokwi.gdbServerPort;
   const chips = loadChips(config?.chip ?? [], rootDir);
 
   const resolvedScenarioFile = scenarioFile ? path.resolve(rootDir, scenarioFile) : null;
@@ -248,25 +252,27 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
 
   const transport = new WebSocketTransport(token, DEFAULT_SERVER, version, sha);
   const client = new APIClient(transport);
-  client.onConnected = (hello) => {
-    if (!quiet) {
-      console.log(`Connected to Wokwi Simulation API ${hello.appVersion}`);
-    }
-  };
+  const hello = new Promise<APIHello>((resolve) => {
+    client.onConnected = (message) => {
+      if (!quiet) {
+        console.log(`Connected to Wokwi Simulation API ${message.appVersion}`);
+      }
+      resolve(message);
+    };
+  });
   client.onError = (error) => {
     console.error('API Error:', error.message);
     process.exit(1);
   };
 
   let rfc2217Server: RFC2217Server | undefined;
+  let gdbServer: GDBServer | undefined;
 
   try {
     await client.connected;
     await client.fileUpload('diagram.json', diagram);
     const firmwareParams = await uploadFirmware(client, firmwarePath);
-    if (elfPath != null) {
-      await client.fileUpload('firmware.elf', new Uint8Array(readFileSync(elfPath)));
-    }
+    const elfName = elfPath != null ? await uploadELF(client, elfPath) : undefined;
 
     for (const chip of chips) {
       await client.fileUpload(`${chip.name}.chip.json`, readFileSync(chip.jsonPath, 'utf-8'));
@@ -325,6 +331,14 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
 
     await client.serialMonitorListen();
 
+    const serverFeatures = (await hello).features ?? [];
+    const gdbPort = serverFeatures.includes('gdb') ? gdbServerPort : undefined;
+    if (gdbServerPort != null && gdbPort == null) {
+      console.warn(
+        chalkTemplate`{yellow Warning:} this simulation server does not support gdb debugging, ignoring gdbServerPort`,
+      );
+    }
+
     if (rfc2217ServerPort) {
       rfc2217Server = new RFC2217Server();
       rfc2217Server.on('error', (err) => {
@@ -377,12 +391,47 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
       );
     }
 
-    await client.simStart({
+    const { warnings = [] } = await client.simStart({
       ...firmwareParams,
-      elf: elfPath != null ? 'firmware.elf' : undefined,
+      elf: elfName,
       chips: chips.map((chip) => chip.name),
-      pause: scenario != null,
+      pause: scenario != null || gdbPort != null,
     });
+    for (const warning of warnings) {
+      console.warn(chalkTemplate`{yellow Warning:} ${warning}`);
+    }
+
+    if (gdbPort != null) {
+      const server = new GDBServer();
+      gdbServer = server;
+      const report = (promise: Promise<unknown>) => {
+        promise.catch((err: Error) => console.error(`GDB: ${err.message}`));
+      };
+      server.on('error', (err) => {
+        console.error(`GDB server error: ${err}`);
+      });
+      server.on('connected', () => {
+        if (!quiet) {
+          console.log('GDB client connected');
+        }
+        report(client.gdbListen());
+      });
+      server.on('data', (bytes) => {
+        report(client.gdbWrite(bytes));
+      });
+      server.on('disconnected', () => {
+        report(client.gdbClose());
+      });
+      client.listen('gdb:data', (event: APIEvent<GDBDataPayload>) => {
+        server.write(Uint8Array.from(event.payload.bytes));
+      });
+      server.listen(gdbPort);
+      if (!quiet) {
+        console.log(
+          `GDB server listening on port ${gdbPort}. Simulation is paused until gdb connects: target remote localhost:${gdbPort}`,
+        );
+      }
+    }
 
     if (interactive) {
       process.stdin.pipe(await createSerialMonitorWritable(client));
@@ -390,7 +439,7 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
 
     if (scenario != null) {
       promises.push(scenario.start(client));
-    } else {
+    } else if (gdbPort == null) {
       await client.simResume();
     }
 
@@ -422,6 +471,7 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
     }
 
     rfc2217Server?.dispose();
+    gdbServer?.dispose();
     client.close();
   }
 }
