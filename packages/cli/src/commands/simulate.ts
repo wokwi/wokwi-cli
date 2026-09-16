@@ -47,6 +47,7 @@ interface SimulateOptions {
   expectText?: string;
   failText?: string;
   elf?: string;
+  gdbServerPort?: string;
   diagramFile?: string;
   interactive?: boolean;
   scenario?: string;
@@ -66,6 +67,10 @@ export function simulateCommand(program: Command): void {
     .option('--expect-text <string>', 'Expect text in serial output')
     .option('--fail-text <string>', 'Fail if text found in serial output')
     .option('--elf <path>', 'ELF file to simulate')
+    .option(
+      '-g, --gdb-server-port <port>',
+      'Listen for gdb on this port and start the simulation paused (default: read from wokwi.toml)',
+    )
     .option('--diagram-file <path>', 'Path to diagram.json')
     .option('--interactive', 'Redirect stdin to serial')
     .option('--scenario <path>', 'Scenario YAML file')
@@ -217,7 +222,9 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
   }
 
   const rfc2217ServerPort = config?.wokwi.rfc2217ServerPort;
-  const gdbServerPort = config?.wokwi.gdbServerPort;
+  const gdbServerPort = options.gdbServerPort
+    ? parseInt(options.gdbServerPort, 10)
+    : config?.wokwi.gdbServerPort;
   const chips = loadChips(config?.chip ?? [], rootDir);
 
   const resolvedScenarioFile = scenarioFile ? path.resolve(rootDir, scenarioFile) : null;

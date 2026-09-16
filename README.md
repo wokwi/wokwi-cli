@@ -46,7 +46,7 @@ wokwi-cli . --vcd-file logic.vcd
 
 ### Debugging with GDB
 
-Set `gdbServerPort` in `wokwi.toml` to debug the simulated firmware with gdb:
+Set `gdbServerPort` in `wokwi.toml` (or pass `--gdb-server-port <port>`, short `-g`) to debug the simulated firmware with gdb:
 
 ```toml
 [wokwi]
