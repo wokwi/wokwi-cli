@@ -18,7 +18,9 @@ import { SimulationTimeoutError } from '../SimulationTimeoutError.js';
 import { TestScenario } from '../TestScenario.js';
 import { parseConfig } from '../config.js';
 import { DEFAULT_SERVER } from '../constants.js';
+import { EspIdfBacktraceDecoder } from '../esp/backtraceDecoder.js';
 import { idfProjectConfig } from '../esp/idfProjectConfig.js';
+import { type ESPIDFProjectDescription } from '../esp/projectDescription.js';
 import { GDBServer } from '../gdb/GDBServer.js';
 import { displayLintResults } from '../lint/index.js';
 import { loadChips } from '../loadChips.js';
@@ -124,6 +126,10 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
   const espIdfProjectDescriptionPath = path.resolve(rootDir, 'build/project_description.json');
   const isIDFProject =
     existsSync(espIdfFlasherArgsPath) && existsSync(espIdfProjectDescriptionPath);
+  const idfProjectDescription =
+    isIDFProject && process.env.ESP_MONITOR_DECODE !== '0'
+      ? (JSON.parse(readFileSync(espIdfProjectDescriptionPath, 'utf8')) as ESPIDFProjectDescription)
+      : undefined;
   let configExists = existsSync(configPath);
   let diagramExists = existsSync(diagramFilePath);
 
@@ -280,6 +286,11 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
     await client.fileUpload('diagram.json', diagram);
     const firmwareParams = await uploadFirmware(client, firmwarePath);
     const elfName = elfPath != null ? await uploadELF(client, elfPath) : undefined;
+    const monitorToolPrefix = idfProjectDescription?.monitor_toolprefix;
+    const backtraceDecoder =
+      monitorToolPrefix && elfPath && elfName
+        ? new EspIdfBacktraceDecoder(`${monitorToolPrefix}addr2line`, path.resolve(elfPath))
+        : undefined;
 
     for (const chip of chips) {
       await client.fileUpload(`${chip.name}.chip.json`, readFileSync(chip.jsonPath, 'utf-8'));
@@ -368,7 +379,9 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
     client.listen('serial-monitor:data', (event: APIEvent<SerialMonitorDataPayload>) => {
       let { bytes } = event.payload;
       bytes = scenario?.processSerialBytes(bytes) ?? bytes;
-      process.stdout.write(new Uint8Array(bytes));
+      const serialBytes = new Uint8Array(bytes);
+      backtraceDecoder?.write(serialBytes);
+      process.stdout.write(serialBytes);
 
       serialLogStream?.write(Buffer.from(bytes));
       expectEngine.feed(bytes);
