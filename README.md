@@ -64,6 +64,14 @@ xtensa-esp32-elf-gdb build/hello_world.elf -ex 'target remote localhost:3333'
 
 The default 30 second simulation timeout still applies; pass `--timeout 0` for an open-ended debugging session.
 
+### ESP-IDF Backtrace Decoding
+
+For detected ESP-IDF projects with an ELF file, the CLI decodes addresses from `Backtrace:` lines
+using the `addr2line` executable named by the project's `monitor_toolprefix` in
+`build/project_description.json`. The executable must be available on `PATH`, as it is when the
+ESP-IDF environment is active. The original serial output is unchanged; decoded frames are written
+to stderr. Set `ESP_MONITOR_DECODE=0` to disable decoding.
+
 ## Configuration Wizard
 
 To generate a `wokwi.toml` and a default `diagram.json` files for your project, run:
