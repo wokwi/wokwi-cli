@@ -64,6 +64,34 @@ xtensa-esp32-elf-gdb build/hello_world.elf -ex 'target remote localhost:3333'
 
 The default 30 second simulation timeout still applies; pass `--timeout 0` for an open-ended debugging session.
 
+### SD card contents
+
+If your diagram includes a [micro SD card](https://docs.wokwi.com/parts/wokwi-microsd-card), the CLI can preload it and read it back. The simplest way is to put the files in a `sdcard/` directory next to `wokwi.toml`: it is copied onto a freshly formatted 8 MB card when the simulation starts. For more control, add a `[[sdcard]]` section to `wokwi.toml`:
+
+```toml
+[[sdcard]]
+# part = 'sd1'        # diagram part id; only needed when the diagram has more than one card
+folder = 'assets/sd'  # directory tree copied onto the card (or: image = 'card.img' for a raw disk image)
+size = '32M'          # card capacity, default 8M (the Wokwi CI server allows up to 64M)
+writeback = true      # write the card contents back to the folder / image when the simulation ends
+```
+
+Write-back mirrors the card into the folder: files the firmware created or changed are written, files it deleted are removed. An `image` is replaced atomically. The command line can override all of this:
+
+```
+--sdcard <path>          folder or .img file for the card; <part>=<path> targets a specific card (repeatable)
+--sdcard-size <size>     e.g. 32M
+--sdcard-writeback       write the final contents back to the source
+--sdcard-out <path>      write the final contents here instead (.img for an image, otherwise a folder); implies write-back
+--no-sdcard              run with an empty card, ignoring wokwi.toml and the sdcard/ folder
+```
+
+For example, to run a test against a fixture and keep whatever the firmware wrote:
+
+```bash
+wokwi-cli . --sdcard tests/fixtures/sd --sdcard-out build/sd-out --expect-text "config saved"
+```
+
 ## Configuration Wizard
 
 To generate a `wokwi.toml` and a default `diagram.json` files for your project, run:

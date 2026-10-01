@@ -10,8 +10,17 @@ import { parseConfig } from '../config.js';
 import { DEFAULT_SERVER } from '../constants.js';
 import { loadChips } from '../loadChips.js';
 import { readVersion } from '../readVersion.js';
+import { resolveSDCards, type SDCardSource } from '../sdcard/config.js';
+import { uploadSDCards, writeBackSDCards } from '../sdcard/upload.js';
 import { WebSocketTransport } from '../transport/WebSocketTransport.js';
 import { uploadFirmware } from '../uploadFirmware.js';
+
+export interface StartSimulationOptions {
+  /** SD card contents: a folder or a raw .img file, relative to the project directory */
+  sdcard?: string;
+  /** Write the final SD card contents here (.img → image, otherwise a folder) */
+  sdcardOut?: string;
+}
 
 export interface SimulationStatus {
   running: boolean;
@@ -26,6 +35,10 @@ export class SimulationManager {
   private currentProject?: string;
   private serialBuffer: string[] = [];
   private readonly maxSerialBuffer = 1000;
+  /** SD cards of the running simulation, for write-back */
+  private sdcards: SDCardSource[] = [];
+  /** Messages produced by the last SD card write-back */
+  lastSDCardWriteBack: string[] = [];
 
   constructor(
     private readonly rootDir: string,
@@ -69,10 +82,13 @@ export class SimulationManager {
     }
   }
 
-  async startSimulation(projectPath?: string): Promise<void> {
+  async startSimulation(projectPath?: string, options: StartSimulationOptions = {}): Promise<void> {
     if (!this.client) {
       await this.connect();
     }
+
+    // Persist the previous simulation's card before replacing it
+    await this.flushSDCards();
 
     const targetDir = projectPath ?? this.rootDir;
     const configPath = path.join(targetDir, 'wokwi.toml');
@@ -101,6 +117,15 @@ export class SimulationManager {
     }
 
     const chips = loadChips(config.chip ?? [], targetDir);
+    const sdcards = resolveSDCards({
+      rootDir: targetDir,
+      cwd: targetDir,
+      config: config.sdcard,
+      flags: {
+        sdcard: options.sdcard ? [options.sdcard] : undefined,
+        sdcardOut: options.sdcardOut ? [options.sdcardOut] : undefined,
+      },
+    });
 
     // Upload files
     if (!this.client) {
@@ -121,20 +146,39 @@ export class SimulationManager {
       );
     }
 
+    const sdcardUpload = await uploadSDCards(this.client, sdcards, targetDir);
+
     // Start simulation
     await this.client.serialMonitorListen();
     await this.client.simStart({
       ...firmwareParams,
       elf: elfPath ? 'firmware.elf' : undefined,
       chips: chips.map((chip) => chip.name),
+      sdcards: sdcardUpload.params.length ? sdcardUpload.params : undefined,
     });
 
     this.currentProject = targetDir;
+    this.sdcards = sdcards;
+  }
+
+  /** Writes the SD card contents back (write-back / sdcardOut), pausing the simulation first */
+  private async flushSDCards(): Promise<void> {
+    this.lastSDCardWriteBack = [];
+    if (!this.client || !this.sdcards.some((source) => source.writeback)) {
+      return;
+    }
+    await this.client.simPause();
+    this.lastSDCardWriteBack = await writeBackSDCards(
+      this.client,
+      this.sdcards,
+      this.currentProject ?? this.rootDir,
+    );
   }
 
   async stopSimulation(): Promise<void> {
     if (this.client) {
       await this.client.simPause();
+      await this.flushSDCards();
     }
   }
 
@@ -146,6 +190,7 @@ export class SimulationManager {
 
   async restartSimulation(): Promise<void> {
     if (this.client) {
+      await this.flushSDCards();
       await this.client.simRestart();
     }
   }
