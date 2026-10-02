@@ -60,6 +60,7 @@ interface SimulateOptions {
   timeoutExitCode?: string;
   quiet?: boolean;
   vcdFile?: string;
+  coverageFile?: string;
   sdcard?: string[] | false;
   sdcardSize?: string;
   sdcardWriteback?: boolean;
@@ -91,6 +92,10 @@ export function simulateCommand(program: Command): void {
     .option('--timeout-exit-code <code>', 'Exit code on timeout', '42')
     .option('-q, --quiet', 'Suppress status messages')
     .option('--vcd-file <path>', 'Output path for VCD (logic analyzer) file')
+    .option(
+      '--coverage-file <path>',
+      'Collect instruction coverage and write it as JSON (ESP32 family)',
+    )
     .option(
       '--sdcard <path>',
       'SD card contents: a folder or a raw .img file (use <part>=<path> for a specific card; repeatable)',
@@ -139,6 +144,7 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
   const timeoutExitCode = parseInt(options.timeoutExitCode ?? '42', 10);
   const timeoutNanos = timeout * millis;
   const vcdFile = options.vcdFile;
+  let coverageFile = options.coverageFile;
 
   const token = requireToken();
 
@@ -396,6 +402,12 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
         chalkTemplate`{yellow Warning:} this simulation server does not support gdb debugging, ignoring gdbServerPort`,
       );
     }
+    if (coverageFile && !serverFeatures.includes('coverage')) {
+      console.warn(
+        chalkTemplate`{yellow Warning:} this simulation server does not support coverage, ignoring --coverage-file`,
+      );
+      coverageFile = undefined;
+    }
 
     if (rfc2217ServerPort) {
       rfc2217Server = new RFC2217Server();
@@ -455,6 +467,7 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
       chips: chips.map((chip) => chip.name),
       pause: scenario != null || gdbPort != null,
       sdcards: sdcardUpload.params.length ? sdcardUpload.params : undefined,
+      coverage: coverageFile != null,
     });
     simulationStarted = true;
     for (const warning of warnings) {
@@ -525,6 +538,22 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
         console.error(
           chalkTemplate`{red Error:} SD card write-back failed: ${(err as Error).message}`,
         );
+      }
+    }
+
+    // Export instruction coverage if requested
+    if (coverageFile && simulationStarted) {
+      try {
+        const result = await client.readCoverage();
+        writeFileSync(coverageFile, JSON.stringify(result));
+        if (!quiet) {
+          const { addresses, instructions } = result.stats;
+          console.log(
+            `Coverage written to: ${coverageFile} (${addresses} addresses, ${instructions} instructions)`,
+          );
+        }
+      } catch (err) {
+        console.error('Error exporting coverage:', (err as Error).message);
       }
     }
 

@@ -44,6 +44,16 @@ If your diagram includes a [logic analyzer](https://docs.wokwi.com/parts/wokwi-l
 wokwi-cli . --vcd-file logic.vcd
 ```
 
+### Instruction Coverage
+
+For ESP32 family boards, the CLI can record which instructions ran during the simulation and how often, including how many times each branch was taken:
+
+```bash
+wokwi-cli . --coverage-file coverage.json --expect-text "All tests passed"
+```
+
+The JSON file holds a `[pc, hits, taken]` triple for every executed address; map the addresses back to source lines with the symbols in your ELF file.
+
 ### Debugging with GDB
 
 Set `gdbServerPort` in `wokwi.toml` (or pass `--gdb-server-port <port>`, short `-g`) to debug the simulated firmware with gdb:

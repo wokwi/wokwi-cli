@@ -28,6 +28,7 @@ export type {
   APISimStartParams,
   APISimStartResponse,
   ChipsLogPayload,
+  CoverageReadResponse,
   FlashSection,
   GDBDataPayload,
   PinReadResponse,

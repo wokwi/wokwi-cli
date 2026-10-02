@@ -9,6 +9,7 @@ import type {
   APISDCardExportResponse,
   APISimStartParams,
   APISimStartResponse,
+  CoverageReadResponse,
   PinReadResponse,
   VCDReadResponse,
 } from './APITypes.js';
@@ -173,6 +174,11 @@ export class APIClient {
 
   async readVCD() {
     return await this.sendCommand<VCDReadResponse>('sim:read-vcd');
+  }
+
+  /** Instruction coverage collected so far; requires `simStart({ coverage: true })` */
+  async readCoverage() {
+    return await this.sendCommand<CoverageReadResponse>('coverage:read');
   }
 
   async addPausePoint(params: PausePointParams, resume = false) {

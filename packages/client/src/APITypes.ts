@@ -83,6 +83,8 @@ export interface APISimStartParams {
   chips?: string[];
   /** Contents / size of the micro SD card(s) in the diagram */
   sdcards?: APISDCardParams[];
+  /** Collect instruction coverage from reset; read it with `readCoverage()` (ESP32 family) */
+  coverage?: boolean;
 }
 
 export interface APISDCardExportParams {
@@ -108,4 +110,28 @@ export interface VCDReadResponse {
   vcd: string;
   channelCount: number;
   sampleCount: number;
+}
+
+/**
+ * Instruction coverage, format "wokwi-coverage" v1: one `[pc, hits, taken]` triple per executed
+ * address, sorted by `pc`. `hits` is how many times the instruction ran and `taken` how many of
+ * those continued somewhere other than the next instruction, so for a conditional branch the
+ * not-taken count is `hits - taken`. Addresses that never executed are absent.
+ */
+export interface CoverageReadResponse {
+  format: 'wokwi-coverage';
+  version: 1;
+  /** Simulated chip the addresses belong to, e.g. `esp32-c3` */
+  chip: string;
+  /** Address granularity in bytes (1 Xtensa, 2 RISC-V) */
+  granularity: number;
+  pcs: [pc: number, hits: number, taken: number][];
+  stats: {
+    instructions: number;
+    addresses: number;
+    taken: number;
+    pages: number;
+  };
+  /** Simulation time at export */
+  nanos: number;
 }
