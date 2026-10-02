@@ -5,6 +5,8 @@ import type {
   APIHello,
   APIResponse,
   APIResultError,
+  APISDCardExportParams,
+  APISDCardExportResponse,
   APISimStartParams,
   APISimStartResponse,
   PinReadResponse,
@@ -74,6 +76,14 @@ export class APIClient {
   async simStart(params: APISimStartParams) {
     this._running = false;
     return await this.sendCommand<APISimStartResponse>('sim:start', params);
+  }
+
+  /**
+   * Exports the contents of a simulated micro SD card, either as a raw disk image or as a list
+   * of files. Pause the simulation first for a consistent snapshot.
+   */
+  async sdcardExport(params: APISDCardExportParams = {}) {
+    return await this.sendCommand<APISDCardExportResponse>('sdcard:export', params);
   }
 
   async simPause() {

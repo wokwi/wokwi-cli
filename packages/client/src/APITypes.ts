@@ -64,12 +64,38 @@ export interface FlashSection {
   file: string;
 }
 
+export interface APISDCardParams {
+  /** Diagram part id of the micro SD card; optional when the diagram has a single card */
+  part?: string;
+  /** Uploaded files whose names start with this prefix are copied to the card (prefix stripped) */
+  prefix?: string;
+  /** Name of an uploaded raw disk image to serve as the card */
+  image?: string;
+  /** Card capacity in bytes (default 8 MB) */
+  sizeBytes?: number;
+}
+
 export interface APISimStartParams {
   firmware?: string | FlashSection[];
   flashSize?: string;
   elf?: string;
   pause?: boolean;
   chips?: string[];
+  /** Contents / size of the micro SD card(s) in the diagram */
+  sdcards?: APISDCardParams[];
+}
+
+export interface APISDCardExportParams {
+  part?: string;
+  /** `image` (default): the raw disk image; `files`: the files on the card */
+  format?: 'image' | 'files';
+}
+
+export interface APISDCardExportResponse {
+  /** base64-encoded raw disk image (format=image) */
+  image?: string;
+  /** files on the card, base64-encoded (format=files) */
+  files?: Array<{ name: string; binary: string }>;
 }
 
 export interface PinReadResponse {
