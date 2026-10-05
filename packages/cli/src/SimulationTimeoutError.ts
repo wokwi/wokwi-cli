@@ -1,9 +1,8 @@
-export class SimulationTimeoutError extends Error {
-  constructor(
-    public readonly exitCode: number,
-    message: string,
-  ) {
-    super(message);
+import { ExitCodeError } from './ExitCodeError.js';
+
+export class SimulationTimeoutError extends ExitCodeError {
+  constructor(exitCode: number, message: string) {
+    super(exitCode, message);
     this.name = 'SimulationTimeoutError';
   }
 }

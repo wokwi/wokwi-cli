@@ -14,6 +14,7 @@ import { createWriteStream, existsSync, readFileSync, writeFileSync } from 'fs';
 import path, { join } from 'path';
 import YAML from 'yaml';
 import { ExpectEngine } from '../ExpectEngine.js';
+import { SimulationInterruptedError } from '../SimulationInterruptedError.js';
 import { SimulationTimeoutError } from '../SimulationTimeoutError.js';
 import { TestScenario } from '../TestScenario.js';
 import { parseConfig } from '../config.js';
@@ -40,6 +41,7 @@ import { WebSocketTransport } from '../transport/WebSocketTransport.js';
 import { uploadELF, uploadFirmware } from '../uploadFirmware.js';
 import { checkForCommandTypo } from '../utils/didYouMean.js';
 import { createSerialMonitorWritable } from '../utils/serialMonitorWritable.js';
+import { terminationSignal } from '../utils/terminationSignal.js';
 import { requireToken } from '../utils/token.js';
 
 const millis = 1_000_000;
@@ -516,13 +518,15 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
       await client.simResume();
     }
 
-    if (promises.length === 0) {
-      // wait forever
-      await new Promise(() => {});
-    }
-
-    // wait until the scenario finishes or a timeout occurs
-    await Promise.race(promises);
+    // wait until the scenario finishes, a timeout occurs or the process is asked to stop; the
+    // signal promise is created here because a rejection nobody awaits yet crashes the process
+    await Promise.race([
+      ...promises,
+      terminationSignal().then((signal) => {
+        console.error(chalkTemplate`\n{yellow ${signal}}: stopping the simulation`);
+        throw new SimulationInterruptedError(signal);
+      }),
+    ]);
     // wait for the screenshot to be saved, if any
     await screenshotPromise;
   } finally {
