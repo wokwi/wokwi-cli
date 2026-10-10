@@ -29,6 +29,16 @@ export class WokwiMCPTools {
               description:
                 'Path to the project directory (optional, defaults to current directory)',
             },
+            sdcard: {
+              type: 'string',
+              description:
+                'SD card contents: a folder or a raw .img file, relative to the project directory (optional; overrides [[sdcard]] in wokwi.toml and the sdcard/ folder)',
+            },
+            sdcardOut: {
+              type: 'string',
+              description:
+                'Write the final SD card contents here when the simulation is stopped or restarted (.img for an image, otherwise a folder; optional)',
+            },
           },
         },
       },
@@ -169,9 +179,15 @@ export class WokwiMCPTools {
     try {
       switch (name) {
         case 'wokwi_start_simulation': {
-          await this.simulationManager.startSimulation(args.projectPath);
+          const writeBack = await this.simulationManager.startSimulation(args.projectPath, {
+            sdcard: args.sdcard,
+            sdcardOut: args.sdcardOut,
+          });
 
           let responseText = 'Simulation started successfully';
+          if (writeBack.length) {
+            responseText += `\n\n${writeBack.join('\n')}`;
+          }
           const warnings = this.getLintWarnings?.();
           if (warnings && warnings.stats.warnings > 0) {
             const warningList = warnings.issues
@@ -186,11 +202,12 @@ export class WokwiMCPTools {
           };
         }
 
-        case 'wokwi_stop_simulation':
-          await this.simulationManager.stopSimulation();
+        case 'wokwi_stop_simulation': {
+          const writeBack = await this.simulationManager.stopSimulation();
           return {
-            content: [{ type: 'text', text: 'Simulation stopped' }],
+            content: [{ type: 'text', text: ['Simulation stopped', ...writeBack].join('\n') }],
           };
+        }
 
         case 'wokwi_resume_simulation':
           await this.simulationManager.resumeSimulation();
@@ -198,11 +215,12 @@ export class WokwiMCPTools {
             content: [{ type: 'text', text: 'Simulation resumed' }],
           };
 
-        case 'wokwi_restart_simulation':
-          await this.simulationManager.restartSimulation();
+        case 'wokwi_restart_simulation': {
+          const writeBack = await this.simulationManager.restartSimulation();
           return {
-            content: [{ type: 'text', text: 'Simulation restarted' }],
+            content: [{ type: 'text', text: ['Simulation restarted', ...writeBack].join('\n') }],
           };
+        }
 
         case 'wokwi_get_status': {
           const status = await this.simulationManager.getStatus();

@@ -5,8 +5,11 @@ import type {
   APIHello,
   APIResponse,
   APIResultError,
+  APISDCardExportParams,
+  APISDCardExportResponse,
   APISimStartParams,
   APISimStartResponse,
+  CoverageReadResponse,
   PinReadResponse,
   VCDReadResponse,
 } from './APITypes.js';
@@ -74,6 +77,14 @@ export class APIClient {
   async simStart(params: APISimStartParams) {
     this._running = false;
     return await this.sendCommand<APISimStartResponse>('sim:start', params);
+  }
+
+  /**
+   * Exports the contents of a simulated micro SD card, either as a raw disk image or as a list
+   * of files. Pause the simulation first for a consistent snapshot.
+   */
+  async sdcardExport(params: APISDCardExportParams = {}) {
+    return await this.sendCommand<APISDCardExportResponse>('sdcard:export', params);
   }
 
   async simPause() {
@@ -163,6 +174,11 @@ export class APIClient {
 
   async readVCD() {
     return await this.sendCommand<VCDReadResponse>('sim:read-vcd');
+  }
+
+  /** Instruction coverage collected so far; requires `simStart({ coverage: true })` */
+  async readCoverage() {
+    return await this.sendCommand<CoverageReadResponse>('coverage:read');
   }
 
   async addPausePoint(params: PausePointParams, resume = false) {

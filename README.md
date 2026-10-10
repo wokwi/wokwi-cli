@@ -44,6 +44,16 @@ If your diagram includes a [logic analyzer](https://docs.wokwi.com/parts/wokwi-l
 wokwi-cli . --vcd-file logic.vcd
 ```
 
+### Instruction Coverage
+
+For ESP32 family boards, the CLI can record which instructions ran during the simulation and how often, including how many times each branch was taken:
+
+```bash
+wokwi-cli . --coverage-file coverage.json --expect-text "All tests passed"
+```
+
+The JSON file holds a `[pc, hits, taken]` triple for every executed address; map the addresses back to source lines with the symbols in your ELF file.
+
 ### Debugging with GDB
 
 Set `gdbServerPort` in `wokwi.toml` (or pass `--gdb-server-port <port>`, short `-g`) to debug the simulated firmware with gdb:
@@ -71,6 +81,34 @@ using the `addr2line` executable named by the project's `monitor_toolprefix` in
 `build/project_description.json`. The executable must be available on `PATH`, as it is when the
 ESP-IDF environment is active. The original serial output is unchanged; decoded frames are written
 to stderr. Set `ESP_MONITOR_DECODE=0` to disable decoding.
+
+### SD card contents
+
+If your diagram includes a [micro SD card](https://docs.wokwi.com/parts/wokwi-microsd-card), the CLI can preload it and read it back. The simplest way is to put the files in a `sdcard/` directory next to `wokwi.toml`: it is copied onto a freshly formatted 8 MB card when the simulation starts. For more control, add a `[[sdcard]]` section to `wokwi.toml`:
+
+```toml
+[[sdcard]]
+# part = 'sd1'        # diagram part id; only needed when the diagram has more than one card
+folder = 'assets/sd'  # directory tree copied onto the card (or: image = 'card.img' for a raw disk image)
+size = '32M'          # card capacity, default 8M (the Wokwi CI server allows up to 64M)
+writeback = true      # write the card contents back to the folder / image when the simulation ends
+```
+
+Write-back mirrors the card into the folder: files the firmware created or changed are written, files it deleted are removed. An `image` is replaced atomically. The command line can override all of this:
+
+```
+--sdcard <path>          folder or .img file for the card; <part>=<path> targets a specific card (repeatable)
+--sdcard-size <size>     e.g. 32M
+--sdcard-writeback       write the final contents back to the source
+--sdcard-out <path>      write the final contents here instead (.img for an image, otherwise a folder); implies write-back
+--no-sdcard              run with an empty card, ignoring wokwi.toml and the sdcard/ folder
+```
+
+For example, to run a test against a fixture and keep whatever the firmware wrote:
+
+```bash
+wokwi-cli . --sdcard tests/fixtures/sd --sdcard-out build/sd-out --expect-text "config saved"
+```
 
 ## Configuration Wizard
 

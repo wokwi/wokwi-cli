@@ -14,6 +14,7 @@ import { createWriteStream, existsSync, readFileSync, writeFileSync } from 'fs';
 import path, { join } from 'path';
 import YAML from 'yaml';
 import { ExpectEngine } from '../ExpectEngine.js';
+import { SimulationInterruptedError } from '../SimulationInterruptedError.js';
 import { SimulationTimeoutError } from '../SimulationTimeoutError.js';
 import { TestScenario } from '../TestScenario.js';
 import { parseConfig } from '../config.js';
@@ -36,10 +37,13 @@ import { TouchPressCommand } from '../scenario/TouchPressCommand.js';
 import { TouchReleaseCommand } from '../scenario/TouchReleaseCommand.js';
 import { WaitSerialCommand } from '../scenario/WaitSerialCommand.js';
 import { WriteSerialCommand } from '../scenario/WriteSerialCommand.js';
+import { resolveSDCards, type SDCardSource } from '../sdcard/config.js';
+import { uploadSDCards, writeBackSDCards } from '../sdcard/upload.js';
 import { WebSocketTransport } from '../transport/WebSocketTransport.js';
 import { uploadELF, uploadFirmware } from '../uploadFirmware.js';
 import { checkForCommandTypo } from '../utils/didYouMean.js';
 import { createSerialMonitorWritable } from '../utils/serialMonitorWritable.js';
+import { terminationSignal } from '../utils/terminationSignal.js';
 import { requireToken } from '../utils/token.js';
 
 const millis = 1_000_000;
@@ -60,6 +64,15 @@ interface SimulateOptions {
   timeoutExitCode?: string;
   quiet?: boolean;
   vcdFile?: string;
+  coverageFile?: string;
+  sdcard?: string[] | false;
+  sdcardSize?: string;
+  sdcardWriteback?: boolean;
+  sdcardOut?: string[];
+}
+
+function collect(value: string, previous: string[] | false) {
+  return [...(previous || []), value];
 }
 
 export function simulateCommand(program: Command): void {
@@ -83,6 +96,25 @@ export function simulateCommand(program: Command): void {
     .option('--timeout-exit-code <code>', 'Exit code on timeout', '42')
     .option('-q, --quiet', 'Suppress status messages')
     .option('--vcd-file <path>', 'Output path for VCD (logic analyzer) file')
+    .option(
+      '--coverage-file <path>',
+      'Collect instruction coverage and write it as JSON (ESP32 family)',
+    )
+    .option(
+      '--sdcard <path>',
+      'SD card contents: a folder or a raw .img file (use <part>=<path> for a specific card; repeatable)',
+      collect,
+      [],
+    )
+    .option('--sdcard-size <size>', 'SD card capacity, e.g. 32M (default 8M)')
+    .option('--sdcard-writeback', 'Write the SD card contents back to the source when done')
+    .option(
+      '--sdcard-out <path>',
+      'Write the final SD card contents here (.img for an image, otherwise a folder; implies write-back)',
+      collect,
+      [],
+    )
+    .option('--no-sdcard', 'Run with an empty SD card, ignoring wokwi.toml and the sdcard/ folder')
     .action((projectPath: string, options: SimulateOptions, command: Command) => {
       return runSimulation(projectPath, options, command);
     });
@@ -116,6 +148,7 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
   const timeoutExitCode = parseInt(options.timeoutExitCode ?? '42', 10);
   const timeoutNanos = timeout * millis;
   const vcdFile = options.vcdFile;
+  let coverageFile = options.coverageFile;
 
   const token = requireToken();
 
@@ -233,6 +266,24 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
     : config?.wokwi.gdbServerPort;
   const chips = loadChips(config?.chip ?? [], rootDir);
 
+  let sdcards: SDCardSource[];
+  try {
+    sdcards = resolveSDCards({
+      rootDir,
+      cwd: process.cwd(),
+      config: config?.sdcard,
+      flags: {
+        sdcard: options.sdcard,
+        sdcardSize: options.sdcardSize,
+        sdcardWriteback: options.sdcardWriteback,
+        sdcardOut: options.sdcardOut,
+      },
+    });
+  } catch (err) {
+    console.error(chalkTemplate`{red Error:} ${(err as Error).message}`);
+    process.exit(1);
+  }
+
   const resolvedScenarioFile = scenarioFile ? path.resolve(rootDir, scenarioFile) : null;
   if (resolvedScenarioFile && !existsSync(resolvedScenarioFile)) {
     const fullPath = path.resolve(resolvedScenarioFile);
@@ -280,6 +331,7 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
 
   let rfc2217Server: RFC2217Server | undefined;
   let gdbServer: GDBServer | undefined;
+  let simulationStarted = false;
 
   try {
     await client.connected;
@@ -298,6 +350,13 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
         `${chip.name}.chip.wasm`,
         new Uint8Array(readFileSync(chip.wasmPath)),
       );
+    }
+
+    const sdcardUpload = await uploadSDCards(client, sdcards, process.cwd());
+    if (!quiet) {
+      for (const line of sdcardUpload.summary) {
+        console.log(line);
+      }
     }
 
     const promises = [];
@@ -355,6 +414,12 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
       console.warn(
         chalkTemplate`{yellow Warning:} this simulation server does not support gdb debugging, ignoring gdbServerPort`,
       );
+    }
+    if (coverageFile && !serverFeatures.includes('coverage')) {
+      console.warn(
+        chalkTemplate`{yellow Warning:} this simulation server does not support coverage, ignoring --coverage-file`,
+      );
+      coverageFile = undefined;
     }
 
     if (rfc2217ServerPort) {
@@ -416,7 +481,10 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
       elf: elfName,
       chips: chips.map((chip) => chip.name),
       pause: scenario != null || gdbPort != null,
+      sdcards: sdcardUpload.params.length ? sdcardUpload.params : undefined,
+      coverage: coverageFile != null,
     });
+    simulationStarted = true;
     for (const warning of warnings) {
       console.warn(chalkTemplate`{yellow Warning:} ${warning}`);
     }
@@ -463,16 +531,49 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
       await client.simResume();
     }
 
-    if (promises.length === 0) {
-      // wait forever
-      await new Promise(() => {});
-    }
-
-    // wait until the scenario finishes or a timeout occurs
-    await Promise.race(promises);
+    // wait until the scenario finishes, a timeout occurs or the process is asked to stop; the
+    // signal promise is created here because a rejection nobody awaits yet crashes the process
+    await Promise.race([
+      ...promises,
+      terminationSignal().then((signal) => {
+        console.error(chalkTemplate`\n{yellow ${signal}}: stopping the simulation`);
+        throw new SimulationInterruptedError(signal);
+      }),
+    ]);
     // wait for the screenshot to be saved, if any
     await screenshotPromise;
   } finally {
+    // Write the SD card contents back, if requested
+    if (simulationStarted && sdcards.some((source) => source.writeback)) {
+      try {
+        await client.simPause();
+        const summary = await writeBackSDCards(client, sdcards, process.cwd());
+        if (!quiet) {
+          console.log(summary.join('\n'));
+        }
+      } catch (err) {
+        console.error(
+          chalkTemplate`{red Error:} SD card write-back failed: ${(err as Error).message}`,
+        );
+      }
+    }
+
+    // Export instruction coverage if requested
+    if (coverageFile && simulationStarted) {
+      try {
+        const result = await client.readCoverage();
+        writeFileSync(coverageFile, JSON.stringify(result));
+        if (!quiet) {
+          const { addresses, instructions } = result.stats;
+          console.log(
+            `Coverage written to: ${coverageFile} (${addresses} addresses, ${instructions} instructions)`,
+          );
+        }
+      } catch (err) {
+        console.error('Error exporting coverage:', (err as Error).message);
+      }
+    }
+
     // Export VCD if requested
     if (vcdFile) {
       try {
