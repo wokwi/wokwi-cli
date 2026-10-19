@@ -31,6 +31,8 @@ export type {
   CoverageReadResponse,
   FlashSection,
   GDBDataPayload,
+  HeapMonitorParams,
+  HeapSamplePayload,
   PinReadResponse,
   SerialMonitorDataPayload,
   VCDReadResponse,

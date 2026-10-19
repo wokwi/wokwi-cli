@@ -13,6 +13,7 @@ import type { Command } from 'commander';
 import { createWriteStream, existsSync, readFileSync, writeFileSync } from 'fs';
 import path, { join } from 'path';
 import YAML from 'yaml';
+import { ExitCodeError } from '../ExitCodeError.js';
 import { ExpectEngine } from '../ExpectEngine.js';
 import { SimulationInterruptedError } from '../SimulationInterruptedError.js';
 import { SimulationTimeoutError } from '../SimulationTimeoutError.js';
@@ -21,6 +22,7 @@ import { parseConfig } from '../config.js';
 import { DEFAULT_SERVER } from '../constants.js';
 import { idfProjectConfig } from '../esp/idfProjectConfig.js';
 import { GDBServer } from '../gdb/GDBServer.js';
+import { HeapMonitor } from '../heapMonitor.js';
 import { displayLintResults } from '../lint/index.js';
 import { loadChips } from '../loadChips.js';
 import { readVersion } from '../readVersion.js';
@@ -63,6 +65,9 @@ interface SimulateOptions {
   quiet?: boolean;
   vcdFile?: string;
   coverageFile?: string;
+  heapInterval?: string;
+  heapMinFree?: string;
+  heapCsv?: string;
   sdcard?: string[] | false;
   sdcardSize?: string;
   sdcardWriteback?: boolean;
@@ -98,6 +103,12 @@ export function simulateCommand(program: Command): void {
       '--coverage-file <path>',
       'Collect instruction coverage and write it as JSON (ESP32 family)',
     )
+    .option(
+      '--heap-interval <ms>',
+      'Sample the ESP-IDF heap every <ms> of simulated time (needs the ELF; default 1000)',
+    )
+    .option('--heap-min-free <bytes>', 'Fail when the ESP-IDF free heap drops below <bytes>')
+    .option('--heap-csv <path>', 'Write the ESP-IDF heap samples to a CSV file')
     .option(
       '--sdcard <path>',
       'SD card contents: a folder or a raw .img file (use <part>=<path> for a specific card; repeatable)',
@@ -147,6 +158,15 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
   const timeoutNanos = timeout * millis;
   const vcdFile = options.vcdFile;
   let coverageFile = options.coverageFile;
+  let heapMonitor =
+    options.heapInterval != null || options.heapMinFree != null || options.heapCsv != null
+      ? new HeapMonitor({
+          intervalNanos: parseInt(options.heapInterval ?? '1000', 10) * millis,
+          minFree: options.heapMinFree != null ? parseInt(options.heapMinFree, 10) : undefined,
+          csvFile: options.heapCsv,
+          quiet: !!quiet,
+        })
+      : undefined;
 
   const token = requireToken();
 
@@ -237,6 +257,12 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
     console.error(chalkTemplate`{red Error:} ELF file not found: {yellow ${fullPath}}.`);
     console.error(
       chalkTemplate`Please check the {yellow elf} path in your {yellow wokwi.toml} configuration file.`,
+    );
+    process.exit(1);
+  }
+  if (heapMonitor && elfPath == null) {
+    console.error(
+      chalkTemplate`{red Error:} heap monitoring needs the firmware ELF: set {yellow elf} in {yellow wokwi.toml} or pass {yellow --elf}.`,
     );
     process.exit(1);
   }
@@ -410,6 +436,12 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
       );
       coverageFile = undefined;
     }
+    if (heapMonitor && !serverFeatures.includes('heap')) {
+      console.warn(
+        chalkTemplate`{yellow Warning:} this simulation server does not support heap monitoring, ignoring the --heap options`,
+      );
+      heapMonitor = undefined;
+    }
 
     if (rfc2217ServerPort) {
       rfc2217Server = new RFC2217Server();
@@ -467,11 +499,21 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
       ...firmwareParams,
       elf: elfName,
       chips: chips.map((chip) => chip.name),
-      pause: scenario != null || gdbPort != null,
+      // paused until the heap monitor is armed, so its samples fall on whole intervals
+      pause: scenario != null || gdbPort != null || heapMonitor != null,
       sdcards: sdcardUpload.params.length ? sdcardUpload.params : undefined,
       coverage: coverageFile != null,
     });
     simulationStarted = true;
+    if (heapMonitor) {
+      promises.push(
+        heapMonitor.run(client).catch((err: Error) => {
+          console.error(chalkTemplate`\n\n{red Error:} ${err.message}`);
+          console.error('TEST FAILED.');
+          throw new ExitCodeError(1, err.message);
+        }),
+      );
+    }
     for (const warning of warnings) {
       console.warn(chalkTemplate`{yellow Warning:} ${warning}`);
     }
@@ -576,6 +618,10 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
       } catch (err) {
         console.error('Error exporting VCD:', (err as Error).message);
       }
+    }
+
+    if (heapMonitor && !quiet) {
+      console.log(heapMonitor.summary());
     }
 
     rfc2217Server?.dispose();

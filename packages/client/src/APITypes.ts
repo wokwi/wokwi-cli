@@ -49,6 +49,19 @@ export interface GDBDataPayload {
   bytes: number[];
 }
 
+/** `heap:sample` payload: a board's ESP-IDF counters for malloc() memory, or why decoding stopped */
+export type HeapSamplePayload = { part: string } & (
+  | { free: number; minFree: number }
+  | { error: string }
+);
+
+export interface HeapMonitorParams {
+  /** MCU part id, the primary when omitted */
+  part?: string;
+  /** Simulated time between `heap:sample` events */
+  intervalNanos: number;
+}
+
 export interface ChipsLogPayload {
   chip: string;
   message: string;

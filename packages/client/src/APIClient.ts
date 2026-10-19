@@ -10,6 +10,7 @@ import type {
   APISimStartParams,
   APISimStartResponse,
   CoverageReadResponse,
+  HeapMonitorParams,
   PinReadResponse,
   VCDReadResponse,
 } from './APITypes.js';
@@ -179,6 +180,11 @@ export class APIClient {
   /** Instruction coverage collected so far; requires `simStart({ coverage: true })` */
   async readCoverage() {
     return await this.sendCommand<CoverageReadResponse>('coverage:read');
+  }
+
+  /** Starts `heap:sample` events for an ESP-IDF board, every `intervalNanos` of simulated time */
+  async heapMonitor(params: HeapMonitorParams) {
+    return await this.sendCommand('heap:monitor', params);
   }
 
   async addPausePoint(params: PausePointParams, resume = false) {

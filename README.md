@@ -54,6 +54,22 @@ wokwi-cli . --coverage-file coverage.json --expect-text "All tests passed"
 
 The JSON file holds a `[pc, hits, taken]` triple for every executed address; map the addresses back to source lines with the symbols in your ELF file.
 
+### Heap Monitoring
+
+For ESP-IDF firmware, the CLI can follow the free heap over simulated time and fail the run when it drops below a limit, which catches memory leaks without any logging code in the firmware. The `elf` file must be set in `wokwi.toml` (or passed with `--elf`):
+
+```bash
+wokwi-cli . --heap-min-free 100000 --heap-csv heap.csv --expect-text "All tests passed"
+```
+
+```
+--heap-interval <ms>     sample the heap every <ms> of simulated time (default 1000)
+--heap-min-free <bytes>  fail when the free heap drops below <bytes>
+--heap-csv <path>        write every sample to a CSV file (part, time_s, free, min_free)
+```
+
+A sample is printed when the free heap changes (`--heap-csv` keeps every sample), and the run ends with a summary of the free heap at the first and last sample, the lowest value, and the rate at which the heap was lost.
+
 ### Debugging with GDB
 
 Set `gdbServerPort` in `wokwi.toml` (or pass `--gdb-server-port <port>`, short `-g`) to debug the simulated firmware with gdb:
