@@ -125,7 +125,7 @@ export const boards: IBoard[] = [
     serialInterfaces: ['uart', 'usb-serialjtag'],
   },
 
-  // RP2040-based boards
+  // RP2 boards
   {
     title: 'Raspberry Pi Pico',
     type: 'wokwi-pi-pico',
@@ -136,6 +136,20 @@ export const boards: IBoard[] = [
   {
     title: 'Raspberry Pi Pico W',
     type: 'board-pi-pico-w',
+    family: 'rp2',
+    serialPins: { RX: 'GP1', TX: 'GP0' },
+    serialInterfaces: ['uart', 'usb'],
+  },
+  {
+    title: 'Raspberry Pi Pico 2',
+    type: 'board-pi-pico-2',
+    family: 'rp2',
+    serialPins: { RX: 'GP1', TX: 'GP0' },
+    serialInterfaces: ['uart', 'usb'],
+  },
+  {
+    title: 'Raspberry Pi Pico 2W',
+    type: 'board-pi-pico-2w',
     family: 'rp2',
     serialPins: { RX: 'GP1', TX: 'GP0' },
     serialInterfaces: ['uart', 'usb'],
