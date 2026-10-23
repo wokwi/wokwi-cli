@@ -387,14 +387,17 @@ async function runSimulation(projectPath: string, options: SimulateOptions, comm
       );
     }
     if (failText) {
-      void expectEngine.waitForMatch(failText).then(() => {
+      const failTextFound = expectEngine.waitForMatch(failText).then(() => {
         console.error(
           chalkTemplate`\n\n{red Error:} Unexpected text found: {yellow "${failText}"}`,
         );
         console.error('TEST FAILED.');
-        client.close();
-        process.exit(1);
+        throw new ExitCodeError(1, `unexpected text found: ${failText}`);
       });
+      // the text can show up before the race below subscribes, and an unhandled rejection
+      // crashes the process; the race still receives the error
+      failTextFound.catch(() => {});
+      promises.push(failTextFound);
     }
 
     let screenshotPromise = Promise.resolve();
