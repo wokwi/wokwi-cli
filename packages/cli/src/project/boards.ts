@@ -117,6 +117,14 @@ export const boards: IBoard[] = [
     serialInterfaces: ['uart', 'usb-serialjtag'],
   },
   {
+    title: 'ESP-Mosaico',
+    type: 'board-esp-mosaico',
+    family: 'esp32',
+    idfTarget: 'esp32s31',
+    serialPins: { RX: 'RX0', TX: 'TX0' },
+    serialInterfaces: ['uart'],
+  },
+  {
     title: 'M5Stack CoreS3',
     type: 'board-m5stack-core-s3',
     family: 'esp32',
