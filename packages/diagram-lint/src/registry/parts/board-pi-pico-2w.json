@@ -46,7 +46,7 @@
     "VBUS",
     "VSYS"
   ],
-  "documented": false,
+  "documented": true,
   "isBoard": true,
   "category": "boards"
 }
